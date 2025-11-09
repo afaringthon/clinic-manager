@@ -1,10 +1,11 @@
 package logico;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Paciente extends Persona {
-	private List<Consulta> historial;
-	private List<Vacuna> vacunas;
+	private List<Consulta> historial  = new ArrayList<>();
+	private List<Vacuna> vacunas = new ArrayList<>();
 
 	public Paciente(String nombre, String apellido, int edad) {
 		super(nombre, apellido, edad);

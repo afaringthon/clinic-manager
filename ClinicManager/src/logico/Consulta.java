@@ -8,6 +8,9 @@ public class Consulta extends Visita {
 	private EnfermedadBajoVigilancia enfermedadBajoVigilancia;
 	private boolean esImportante;
 	
+	//String snapId = (enfermedad == null) ? null : enfermedad.getId();
+    //String snapName = (enfermedad == null) ? diagnostico : enfermedad.getNombre();
+	
 	public Consulta(Paciente paciente, Medico medico, LocalDate fecha, String sintomas, String diagnostico, 
 			EnfermedadBajoVigilancia enfermedadBajoVigilancia) {
 		super(paciente, medico, fecha);

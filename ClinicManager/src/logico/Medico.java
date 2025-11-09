@@ -1,10 +1,11 @@
 package logico;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Medico extends Persona {
 	private String especialidad;
-	private List<Cita> citas;
+	private List<Cita> citas = new ArrayList<>();
 	private int maxCitas;
 
 	public Medico(String nombre, String apellido, int edad, String especialidad, int maxCitas) {
