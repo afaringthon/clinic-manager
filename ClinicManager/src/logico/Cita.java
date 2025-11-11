@@ -6,11 +6,6 @@ public class Cita extends Visita {
 	private String sintomas;
 	private boolean esActivo;
 
-	public Cita(Paciente paciente, Medico medico, LocalDate fecha, String sintomas, boolean esActivo) {
-		super(paciente, medico, fecha);
-		this.sintomas = sintomas;
-		this.esActivo = esActivo;
-	}
 
 	public Cita(Paciente paciente, Medico medico, LocalDate fecha, String sintomas) {
 		super(paciente, medico, fecha);

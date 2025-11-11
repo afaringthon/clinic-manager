@@ -6,7 +6,7 @@ import java.util.List;
 
 public class Medico extends Persona {
 	private String especialidad;
-	private List<Cita> citas;
+	private ArrayList<Cita> citas;
 	private int maxCitas;
 
 	public Medico(String nombre, String apellido, int edad, String cedula, String especialidad, int maxCitas) {
@@ -24,7 +24,7 @@ public class Medico extends Persona {
 		this.especialidad = especialidad;
 	}
 
-	public List<Cita> getCitas() {
+	public ArrayList<Cita> getCitas() {
 		return citas;
 	}
 
@@ -59,8 +59,8 @@ public class Medico extends Persona {
 		return false;
 	}
 
-	public List<Cita> getCitasActivas() {
-		List<Cita> activas = new ArrayList<>();
+	public ArrayList<Cita> getCitasActivas() {
+		ArrayList<Cita> activas = new ArrayList<>();
 		for (int i = 0; i < citas.size(); i++) {
 			if (citas.get(i).isEsActivo()) {
 				activas.add(citas.get(i));
@@ -69,8 +69,8 @@ public class Medico extends Persona {
 		return activas;
 	}
 
-	public List<Cita> getCitasPorFecha(LocalDate fecha) {
-		List<Cita> citasFecha = new ArrayList<>();
+	public ArrayList<Cita> getCitasPorFecha(LocalDate fecha) {
+		ArrayList<Cita> citasFecha = new ArrayList<>();
 		for (int i = 0; i < citas.size(); i++) {
 			if (citas.get(i).getFecha().equals(fecha) && citas.get(i).isEsActivo()) {
 				citasFecha.add(citas.get(i));
