@@ -1,61 +1,88 @@
 package logico;
 
-<<<<<<< HEAD
 import java.util.ArrayList;
-import java.util.List;
-=======
-public class Paciente {
-	
-	private String nombre; 
-	private String apellido;
-	
-	
-	public Paciente(String nombre, String apellido) {
-		super();
-		this.nombre = nombre;
-		this.apellido = apellido;
-	}
->>>>>>> branch 'main' of https://github.com/afaringthon/clinic-manager.git
 
-<<<<<<< HEAD
 public class Paciente extends Persona {
-	private List<Consulta> historial  = new ArrayList<>();
-	private List<Vacuna> vacunas = new ArrayList<>();
-
-	public Paciente(String nombre, String apellido, int edad) {
-		super(nombre, apellido, edad);
-	}
-
-	public List<Consulta> getHistorial() {
-		return historial;
-	}
-
-	public void setHistorial(List<Consulta> historial) {
-		this.historial = historial;
-	}
-
-	public List<Vacuna> getVacunas() {
-		return vacunas;
-	}
-
-	public void setVacunas(List<Vacuna> vacunas) {
-		this.vacunas = vacunas;
-=======
-	public String getNombre() {
-		return nombre;
-	}
-
-	public void setNombre(String nombre) {
-		this.nombre = nombre;
-	}
-
-	public String getApellido() {
-		return apellido;
-	}
-
-	public void setApellido(String apellido) {
-		this.apellido = apellido;
->>>>>>> branch 'main' of https://github.com/afaringthon/clinic-manager.git
-	}
-
+    private ArrayList<Consulta> historial;
+    private ArrayList<Vacuna> vacunas;
+    private String direccion;
+    private String telefono;
+    
+    public Paciente(String nombre, String apellido, int edad, String cedula) {
+        super(nombre, apellido, edad, cedula);
+        // CORRECCIÓN IMPORTANTE: tu código tenía ArrayList<Consulta> historial = new ArrayList<>();
+        // Eso crea una variable local, no inicializa el atributo
+        this.historial = new ArrayList<>();
+        this.vacunas = new ArrayList<>();
+    }
+    
+    public ArrayList<Consulta> getHistorial() {
+        return historial;
+    }
+    
+    public void setHistorial(ArrayList<Consulta> historial) {
+        this.historial = historial;
+    }
+    
+    public ArrayList<Vacuna> getVacunas() {
+        return vacunas;
+    }
+    
+    public void setVacunas(ArrayList<Vacuna> vacunas) {
+        this.vacunas = vacunas;
+    }
+    
+    public String getDireccion() {
+        return direccion;
+    }
+    
+    public void setDireccion(String direccion) {
+        this.direccion = direccion;
+    }
+    
+    public String getTelefono() {
+        return telefono;
+    }
+    
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
+    }
+    
+   
+    public void agregarConsulta(Consulta consulta) {
+        historial.add(consulta);
+    }
+    
+    public void agregarVacuna(Vacuna vacuna) {
+        vacunas.add(vacuna);
+    }
+    
+    public boolean tieneVacuna(String nombreVacuna) {
+        for (int i = 0; i < vacunas.size(); i++) {
+            if (vacunas.get(i).getNombre().equals(nombreVacuna) && vacunas.get(i).isVacunado()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public ArrayList<Consulta> getConsultasImportantes() {
+        ArrayList<Consulta> importantes = new ArrayList<>();
+        for (int i = 0; i < historial.size(); i++) {
+            if (historial.get(i).isEsImportante()) {
+                importantes.add(historial.get(i));
+            }
+        }
+        return importantes;
+    }
+    
+    public ArrayList<Consulta> getConsultasConEnfermedadesVigiladas() {
+        ArrayList<Consulta> vigiladas = new ArrayList<>();
+        for (int i = 0; i < historial.size(); i++) {
+            if (historial.get(i).getEnfermedadBajoVigilancia() != null) {
+                vigiladas.add(historial.get(i));
+            }
+        }
+        return vigiladas;
+    }
 }
