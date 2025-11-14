@@ -4,7 +4,7 @@ public abstract class Persona {
 	protected String cedula;
 	protected String nombre;
 	protected String apellido;
-	protected int edad;
+	protected int edad; // preguntarle al profe si quiere la fecha de nacido o la edad
 
 	public Persona(String nombre, String apellido, int edad, String cedula) {
 		this.cedula = cedula;

@@ -42,7 +42,7 @@ public class Consulta extends Visita {
 		this.enfermedadBajoVigilancia = enfermedadBajoVigilancia;
 	}
 
-	public boolean isEsImportante() {
+	public boolean EsImportante() {
 		return esImportante;
 	}
 

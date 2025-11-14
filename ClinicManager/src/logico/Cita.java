@@ -4,13 +4,13 @@ import java.time.LocalDate;
 
 public class Cita extends Visita {
 	private String sintomas;
-	private boolean esActivo;
+	private boolean estadoCita;
 
 
 	public Cita(Paciente paciente, Medico medico, LocalDate fecha, String sintomas) {
 		super(paciente, medico, fecha);
 		this.sintomas = sintomas;
-		this.esActivo = true; // Por defecto las citas nuevas son activas
+		this.estadoCita = true; 
 	}
 
 	public String getSintomas() {
@@ -21,21 +21,21 @@ public class Cita extends Visita {
 		this.sintomas = sintomas;
 	}
 
-	public boolean isEsActivo() {
-		return esActivo;
+	public boolean estadoCita() {
+		return estadoCita;
 	}
 
-	public void setEsActivo(boolean esActivo) {
-		this.esActivo = esActivo;
+	public void setEstadoCita(boolean estadoCita) {
+		this.estadoCita = estadoCita;
 	}
 
-	// Método para cancelar una cita
-	public void cancelar() {
-		this.esActivo = false;
+	
+	public void cancelarCita() {
+		this.estadoCita = false;
 	}
 
-	// Método para activar una cita
-	public void activar() {
-		this.esActivo = true;
+
+	public void activarCita() {
+		this.estadoCita = true;
 	}
 }
