@@ -9,8 +9,8 @@ public class Medico extends Persona {
     private ArrayList<Cita> citas;
     private int maxCitas;
     
-    public Medico(String nombre, String apellido, int edad, String cedula, String especialidad, int maxCitas) {
-        super(nombre, apellido, edad, cedula);
+    public Medico(String nombre, String apellido, int edad, String cedula, String sexo, String especialidad, int maxCitas) {
+        super(nombre, apellido, edad, cedula, sexo);
         this.especialidad = especialidad;
         this.maxCitas = maxCitas;
         this.citas = new ArrayList<>();
@@ -43,7 +43,6 @@ public class Medico extends Persona {
     public void setMaxCitas(int maxCitas) {
         this.maxCitas = maxCitas;
     }
-    
     
     public boolean puedeAceptarCita(LocalDate fecha) {
         int cantCitasEnDia = contarCitasEnDia(fecha);

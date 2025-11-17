@@ -9,8 +9,8 @@ public class Paciente extends Persona {
     private String direccion;
     private String telefono;
     
-    public Paciente(String nombre, String apellido, int edad, String cedula) {
-        super(nombre, apellido, edad, cedula);
+    public Paciente(String nombre, String apellido, int edad, String cedula, String sexo) {
+        super(nombre, apellido, edad, cedula, sexo);
         this.historial = new ArrayList<>();
         this.vacunas = new ArrayList<>();
     }
@@ -55,7 +55,6 @@ public class Paciente extends Persona {
         this.telefono = telefono;
     }
     
-    
     public void agregarConsulta(Consulta consulta) {
         historial.add(consulta);
     }
@@ -76,7 +75,7 @@ public class Paciente extends Persona {
     public ArrayList<Consulta> getConsultasImportantes() {
         ArrayList<Consulta> importantes = new ArrayList<>();
         for (int i = 0; i < historial.size(); i++) {
-            if (historial.get(i).EsImportante()) {
+            if (historial.get(i).isEsImportante()) {
                 importantes.add(historial.get(i));
             }
         }

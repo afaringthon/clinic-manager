@@ -7,7 +7,6 @@ public class Clinica {
     
     private static int contadorPacientes = 1;
     private static int contadorMedicos = 1;
-    private static int contadorCitas = 1;
     private static int contadorConsultas = 1;
     private static int contadorVacunas = 1;
     private static int contadorEnfermedades = 1;
@@ -28,16 +27,16 @@ public class Clinica {
         enfermedadesVigiladas = new ArrayList<>();
     }
     
- 
+    // ==================== PACIENTES ====================
     
     public boolean agregarPaciente(Paciente paciente) {
-    	if (existePaciente(paciente.getCedula())) {
-    		return false; 
-    	}
+        if (existePaciente(paciente.getCedula())) {
+            return false;
+        }
         paciente.setIdPaciente("P-" + contadorPacientes);
         contadorPacientes++;
         pacientes.add(paciente);
-        return true; 
+        return true;
     }
     
     public Paciente buscarPacientePorCedula(String cedula) {
@@ -58,7 +57,6 @@ public class Clinica {
         }
         return encontrados;
     }
-
     
     public boolean existePaciente(String cedula) {
         return buscarPacientePorCedula(cedula) != null;
@@ -78,29 +76,16 @@ public class Clinica {
         return false;
     }
     
-    public ArrayList<Cita> getCitasPorPaciente(Paciente paciente) {
-        ArrayList<Cita> citasPaciente = new ArrayList<>();
-        for (int i = 0; i < citas.size(); i++) {
-            if (citas.get(i).getPaciente().getCedula().equals(paciente.getCedula())) {
-                citasPaciente.add(citas.get(i));
-            }
-        }
-        return citasPaciente;
-    }
-
-    
-    
+   
     
     public boolean agregarMedico(Medico medico) {
-        if(existeMedico(medico.getCedula())) {
-        	return false;
+        if (existeMedico(medico.getCedula())) {
+            return false;
         }
-    	
-    	medico.setIdMedico("M-" + contadorMedicos);
+        medico.setIdMedico("M-" + contadorMedicos);
         contadorMedicos++;
         medicos.add(medico);
-        
-        return true; 
+        return true;
     }
     
     public Medico buscarMedicoPorCedula(String cedula) {
@@ -155,8 +140,6 @@ public class Clinica {
     public boolean agendarCita(Cita cita) {
         Medico medico = cita.getMedico();
         if (medico.puedeAceptarCita(cita.getFecha())) {
-            cita.setId("CIT-" + contadorCitas);
-            contadorCitas++;
             citas.add(cita);
             medico.agregarCita(cita);
             return true;
@@ -178,41 +161,36 @@ public class Clinica {
         return activas;
     }
     
-    public boolean cancelarCita(String idCita) {
+    public Cita buscarCitaPorCedula(String cedula) {
         for (int i = 0; i < citas.size(); i++) {
-            if (citas.get(i).getId().equals(idCita)) {
-                citas.get(i).cancelarCita();  
-                return true;
-            }
-        }
-        return false;
-    }
-
-    
-    public boolean reactivarCita(String idCita) {
-        for (int i = 0; i < citas.size(); i++) {
-            if (citas.get(i).getId().equals(idCita)) {
-                citas.get(i).activarCita();  
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    public Cita buscarCitaPorId(String id) {
-        for (int i = 0; i < citas.size(); i++) {
-            if (citas.get(i).getId().equals(id)) {
+            if (citas.get(i).getCedulaPaciente().equals(cedula) && citas.get(i).estadoCita()) {
                 return citas.get(i);
             }
         }
         return null;
     }
     
+    public boolean cancelarCitaPorCedula(String cedula) {
+        for (int i = 0; i < citas.size(); i++) {
+            if (citas.get(i).getCedulaPaciente().equals(cedula) && citas.get(i).estadoCita()) {
+                citas.get(i).cancelarCita();
+                return true;
+            }
+        }
+        return false;
+    }
     
-
-   
-
- ArrayList<Cita> getCitasPorMedico(Medico medico) {
+    public ArrayList<Cita> getCitasPorPaciente(String cedulaPaciente) {
+        ArrayList<Cita> citasPaciente = new ArrayList<>();
+        for (int i = 0; i < citas.size(); i++) {
+            if (citas.get(i).getCedulaPaciente().equals(cedulaPaciente)) {
+                citasPaciente.add(citas.get(i));
+            }
+        }
+        return citasPaciente;
+    }
+    
+    public ArrayList<Cita> getCitasPorMedico(Medico medico) {
         ArrayList<Cita> citasMedico = new ArrayList<>();
         for (int i = 0; i < citas.size(); i++) {
             if (citas.get(i).getMedico().getCedula().equals(medico.getCedula()) && 
@@ -222,18 +200,18 @@ public class Clinica {
         }
         return citasMedico;
     }
- 
- public int getTotalCitasMedico(String idMedico) {
-	    int total = 0;
-	    for (int i = 0; i < citas.size(); i++) {
-	        if (citas.get(i).getMedico().getIdMedico().equals(idMedico)) {
-	            total++;
-	        }
-	    }
-	    return total;
-	}
     
-  
+    public int getTotalCitasMedico(String idMedico) {
+        int total = 0;
+        for (int i = 0; i < citas.size(); i++) {
+            if (citas.get(i).getMedico().getIdMedico().equals(idMedico)) {
+                total++;
+            }
+        }
+        return total;
+    }
+    
+   
     
     public void agregarConsulta(Consulta consulta) {
         consulta.setId("CON-" + contadorConsultas);
@@ -278,7 +256,7 @@ public class Clinica {
     public ArrayList<Consulta> getConsultasImportantes() {
         ArrayList<Consulta> importantes = new ArrayList<>();
         for (int i = 0; i < consultas.size(); i++) {
-            if (consultas.get(i).EsImportante()) {
+            if (consultas.get(i).isEsImportante()) {
                 importantes.add(consultas.get(i));
             }
         }
@@ -305,8 +283,8 @@ public class Clinica {
     public ArrayList<Vacuna> getCatalogoVacunas() {
         return catalogoVacunas;
     }
- 
     
+  
     public void agregarEnfermedadVigilada(EnfermedadBajoVigilancia enfermedad) {
         enfermedad.setId("ENF-" + contadorEnfermedades);
         contadorEnfermedades++;
@@ -330,17 +308,14 @@ public class Clinica {
         return enfermedadesVigiladas;
     }
     
-  
     public boolean eliminarEnfermedadVigilada(String idEnfermedad) {
-       
         for (int i = 0; i < consultas.size(); i++) {
             if (consultas.get(i).getEnfermedadBajoVigilancia() != null &&
                 consultas.get(i).getEnfermedadBajoVigilancia().getId().equals(idEnfermedad)) {
-                return false;  
+                return false;
             }
         }
         
-       
         for (int i = 0; i < enfermedadesVigiladas.size(); i++) {
             if (enfermedadesVigiladas.get(i).getId().equals(idEnfermedad)) {
                 enfermedadesVigiladas.remove(i);
