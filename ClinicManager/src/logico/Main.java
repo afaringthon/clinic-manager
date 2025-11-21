@@ -65,7 +65,7 @@ public class Main {
         // Mostrar ventana de login
         principal framePrincipal = new principal();
         Login dialog = new Login(framePrincipal, cliente);
-        dialog.setVisible(true);
+        dialog.setVisible(true);//falta crear clase login
         
         // Al cerrar la aplicacion
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
