@@ -1,9 +1,12 @@
 package logico;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 
-public class Cita {
-    private String nombrePaciente;
+public class Cita implements Serializable {
+	private static final long serialVersionUID = 1L;
+	
+	private String nombrePaciente;
     private String cedulaPaciente;
     private Medico medico;
     private LocalDate fecha;

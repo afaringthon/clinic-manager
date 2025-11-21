@@ -1,10 +1,13 @@
 package logico;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-public class Clinica {
-    
+public class Clinica implements Serializable {
+	private static final long serialVersionUID = 1L;
+	
+	
     private static int contadorPacientes = 1;
     private static int contadorMedicos = 1;
     private static int contadorConsultas = 1;

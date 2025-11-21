@@ -2,8 +2,11 @@ package logico;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.io.Serializable;
 
-public class Medico extends Persona {
+public class Medico extends Persona implements Serializable {
+	private static final long serialVersionUID = 1L;
+	
     private String idMedico;
     private String especialidad;
     private ArrayList<Cita> citas;

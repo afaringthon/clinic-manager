@@ -1,8 +1,11 @@
 package logico;
 
 import java.util.ArrayList;
+import java.io.Serializable;
 
-public class Paciente extends Persona {
+public class Paciente extends Persona implements Serializable {
+	private static final long serialVersionUID = 1L;
+	
     private String idPaciente;
     private ArrayList<Consulta> historial;
     private ArrayList<Vacuna> vacunas;
