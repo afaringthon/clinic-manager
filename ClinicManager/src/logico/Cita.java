@@ -3,34 +3,34 @@ package logico;
 import java.time.LocalDate;
 
 public class Cita {
-    private String nombrePaciente;
-    private String cedulaPaciente;
+    private String nombre;
+    private String cedula;
     private Medico medico;
     private LocalDate fecha;
     private boolean estadoCita;
     
     public Cita(String nombrePaciente, String cedulaPaciente, Medico medico, LocalDate fecha) {
-        this.nombrePaciente = nombrePaciente;
-        this.cedulaPaciente = cedulaPaciente;
+        this.nombre = nombrePaciente;
+        this.cedula = cedulaPaciente;
         this.medico = medico;
         this.fecha = fecha;
         this.estadoCita = true;
     }
     
-    public String getNombrePaciente() {
-        return nombrePaciente;
+    public String getNombre() {
+        return nombre;
     }
     
-    public void setNombrePaciente(String nombrePaciente) {
-        this.nombrePaciente = nombrePaciente;
+    public void setNombre(String nombrePaciente) {
+        this.nombre = nombrePaciente;
     }
     
-    public String getCedulaPaciente() {
-        return cedulaPaciente;
+    public String getCedula() {
+        return cedula;
     }
     
-    public void setCedulaPaciente(String cedulaPaciente) {
-        this.cedulaPaciente = cedulaPaciente;
+    public void setCedula(String cedulaPaciente) {
+        this.cedula = cedulaPaciente;
     }
     
     public Medico getMedico() {

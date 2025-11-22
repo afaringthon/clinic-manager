@@ -1,7 +1,11 @@
 package logico;
 
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+
+import logico.Clinica;
 
 public class Medico extends Persona {
     private String idMedico;
@@ -90,4 +94,24 @@ public class Medico extends Persona {
     public int capacidadDisponible(LocalDate fecha) {
         return maxCitas - contarCitasEnDia(fecha);
     }
+    
+    
+    public boolean fechaDisponible(LocalDateTime fecha, String idMedico)
+    {
+    	Duration rango = Duration.ofHours(1);
+    	Medico medico = Clinica.getInstancia().buscarMedicoPorId(idMedico);
+    	
+    	for (Cita c : medico.getCitas()) {
+            if (c == null || c.getFecha() == null) continue;
+            LocalDateTime existente = c.getFecha();
+            Duration diff = Duration.between(existente, fecha).abs();
+            if (diff.compareTo(rango) < 0) { // < 1 hora
+                return false;
+            }
+        }
+        return true;
+
+    }
+    
+    
 }

@@ -1,7 +1,6 @@
 package visual;
 
 import java.awt.BorderLayout;
-
 import java.awt.FlowLayout;
 
 import javax.swing.DefaultComboBoxModel;
@@ -157,7 +156,7 @@ public class AgregarPaciente extends JDialog {
 						}
 						else
 						{
-							Paciente paciente = new Paciente(nombre, apellido, edad, cedula, sexo, direccion, telefono);
+							//Paciente paciente = new Paciente(nombre, apellido, edad, cedula, sexo, direccion, telefono);
 							//TODO hay que guardarlo en la lista
 						}
 						 
