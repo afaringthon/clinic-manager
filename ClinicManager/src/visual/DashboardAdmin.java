@@ -99,7 +99,7 @@ public class DashboardAdmin extends JFrame {
 				AgregarMedico pantallaAgregarMedico = new AgregarMedico();
 				pantallaAgregarMedico.setLocationRelativeTo(DashboardAdmin.this); 
 				pantallaAgregarMedico.setVisible(true);
-				int totalDoctores = instancia.getMedicos().size();
+				int totalDoctores = contarNumMedicos();
 				lbDoctoresNum.setText(String.valueOf(totalDoctores));
 				cargarTablaDoctores();
 				
@@ -155,7 +155,7 @@ public class DashboardAdmin extends JFrame {
 				pantallaListaEnfermedades.setVisible(true);
 				int numEnfermedades = contarNumEnfermedades();
 				lblEnfermedadesNum.setText(String.valueOf(numEnfermedades));
-				//car
+				
 			}
 		});
 		mnMenuVer.add(mnItemEnfermedades);

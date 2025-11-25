@@ -15,12 +15,14 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerDateModel;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import com.formdev.flatlaf.FlatLightLaf;
 
+import logico.Cita;
 import logico.Clinica;
 import logico.Medico;
 
@@ -91,9 +93,23 @@ public class PosponerCita extends JDialog {
 						java.util.Date date = (java.util.Date) spinnerFecha.getValue();
 					    java.time.LocalDate localDate = date.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
 					    
-					    if(instancia.medicoPuedeAceptarCita(id, localDate))
+					    Cita cita = instancia.buscarCitaPorId(id);
+					    
+					    if(localDate.equals(cita.getFecha()))
 					    {
+					    	JOptionPane.showMessageDialog(PosponerCita.this, "La fecha no puede ser el mismo dia", "Alerta", JOptionPane.ERROR_MESSAGE);	
+					    }
+					    
+					    else if (instancia.medicoPuedeAceptarCita(cita.getMedico().getId(), localDate))
+					    {
+					    	cita.setFecha(localDate);
+					    	JOptionPane.showMessageDialog(PosponerCita.this, "Cita fue cambiada para: " + localDate, "Alerta", JOptionPane.INFORMATION_MESSAGE);
 					    	
+					    }
+					    else
+					    {
+					    	JOptionPane.showMessageDialog(PosponerCita.this, "El doctor no puede en esa fecha", "Alerta", JOptionPane.ERROR_MESSAGE);
+
 					    	
 					    }
 

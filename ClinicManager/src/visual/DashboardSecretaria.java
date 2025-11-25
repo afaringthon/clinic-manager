@@ -34,6 +34,7 @@ import com.formdev.flatlaf.FlatLightLaf;
 import logico.Cita;
 import logico.Clinica;
 import logico.Medico;
+import logico.Paciente;
 
 import javax.swing.table.TableModel;
 import java.awt.SystemColor;
@@ -135,7 +136,8 @@ public class DashboardSecretaria extends JFrame {
 		panelPacienteKPI.setLayout(new BoxLayout(panelPacienteKPI, BoxLayout.Y_AXIS));
 		panelPacienteKPI.setBorder(new EmptyBorder(12, 12, 12, 12)); // padding interno
 
-		JLabel lbPacientesNum = new JLabel("20");
+		String citasHoy = String.valueOf(contarNumCitasHoy());
+		JLabel lbPacientesNum = new JLabel(citasHoy);
 		lbPacientesNum.setForeground(SystemColor.textHighlight);
 		lbPacientesNum.setFont(new Font("Segoe UI", Font.BOLD, 48));
 		lbPacientesNum.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -328,5 +330,19 @@ public class DashboardSecretaria extends JFrame {
 
 	        
 	    }
+	}
+	
+	private int contarNumCitasHoy()
+	{
+		int contador = 0;
+		
+		for (Cita c : instancia.getCitas())
+		{
+			if(c.isEsActivo() && c.getFecha().equals(hoy))
+			{
+				contador++;
+			}
+		}
+		return contador;
 	}
 }
