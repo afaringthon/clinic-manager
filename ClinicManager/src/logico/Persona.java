@@ -1,18 +1,25 @@
 package logico;
 
-public abstract class Persona {
+import java.io.Serializable;
+
+public abstract class Persona implements Serializable {
+	private static final long serialVersionUID = 1L;
+	protected String id;
     protected String cedula;
     protected String nombre;
     protected String apellido;
     protected int edad;
     protected String sexo;
+    protected boolean activo;
     
-    public Persona(String nombre, String apellido, int edad, String cedula, String sexo) {
+    public Persona(String id, String nombre, String apellido, int edad, String cedula, String sexo) {
+    	this.id = id;
         this.cedula = cedula;
         this.nombre = nombre;
         this.apellido = apellido;
         this.edad = edad;
         this.sexo = sexo;
+        this.activo = true;
     }
     
     public String getNombre() {
@@ -54,4 +61,20 @@ public abstract class Persona {
     public void setSexo(String sexo) {
         this.sexo = sexo;
     }
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public boolean isActivo() {
+		return activo;
+	}
+
+	public void setActivo(boolean activo) {
+		this.activo = activo;
+	}
 }

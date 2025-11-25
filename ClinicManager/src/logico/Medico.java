@@ -4,28 +4,30 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.io.Serializable;
+
 
 import logico.Clinica;
 
-public class Medico extends Persona {
-    private String idMedico;
+public class Medico extends Persona implements Serializable {
+	private static final long serialVersionUID = 1L;
     private String especialidad;
     private ArrayList<Cita> citas;
     private int maxCitas;
     
-    public Medico(String nombre, String apellido, int edad, String cedula, String sexo, String especialidad, int maxCitas) {
-        super(nombre, apellido, edad, cedula, sexo);
+    public Medico(String id, String nombre, String apellido, int edad, String cedula, String sexo, String especialidad, int maxCitas) {
+        super(id, nombre, apellido, edad, cedula, sexo);
         this.especialidad = especialidad;
         this.maxCitas = maxCitas;
         this.citas = new ArrayList<>();
     }
     
-    public String getIdMedico() {
-        return idMedico;
+    public String getId() {
+        return id;
     }
     
-    public void setIdMedico(String idMedico) {
-        this.idMedico = idMedico;
+    public void setId(String id) {
+        this.id = id;
     }
     
     public String getEspecialidad() {
@@ -48,7 +50,7 @@ public class Medico extends Persona {
         this.maxCitas = maxCitas;
     }
     
-    public boolean puedeAceptarCita(LocalDate fecha) {
+    /*public boolean puedeAceptarCita(LocalDate fecha) {
         int cantCitasEnDia = contarCitasEnDia(fecha);
         return cantCitasEnDia < maxCitas;
     }
@@ -111,7 +113,7 @@ public class Medico extends Persona {
         }
         return true;
 
-    }
+    }*/
     
     
 }

@@ -1,26 +1,26 @@
 package logico;
 
 import java.util.ArrayList;
+import java.io.Serializable;
 
-public class Paciente extends Persona {
-    private String idPaciente;
+public class Paciente extends Persona implements Serializable {
+	private static final long serialVersionUID = 1L;
+	private float peso;
+	private float estatura;
+	private String tipoSangre;
     private ArrayList<Consulta> historial;
     private ArrayList<Vacuna> vacunas;
     private String direccion;
     private String telefono;
     
-    public Paciente(String nombre, String apellido, int edad, String cedula, String sexo) {
-        super(nombre, apellido, edad, cedula, sexo);
+    public Paciente(String id,String nombre, String apellido, int edad, String cedula, String sexo, float peso, float estatura,
+    		String tipoSangre) {
+        super(id, nombre, apellido, edad, cedula, sexo);
+        this.peso = peso;
+        this.estatura = estatura;
+        this.tipoSangre = tipoSangre;
         this.historial = new ArrayList<>();
         this.vacunas = new ArrayList<>();
-    }
-    
-    public String getIdPaciente() {
-        return idPaciente;
-    }
-    
-    public void setIdPaciente(String idPaciente) {
-        this.idPaciente = idPaciente;
     }
     
     public ArrayList<Consulta> getHistorial() {
@@ -91,4 +91,28 @@ public class Paciente extends Persona {
         }
         return vigiladas;
     }
+
+	public float getPeso() {
+		return peso;
+	}
+
+	public void setPeso(float peso) {
+		this.peso = peso;
+	}
+
+	public float getEstatura() {
+		return estatura;
+	}
+
+	public void setEstatura(float estatura) {
+		this.estatura = estatura;
+	}
+
+	public String getTipoSangre() {
+		return tipoSangre;
+	}
+
+	public void setTipoSangre(String tipoSangre) {
+		this.tipoSangre = tipoSangre;
+	}
 }
