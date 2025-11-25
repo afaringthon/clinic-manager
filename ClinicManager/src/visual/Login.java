@@ -1,5 +1,6 @@
 package visual;
 
+<<<<<<< HEAD
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 
@@ -82,4 +83,8 @@ public class Login extends JDialog {
 			}
 		}
 	}
+=======
+public class Login {
+
+>>>>>>> branch 'main' of https://github.com/afaringthon/clinic-manager.git
 }

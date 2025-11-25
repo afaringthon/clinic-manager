@@ -12,7 +12,9 @@ import javax.swing.border.EmptyBorder;
 
 import com.formdev.flatlaf.FlatLightLaf;
 
+import logico.Clinica;
 import logico.Paciente;
+import logico.Vacuna;
 
 import java.awt.CardLayout;
 import javax.swing.JTextField;
@@ -21,7 +23,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JSpinner;
 import javax.swing.JComboBox;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.awt.event.ActionEvent;
+import javax.swing.JCheckBox;
+import javax.swing.JScrollPane;
 
 public class AgregarPaciente extends JDialog {
 
@@ -53,11 +58,15 @@ public class AgregarPaciente extends JDialog {
 	 */
 	public AgregarPaciente() {
 		setTitle("Agregar Paciente");
-		setBounds(100, 100, 538, 517);
+		setBounds(100, 100, 551, 835);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		contentPanel.setLayout(new CardLayout(0, 0));
+		
+		
+		final ArrayList<JCheckBox> vacunasCheckboxes = new ArrayList<>();
+		
 		{
 			JPanel panel = new JPanel();
 			contentPanel.add(panel, "name_9953132040000");
@@ -115,22 +124,83 @@ public class AgregarPaciente extends JDialog {
 			panel.add(this.comboSexo);
 			
 			JLabel lbTelefono = new JLabel("Telefono");
-			lbTelefono.setBounds(119, 293, 56, 16);
+			lbTelefono.setBounds(120, 452, 56, 16);
 			panel.add(lbTelefono);
 			
 			textTelefono = new JTextField();
-			textTelefono.setBounds(119, 309, 270, 22);
+			textTelefono.setBounds(120, 468, 270, 22);
 			panel.add(textTelefono);
 			textTelefono.setColumns(10);
 			
 			JLabel lbDireccion = new JLabel("Direccion");
-			lbDireccion.setBounds(119, 344, 56, 16);
+			lbDireccion.setBounds(120, 503, 56, 16);
 			panel.add(lbDireccion);
 			
 			textDireccion = new JTextField();
-			textDireccion.setBounds(119, 362, 270, 22);
+			textDireccion.setBounds(120, 521, 270, 22);
 			panel.add(textDireccion);
 			textDireccion.setColumns(10);
+			
+			JLabel lbTipoSangre = new JLabel("Tipo de Sangre");
+			lbTipoSangre.setBounds(119, 293, 97, 16);
+			panel.add(lbTipoSangre);
+			
+			JComboBox comboBoxTipoSangre = new JComboBox();
+			comboBoxTipoSangre.setBounds(119, 310, 270, 22);
+			panel.add(comboBoxTipoSangre);
+			
+			JLabel lbEstatura = new JLabel("Estatura");
+			lbEstatura.setBounds(119, 345, 56, 16);
+			panel.add(lbEstatura);
+			
+			JSpinner spinnerEstatura = new JSpinner();
+			spinnerEstatura.setBounds(119, 363, 66, 22);
+			panel.add(spinnerEstatura);
+			
+			JLabel lbPeso = new JLabel("Peso");
+			lbPeso.setBounds(119, 398, 56, 16);
+			panel.add(lbPeso);
+			
+			JSpinner spinnerPeso = new JSpinner();
+			spinnerPeso.setBounds(118, 414, 67, 22);
+			panel.add(spinnerPeso);
+			
+			JLabel lbVacunas = new JLabel("Vacunas");
+			lbVacunas.setBounds(120, 552, 56, 16);
+			panel.add(lbVacunas);
+			
+			
+			ArrayList<Vacuna> catalogoVacunas = Clinica.getInstancia().getCatalogoVacunas();
+			int y = 547;
+            int x = 120;
+            int spacing = 28;
+            
+			if (catalogoVacunas.isEmpty())
+			{
+				JCheckBox checkBox = new JCheckBox("No hay Vacunas");
+				checkBox.setEnabled(false);
+				checkBox.setBounds(x, y, 300, 25);
+				panel.add(checkBox);
+				//vacunasCheckboxes.add(checkBox);
+			}
+			else
+			{
+				for (Vacuna v : catalogoVacunas)
+				{
+					JCheckBox checkBox = new JCheckBox(v.getNombre());
+					checkBox.setBounds(x, y, 300, 25);
+					vacunasCheckboxes.add(checkBox);
+					panel.add(checkBox);
+					
+					y += spacing;
+                    if (y > 650) 
+                    {
+                    	y = 547;
+                        x += 220;
+				    }
+			}
+			
+			
 		}
 		
 		{
@@ -149,16 +219,7 @@ public class AgregarPaciente extends JDialog {
 						String telefono = textTelefono.getText().trim();
 						String direccion = textDireccion.getText().trim();
 						
-						if (nombre.isEmpty() || apellido.isEmpty() || cedula.isEmpty() || sexo.isEmpty() || edad < 1 || 
-								telefono.isEmpty() || direccion.isEmpty())
-						{
-							JOptionPane.showMessageDialog(AgregarPaciente.this, "Hay Campos Faltantes", "Alerta", JOptionPane.ERROR_MESSAGE);
-						}
-						else
-						{
-							//Paciente paciente = new Paciente(nombre, apellido, edad, cedula, sexo, direccion, telefono);
-							//TODO hay que guardarlo en la lista
-						}
+						
 						 
 					}
 				});
@@ -179,3 +240,4 @@ public class AgregarPaciente extends JDialog {
 		}
 	}
  }
+}
