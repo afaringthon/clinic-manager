@@ -20,27 +20,49 @@ import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.SpinnerDateModel;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.JButton;
 import javax.swing.UIManager;
 
 import com.formdev.flatlaf.FlatLightLaf;
+
+import logico.Cita;
+import logico.Clinica;
+import logico.Medico;
+import logico.Paciente;
+
 import javax.swing.table.TableModel;
 import java.awt.SystemColor;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import javax.swing.Icon;
 import javax.swing.JComboBox;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import javax.swing.JSpinner;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ChangeEvent;
 
 public class DashboardMedico extends JFrame {
 
+	Clinica instancia = Clinica.getInstancia();
 	private JPanel contentPane;
-	private JTable tableDoctores;
+	private JTable tablaCitas;
+	DefaultTableModel modelCitas;
+	LocalDate hoy = LocalDate.now();
+	Date fechaInicial = Date.from(hoy.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
 	/**
 	 * Launch the application.
@@ -63,7 +85,7 @@ public class DashboardMedico extends JFrame {
 	 * Create the frame.
 	 */
 	public DashboardMedico() {
-		setTitle("Clinic Manager");
+		setTitle("Clinic Manager - Secretaria");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 1392, 822);
 		contentPane = new JPanel();
@@ -114,17 +136,18 @@ public class DashboardMedico extends JFrame {
 		panelPacienteKPI.setLayout(new BoxLayout(panelPacienteKPI, BoxLayout.Y_AXIS));
 		panelPacienteKPI.setBorder(new EmptyBorder(12, 12, 12, 12)); // padding interno
 
-		JLabel lbPacientesNum = new JLabel("20");
-		lbPacientesNum.setForeground(SystemColor.textHighlight);
-		lbPacientesNum.setFont(new Font("Segoe UI", Font.BOLD, 48));
-		lbPacientesNum.setAlignmentX(Component.CENTER_ALIGNMENT);
-		panelPacienteKPI.add(lbPacientesNum);
+		String citasHoy = String.valueOf(contarNumCitasHoy());
+		JLabel lbCitasNum = new JLabel(citasHoy);
+		lbCitasNum.setForeground(SystemColor.textHighlight);
+		lbCitasNum.setFont(new Font("Segoe UI", Font.BOLD, 48));
+		lbCitasNum.setAlignmentX(Component.CENTER_ALIGNMENT);
+		panelPacienteKPI.add(lbCitasNum);
 
 		panelPacienteKPI.add(Box.createVerticalStrut(4));
 
-		JLabel lblTitlePacientes = new JLabel("Pacientes");
-		lblTitlePacientes.setAlignmentX(Component.CENTER_ALIGNMENT);
-		panelPacienteKPI.add(lblTitlePacientes);
+		JLabel lblTitleCitas = new JLabel("Citas Hoy");
+		lblTitleCitas.setAlignmentX(Component.CENTER_ALIGNMENT);
+		panelPacienteKPI.add(lblTitleCitas);
 
 		gridPanel.add(panelPacienteKPI);
 
@@ -134,39 +157,20 @@ public class DashboardMedico extends JFrame {
 		panelDoctoresKPI.setLayout(new BoxLayout(panelDoctoresKPI, BoxLayout.Y_AXIS));
 		panelDoctoresKPI.setBorder(new EmptyBorder(12, 12, 12, 12));
 
-		JLabel lbDoctoresNum = new JLabel("12");
-		lbDoctoresNum.setForeground(SystemColor.textHighlight);
-		lbDoctoresNum.setFont(new Font("Segoe UI", Font.BOLD, 48));
-		lbDoctoresNum.setAlignmentX(Component.CENTER_ALIGNMENT);
-		panelDoctoresKPI.add(lbDoctoresNum);
+		String citasFuturas = String.valueOf(contarNumCitasFuturas());
+		JLabel lbCitasGeneralsNum = new JLabel(citasFuturas);
+		lbCitasGeneralsNum.setForeground(SystemColor.textHighlight);
+		lbCitasGeneralsNum.setFont(new Font("Segoe UI", Font.BOLD, 48));
+		lbCitasGeneralsNum.setAlignmentX(Component.CENTER_ALIGNMENT);
+		panelDoctoresKPI.add(lbCitasGeneralsNum);
 
 		panelDoctoresKPI.add(Box.createVerticalStrut(4));
 
-		JLabel lblTitleDoctores = new JLabel("Doctores");
-		lblTitleDoctores.setAlignmentX(Component.CENTER_ALIGNMENT);
-		panelDoctoresKPI.add(lblTitleDoctores);
+		JLabel lblCitasGeneral = new JLabel("Citas Futuras");
+		lblCitasGeneral.setAlignmentX(Component.CENTER_ALIGNMENT);
+		panelDoctoresKPI.add(lblCitasGeneral);
 
 		gridPanel.add(panelDoctoresKPI);
-
-		//KPI 4
-		JPanel panelVacunasKPI = new JPanel();
-		panelVacunasKPI.setBackground(SystemColor.inactiveCaptionBorder);
-		panelVacunasKPI.setLayout(new BoxLayout(panelVacunasKPI, BoxLayout.Y_AXIS));
-		panelVacunasKPI.setBorder(new EmptyBorder(12, 12, 12, 12));
-
-		JLabel lbVacunaNum = new JLabel("3");
-		lbVacunaNum.setForeground(SystemColor.textHighlight);
-		lbVacunaNum.setFont(new Font("Segoe UI", Font.BOLD, 48));
-		lbVacunaNum.setAlignmentX(Component.CENTER_ALIGNMENT);
-		panelVacunasKPI.add(lbVacunaNum);
-
-		panelVacunasKPI.add(Box.createVerticalStrut(4));
-
-		JLabel lbTitleVacunas = new JLabel("Vacunas");
-		lbTitleVacunas.setAlignmentX(Component.CENTER_ALIGNMENT);
-		panelVacunasKPI.add(lbTitleVacunas);
-
-		gridPanel.add(panelVacunasKPI);
 
 		// Agrego el grid superior
 		centerContainer.add(gridPanel);
@@ -188,51 +192,43 @@ public class DashboardMedico extends JFrame {
 		panelInferiorIzquierdo.setBackground(Color.WHITE);
 
 		JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 6));
-		headerPanel.setBackground(Color.WHITE); // opcional: mismo fondo
+		headerPanel.setBackground(Color.WHITE);
 		
 		JLabel lbCitas = new JLabel("Citas");
 		lbCitas.setBorder(new EmptyBorder(0, 0, 0, 8)); // margen a la derecha
 		headerPanel.add(lbCitas);
 
-		// Modelo y tabla de ejemplo para DOCTORES
-		String[] columnasDoctores = { "ID", "Nombre", "Especialidad", "Teléfono" };
-		Object[][] datosDoctores = {
-				{ "1", "Juan Pérez", "Cardiología", "555-1234" },
-				{ "2", "María Gómez", "Pediatría", "555-5678" },
-				{ "3", "Luís Ruiz", "Dermatología", "555-9012" },
-				{ "4", "Ana López", "Neurología", "555-3456" }
-		};
-		DefaultTableModel modelDoctores = new DefaultTableModel(datosDoctores, columnasDoctores);
-		tableDoctores = new JTable(modelDoctores);
-		tableDoctores.setDefaultEditor(Object.class, null);
-		
-		JComboBox<String> comboBoxFecha = new JComboBox<>();
-		comboBoxFecha.setPreferredSize(new Dimension(140, 24)); // ancho controlado aquí
-		comboBoxFecha.setMaximumSize(new Dimension(140, 24));   // opcional para reforzar
-		String[] gravedad = {"Hoy", "Ayer", "Manana"};
-		comboBoxFecha.setModel(new DefaultComboBoxModel<>(gravedad));
-		headerPanel.add(comboBoxFecha);
 
-		// añade la cabecera compuesta al NORTH
+		String[] columnasCitas = { "ID", "Nombre", "Apellido", "Cedula" };
+		modelCitas = new DefaultTableModel(columnasCitas, 0);
+		cargarTablaCitas(hoy);
+		tablaCitas = new JTable(modelCitas);
+		tablaCitas.setDefaultEditor(Object.class, null);
+
+
 		panelInferiorIzquierdo.add(headerPanel, BorderLayout.NORTH);
 		
-		tableDoctores.setShowGrid(false);
+		SpinnerDateModel dateModel = new SpinnerDateModel(fechaInicial, null, null, Calendar.DAY_OF_MONTH);
+		JSpinner spinner = new JSpinner(dateModel);
+		spinner.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent arg0) {
+				java.util.Date date = (java.util.Date) spinner.getValue();
+			    java.time.LocalDate localDate = date.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+				cargarTablaCitas(localDate);
+			}
+		});
+		spinner.setEditor(new JSpinner.DateEditor(spinner, "dd/MM/yyyy"));
+		spinner.setPreferredSize(new Dimension(140, 24));
+		headerPanel.add(spinner);
+		
+		tablaCitas.setShowGrid(false);
 
-		JScrollPane scrollDoctores = new JScrollPane(tableDoctores);
+		JScrollPane scrollCitas = new JScrollPane(tablaCitas);
 		// ajustar tamaño preferido del scroll para que ocupe bien la tarjeta
-		scrollDoctores.setPreferredSize(new Dimension(860, 300));
-		panelInferiorIzquierdo.add(scrollDoctores, BorderLayout.CENTER);
+		scrollCitas.setPreferredSize(new Dimension(860, 300));
+		panelInferiorIzquierdo.add(scrollCitas, BorderLayout.CENTER);
 
 		gridPanelBottom.add(panelInferiorIzquierdo);
-
-		// Modelo y tabla de ejemplo para PACIENTES
-		String[] columnasPacientes = { "ID", "Nombre", "Edad", "Teléfono", "Última cita" };
-		Object[][] datosPacientes = {
-				{ "101", "Pedro Castillo", 45, "555-2222", "2025-10-01" },
-				{ "102", "Lucía Morales", 32, "555-3333", "2025-09-15" },
-				{ "103", "Carlos Vega", 28, "555-4444", "2025-11-05" }
-		};
-		DefaultTableModel modelPacientes = new DefaultTableModel(datosPacientes, columnasPacientes);
 
 		// Agrego el grid inferior
 		centerContainer.add(gridPanelBottom);
@@ -243,14 +239,93 @@ public class DashboardMedico extends JFrame {
 		buttonBar.setBorder(new EmptyBorder(8, 0, 12, 0)); // padding superior/inferior
 
 		JButton btnCancelar = new JButton("Cancelar");
+		btnCancelar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int citaTablaSeleccionado = tablaCitas.getSelectedRow();
+				int idCol = 0;
+				
+				if (citaTablaSeleccionado == -1)
+				{
+					JOptionPane.showMessageDialog(DashboardMedico.this, "No hay Nada Seleccionado", "Alerta", JOptionPane.ERROR_MESSAGE);					
+				}
+				else
+				{
+					Object idTexto  = tablaCitas.getModel().getValueAt(citaTablaSeleccionado, idCol);
+					String id = String.valueOf(idTexto);
+					Cita cita = instancia.buscarCitaPorId(id);
+					cita.setEsActivo(false);
+					java.util.Date date = (java.util.Date) spinner.getValue();
+				    java.time.LocalDate localDate = date.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+				    lbCitasNum.setText(String.valueOf(contarNumCitasHoy()));
+					cargarTablaCitas(localDate);
+					lbCitasGeneralsNum.setText(String.valueOf(contarNumCitasFuturas()));
+					JOptionPane.showMessageDialog(DashboardMedico.this, "Cita Cancelada parra" + cita.getNombre(), "Alerta", JOptionPane.INFORMATION_MESSAGE);					
+
+				}
+				
+				
+			}
+		});
 		JButton btnPosponer = new JButton("Posponer");
-		JButton btnAtender = new JButton("Atender");
+		btnPosponer.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int citaTablaSeleccionado = tablaCitas.getSelectedRow();
+				int idCol = 0;
+				
+				if (citaTablaSeleccionado == -1)
+				{
+					JOptionPane.showMessageDialog(DashboardMedico.this, "No hay Nada Seleccionado", "Alerta", JOptionPane.ERROR_MESSAGE);					
+				}
+				else
+				{
+					Object idTexto  = tablaCitas.getModel().getValueAt(citaTablaSeleccionado, idCol);
+					String id = String.valueOf(idTexto);
+					PosponerCita pantallaPosponerCita = new PosponerCita(id);
+					pantallaPosponerCita.setLocationRelativeTo(DashboardMedico.this); 
+					pantallaPosponerCita.setVisible(true);
+					
+					java.util.Date date = (java.util.Date) spinner.getValue();
+				    java.time.LocalDate localDate = date.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+				    lbCitasNum.setText(String.valueOf(contarNumCitasHoy()));
+				    lbCitasGeneralsNum.setText(String.valueOf(contarNumCitasFuturas()));
+					cargarTablaCitas(localDate);
+				}
+				
+				
+			}
+		});
 
 		buttonBar.add(btnCancelar);
 		buttonBar.add(btnPosponer);
-		buttonBar.add(btnAtender);
 
 		contentPane.add(buttonBar, BorderLayout.SOUTH);
+		
+		JButton btnAtender = new JButton("Agregar");
+		btnAtender.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int citaTablaSeleccionado = tablaCitas.getSelectedRow();
+				int idCol = 3;
+				
+				if (citaTablaSeleccionado == -1)
+				{
+					JOptionPane.showMessageDialog(DashboardMedico.this, "No hay Nada Seleccionado", "Alerta", JOptionPane.ERROR_MESSAGE);					
+				}
+				else
+				{
+					Object idTexto  = tablaCitas.getModel().getValueAt(citaTablaSeleccionado, idCol);
+					String id = String.valueOf(idTexto);
+					//buscar si esta el paciente creado
+					PosponerCita pantallaPosponerCita = new PosponerCita(id);
+					pantallaPosponerCita.setLocationRelativeTo(DashboardMedico.this); 
+					pantallaPosponerCita.setVisible(true);
+					
+
+				}
+			    
+
+			}
+		});
+		buttonBar.add(btnAtender);
 
 		setLocationRelativeTo(null);
 	}
@@ -277,5 +352,53 @@ public class DashboardMedico extends JFrame {
 		g2.drawImage(src, 0, 0, w, h, null);
 		g2.dispose();
 		return resized;
+	}
+	
+	private void cargarTablaCitas(LocalDate fecha) { //Cuando se haga el login hay que poner el id del doctor
+	    modelCitas.setRowCount(0);
+	    ArrayList <Cita> citas = instancia.getCitas();
+
+	    if (citas == null) return;
+
+	    for (Cita c : citas) {
+	        String id = c.getId();  
+	        String nombre = c.getNombre();
+	        String apellido = c.getApellido();
+	        String cedula = c.getCedula();
+	        
+	        if(c.isEsActivo() && c.getFecha().equals(fecha))
+	        {
+	        	modelCitas.addRow(new Object[] { id, nombre, apellido, cedula});
+	        }	        
+	    }
+	}
+	
+	private int contarNumCitasHoy()
+	{
+		int contador = 0;
+		
+		for (Cita c : instancia.getCitas())
+		{
+			if(c.isEsActivo() && c.getFecha().equals(hoy))
+			{
+				contador++;
+			}
+		}
+		return contador;
+	}
+	
+	public int contarNumCitasFuturas()
+	{
+		int contador = 0;
+		
+		for (Cita c : instancia.getCitas())
+		{
+			if(c.isEsActivo() && c.getFecha().isAfter(hoy))
+			{
+				contador++;
+			}
+		}
+		
+		return contador;
 	}
 }
