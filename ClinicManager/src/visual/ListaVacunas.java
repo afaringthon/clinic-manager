@@ -147,13 +147,7 @@ public class ListaVacunas extends JDialog {
 			if(v.isEsActivo())
 			{
 				modelVacunas.addRow(new Object[] { id, nombre, fabricante, descripcion});
-			}
-			
+			}	
 		}
-		
-		
 	}
-	
-	
-
 }

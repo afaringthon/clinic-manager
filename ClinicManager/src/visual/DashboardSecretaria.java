@@ -137,11 +137,11 @@ public class DashboardSecretaria extends JFrame {
 		panelPacienteKPI.setBorder(new EmptyBorder(12, 12, 12, 12)); // padding interno
 
 		String citasHoy = String.valueOf(contarNumCitasHoy());
-		JLabel lbPacientesNum = new JLabel(citasHoy);
-		lbPacientesNum.setForeground(SystemColor.textHighlight);
-		lbPacientesNum.setFont(new Font("Segoe UI", Font.BOLD, 48));
-		lbPacientesNum.setAlignmentX(Component.CENTER_ALIGNMENT);
-		panelPacienteKPI.add(lbPacientesNum);
+		JLabel lbCitasNum = new JLabel(citasHoy);
+		lbCitasNum.setForeground(SystemColor.textHighlight);
+		lbCitasNum.setFont(new Font("Segoe UI", Font.BOLD, 48));
+		lbCitasNum.setAlignmentX(Component.CENTER_ALIGNMENT);
+		panelPacienteKPI.add(lbCitasNum);
 
 		panelPacienteKPI.add(Box.createVerticalStrut(4));
 
@@ -157,17 +157,18 @@ public class DashboardSecretaria extends JFrame {
 		panelDoctoresKPI.setLayout(new BoxLayout(panelDoctoresKPI, BoxLayout.Y_AXIS));
 		panelDoctoresKPI.setBorder(new EmptyBorder(12, 12, 12, 12));
 
-		JLabel lbDoctoresNum = new JLabel("12");
-		lbDoctoresNum.setForeground(SystemColor.textHighlight);
-		lbDoctoresNum.setFont(new Font("Segoe UI", Font.BOLD, 48));
-		lbDoctoresNum.setAlignmentX(Component.CENTER_ALIGNMENT);
-		panelDoctoresKPI.add(lbDoctoresNum);
+		String citasFuturas = String.valueOf(contarNumCitasFuturas());
+		JLabel lbCitasGeneralsNum = new JLabel(citasFuturas);
+		lbCitasGeneralsNum.setForeground(SystemColor.textHighlight);
+		lbCitasGeneralsNum.setFont(new Font("Segoe UI", Font.BOLD, 48));
+		lbCitasGeneralsNum.setAlignmentX(Component.CENTER_ALIGNMENT);
+		panelDoctoresKPI.add(lbCitasGeneralsNum);
 
 		panelDoctoresKPI.add(Box.createVerticalStrut(4));
 
-		JLabel lblTitlePacientes = new JLabel("Pacientes");
-		lblTitlePacientes.setAlignmentX(Component.CENTER_ALIGNMENT);
-		panelDoctoresKPI.add(lblTitlePacientes);
+		JLabel lblCitasGeneral = new JLabel("Citas Futuras");
+		lblCitasGeneral.setAlignmentX(Component.CENTER_ALIGNMENT);
+		panelDoctoresKPI.add(lblCitasGeneral);
 
 		gridPanel.add(panelDoctoresKPI);
 
@@ -238,6 +239,33 @@ public class DashboardSecretaria extends JFrame {
 		buttonBar.setBorder(new EmptyBorder(8, 0, 12, 0)); // padding superior/inferior
 
 		JButton btnCancelar = new JButton("Cancelar");
+		btnCancelar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int citaTablaSeleccionado = tablaCitas.getSelectedRow();
+				int idCol = 0;
+				
+				if (citaTablaSeleccionado == -1)
+				{
+					JOptionPane.showMessageDialog(DashboardSecretaria.this, "No hay Nada Seleccionado", "Alerta", JOptionPane.ERROR_MESSAGE);					
+				}
+				else
+				{
+					Object idTexto  = tablaCitas.getModel().getValueAt(citaTablaSeleccionado, idCol);
+					String id = String.valueOf(idTexto);
+					Cita cita = instancia.buscarCitaPorId(id);
+					cita.setEsActivo(false);
+					java.util.Date date = (java.util.Date) spinner.getValue();
+				    java.time.LocalDate localDate = date.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+				    lbCitasNum.setText(String.valueOf(contarNumCitasHoy()));
+					cargarTablaCitas(localDate);
+					lbCitasGeneralsNum.setText(String.valueOf(contarNumCitasFuturas()));
+					JOptionPane.showMessageDialog(DashboardSecretaria.this, "Cita Cancelada parra" + cita.getNombre(), "Alerta", JOptionPane.INFORMATION_MESSAGE);					
+
+				}
+				
+				
+			}
+		});
 		JButton btnPosponer = new JButton("Posponer");
 		btnPosponer.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -258,6 +286,8 @@ public class DashboardSecretaria extends JFrame {
 					
 					java.util.Date date = (java.util.Date) spinner.getValue();
 				    java.time.LocalDate localDate = date.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+				    lbCitasNum.setText(String.valueOf(contarNumCitasHoy()));
+				    lbCitasGeneralsNum.setText(String.valueOf(contarNumCitasFuturas()));
 					cargarTablaCitas(localDate);
 				}
 				
@@ -279,7 +309,11 @@ public class DashboardSecretaria extends JFrame {
 				
 				java.util.Date date = (java.util.Date) spinner.getValue();
 			    java.time.LocalDate localDate = date.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
-				cargarTablaCitas(localDate);
+			    lbCitasNum.setText(String.valueOf(contarNumCitasHoy()));
+				cargarTablaCitas(localDate);	
+				lbCitasGeneralsNum.setText(String.valueOf(contarNumCitasFuturas()));
+			    
+
 			}
 		});
 		buttonBar.add(btnAgregar);
@@ -343,6 +377,21 @@ public class DashboardSecretaria extends JFrame {
 				contador++;
 			}
 		}
+		return contador;
+	}
+	
+	public int contarNumCitasFuturas()
+	{
+		int contador = 0;
+		
+		for (Cita c : instancia.getCitas())
+		{
+			if(c.isEsActivo() && c.getFecha().isAfter(hoy))
+			{
+				contador++;
+			}
+		}
+		
 		return contador;
 	}
 }

@@ -32,7 +32,7 @@ import java.awt.event.ActionEvent;
 public class PosponerCita extends JDialog {
 
 	Clinica instancia = Clinica.getInstancia();
-	static String medicoId;
+	static String citaId;
 	private final JPanel contentPanel = new JPanel();
 	private JSpinner spinnerFecha;
 	private LocalDate hoy = LocalDate.now();
@@ -44,7 +44,7 @@ public class PosponerCita extends JDialog {
 	public static void main(String[] args) {
 		try {
 			UIManager.setLookAndFeel(new FlatLightLaf());
-			PosponerCita dialog = new PosponerCita(medicoId);
+			PosponerCita dialog = new PosponerCita(citaId);
 			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
 		} catch (Exception e) {
@@ -56,6 +56,7 @@ public class PosponerCita extends JDialog {
 	 * Create the dialog.
 	 */
 	public PosponerCita(String id) {
+		setModal(true);
 		setTitle("Posponer Cita");
 		setBounds(100, 100, 405, 236);
 		getContentPane().setLayout(new BorderLayout());
@@ -95,22 +96,25 @@ public class PosponerCita extends JDialog {
 					    
 					    Cita cita = instancia.buscarCitaPorId(id);
 					    
-					    if(localDate.equals(cita.getFecha()))
+					    if (localDate.equals(cita.getFecha()))
 					    {
 					    	JOptionPane.showMessageDialog(PosponerCita.this, "La fecha no puede ser el mismo dia", "Alerta", JOptionPane.ERROR_MESSAGE);	
+					    }
+					    
+					    else if (localDate.isBefore(hoy))
+					    {
+					    	JOptionPane.showMessageDialog(PosponerCita.this, "La fecha no puede antes que hoy", "Alerta", JOptionPane.ERROR_MESSAGE);	
 					    }
 					    
 					    else if (instancia.medicoPuedeAceptarCita(cita.getMedico().getId(), localDate))
 					    {
 					    	cita.setFecha(localDate);
 					    	JOptionPane.showMessageDialog(PosponerCita.this, "Cita fue cambiada para: " + localDate, "Alerta", JOptionPane.INFORMATION_MESSAGE);
-					    	
+					    	dispose();
 					    }
 					    else
 					    {
-					    	JOptionPane.showMessageDialog(PosponerCita.this, "El doctor no puede en esa fecha", "Alerta", JOptionPane.ERROR_MESSAGE);
-
-					    	
+					    	JOptionPane.showMessageDialog(PosponerCita.this, "El doctor no puede en esa fecha", "Alerta", JOptionPane.ERROR_MESSAGE);	
 					    }
 
 					}
