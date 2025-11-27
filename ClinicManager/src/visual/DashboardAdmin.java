@@ -173,6 +173,13 @@ public class DashboardAdmin extends JFrame {
 		mnMenuStats.add(mntmNewMenuItem_1);
 		
 		JMenuItem mntmNewMenuItem_2 = new JMenuItem("Medico (Testing)");
+		mntmNewMenuItem_2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				DashboardMedico pantallaDashboardMedico = new DashboardMedico();
+				pantallaDashboardMedico.setLocationRelativeTo(DashboardAdmin.this); 
+				pantallaDashboardMedico.setVisible(true);
+			}
+		});
 		mnMenuStats.add(mntmNewMenuItem_2);
 		
 		JMenuItem mnItemSecretaria = new JMenuItem("Secretaria (Testing)");

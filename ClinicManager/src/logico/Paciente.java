@@ -14,11 +14,13 @@ public class Paciente extends Persona implements Serializable {
     private String telefono;
     
     public Paciente(String id,String nombre, String apellido, int edad, String cedula, String sexo, float peso, float estatura,
-    		String tipoSangre) {
+    		String tipoSangre, String direccion, String telefono) {
         super(id, nombre, apellido, edad, cedula, sexo);
         this.peso = peso;
         this.estatura = estatura;
         this.tipoSangre = tipoSangre;
+        this.direccion = direccion;
+        this.telefono = telefono;
         this.historial = new ArrayList<>();
         this.vacunas = new ArrayList<>();
     }
@@ -61,35 +63,6 @@ public class Paciente extends Persona implements Serializable {
     
     public void agregarVacuna(Vacuna vacuna) {
         vacunas.add(vacuna);
-    }
-    
-    public boolean tieneVacuna(String nombreVacuna) {
-        for (int i = 0; i < vacunas.size(); i++) {
-            if (vacunas.get(i).getNombre().equals(nombreVacuna) && vacunas.get(i).estaVacunado()) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    public ArrayList<Consulta> getConsultasImportantes() {
-        ArrayList<Consulta> importantes = new ArrayList<>();
-        for (int i = 0; i < historial.size(); i++) {
-            if (historial.get(i).isEsImportante()) {
-                importantes.add(historial.get(i));
-            }
-        }
-        return importantes;
-    }
-    
-    public ArrayList<Consulta> getConsultasConEnfermedadesVigiladas() {
-        ArrayList<Consulta> vigiladas = new ArrayList<>();
-        for (int i = 0; i < historial.size(); i++) {
-            if (historial.get(i).getEnfermedadBajoVigilancia() != null) {
-                vigiladas.add(historial.get(i));
-            }
-        }
-        return vigiladas;
     }
 
 	public float getPeso() {

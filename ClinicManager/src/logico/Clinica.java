@@ -41,13 +41,14 @@ public class Clinica implements Serializable {
     	return instancia;
     }
     
-    public void agregarPaciente(String nombre, String apellido, int edad, String cedula,
-    		String sexo, float peso, float estatura, String tipoSangre)
+    public Paciente agregarPaciente(String nombre, String apellido, int edad, String cedula,
+    		String sexo, float peso, float estatura, String tipoSangre, String direccion, String telefono)
     {
     	Paciente paciente = new Paciente("P" + contadorPacientes, nombre, apellido, edad, cedula, sexo, peso,
-    			estatura, tipoSangre);
+    			estatura, tipoSangre, direccion, telefono);
     	pacientes.add(paciente);
     	contadorPacientes++;
+    	return paciente;
     	
     }
     
@@ -288,5 +289,40 @@ public class Clinica implements Serializable {
 		}
 		
 		return puedeAceptar;
+	}
+	
+	public Cita buscarCitaPorId(String CitaId)
+	{
+		for (Cita c : citas)
+		{
+			if(c.getId().equalsIgnoreCase(CitaId))
+			{
+				return c;
+			}
+		}
+		
+		return null;
+	}
+	
+	public boolean verificarSiPacienteExiste(String cedula)
+	{
+		
+		for (Paciente p : pacientes)
+		{
+			if(p.getCedula().equalsIgnoreCase(cedula))
+			{
+				return true;
+			}
+		}
+		
+		for (Medico m : medicos)
+		{
+			if(m.getId().equalsIgnoreCase(cedula))
+			{
+				return true;
+			}
+		}
+		
+		return false;
 	}
 }

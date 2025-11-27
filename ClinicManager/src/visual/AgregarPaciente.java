@@ -3,6 +3,7 @@ package visual;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 
+import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -24,6 +25,8 @@ import javax.swing.JSpinner;
 import javax.swing.JComboBox;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.awt.event.ActionEvent;
 import javax.swing.JCheckBox;
 import javax.swing.JScrollPane;
@@ -31,6 +34,8 @@ import javax.swing.JScrollPane;
 public class AgregarPaciente extends JDialog {
 
 	private final JPanel contentPanel = new JPanel();
+	Clinica instancia = Clinica.getInstancia();
+    private final Map<JCheckBox, Vacuna> vacunaChecks = new LinkedHashMap<>();
 	private JTextField textNombre;
 	private JTextField textApellido;
 	private JTextField textCedula;
@@ -57,8 +62,9 @@ public class AgregarPaciente extends JDialog {
 	 * Create the dialog.
 	 */
 	public AgregarPaciente() {
+		setResizable(false);
 		setTitle("Agregar Paciente");
-		setBounds(100, 100, 551, 835);
+		setBounds(100, 100, 514, 800);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
@@ -116,7 +122,7 @@ public class AgregarPaciente extends JDialog {
 			lblSexo.setBounds(119, 242, 56, 16);
 			panel.add(lblSexo);
 			
-			String[] opciones = {"Masculino", "Femenino", "Otro"};
+			String[] opciones = {"Masculino", "Femenino"};
 			DefaultComboBoxModel modelo = new DefaultComboBoxModel(opciones);
 			this.comboSexo = new JComboBox();
 			this.comboSexo.setModel(modelo);
@@ -145,7 +151,8 @@ public class AgregarPaciente extends JDialog {
 			lbTipoSangre.setBounds(119, 293, 97, 16);
 			panel.add(lbTipoSangre);
 			
-			JComboBox comboBoxTipoSangre = new JComboBox();
+			String[] opcionesTipoSangre = { "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"};
+			JComboBox<String> comboBoxTipoSangre = new JComboBox<>(opcionesTipoSangre);
 			comboBoxTipoSangre.setBounds(119, 310, 270, 22);
 			panel.add(comboBoxTipoSangre);
 			
@@ -166,41 +173,46 @@ public class AgregarPaciente extends JDialog {
 			panel.add(spinnerPeso);
 			
 			JLabel lbVacunas = new JLabel("Vacunas");
-			lbVacunas.setBounds(120, 552, 56, 16);
+			lbVacunas.setBounds(119, 554, 56, 16);
 			panel.add(lbVacunas);
 			
-			
-			ArrayList<Vacuna> catalogoVacunas = Clinica.getInstancia().getCatalogoVacunas();
-			int y = 547;
-            int x = 120;
-            int spacing = 28;
+			JPanel vaccinesPanel = new JPanel();
+            vaccinesPanel.setLayout(new BoxLayout(vaccinesPanel, BoxLayout.Y_AXIS));
+            vaccinesPanel.setBorder(new EmptyBorder(4,4,4,4));
             
-			if (catalogoVacunas.isEmpty())
-			{
-				JCheckBox checkBox = new JCheckBox("No hay Vacunas");
-				checkBox.setEnabled(false);
-				checkBox.setBounds(x, y, 300, 25);
-				panel.add(checkBox);
-				//vacunasCheckboxes.add(checkBox);
-			}
-			else
-			{
-				for (Vacuna v : catalogoVacunas)
-				{
-					JCheckBox checkBox = new JCheckBox(v.getNombre());
-					checkBox.setBounds(x, y, 300, 25);
-					vacunasCheckboxes.add(checkBox);
-					panel.add(checkBox);
-					
-					y += spacing;
-                    if (y > 650) 
-                    {
-                    	y = 547;
-                        x += 220;
-				    }
-			}
+            JScrollPane scrollVacunas = new JScrollPane(vaccinesPanel);
+            scrollVacunas.setBounds(120, 575, 270, 100);
+            panel.add(scrollVacunas);
 			
-			
+            ArrayList<Vacuna> catalogoVacunas = instancia.getCatalogoVacunas();
+            int y = 700;
+            int x = 120;
+            int espaciado = 32;
+            
+            if(catalogoVacunas == null || catalogoVacunas.isEmpty())
+            {
+            	JCheckBox checkBox = new JCheckBox("No hay Vacunas");
+                checkBox.setEnabled(false);
+                checkBox.setBounds(x, y, 300, 25);
+                vaccinesPanel.add(checkBox);
+            }
+            else
+            {
+            	for(Vacuna v : catalogoVacunas)
+            	{
+            		if(v == null || !v.isEsActivo())
+            		{
+            			continue;
+            		}
+            		
+            		JCheckBox checkBox = new JCheckBox(v.getNombre());
+                    checkBox.setBounds(x, y, 300, 25);
+                    vacunaChecks.put(checkBox, v);
+                    vaccinesPanel.add(checkBox);
+            		
+                    y += espaciado;
+            	}
+            	
 		}
 		
 		{
@@ -218,8 +230,26 @@ public class AgregarPaciente extends JDialog {
 						String sexo = comboSexo.getSelectedItem().toString();
 						String telefono = textTelefono.getText().trim();
 						String direccion = textDireccion.getText().trim();
+						String tipoSangre = comboBoxTipoSangre.getSelectedItem().toString();
+						Number p = (Number) spinnerPeso.getValue();
+						float peso = p.floatValue();
+						Number e = (Number) spinnerEstatura.getValue();
+						float estatura = e.floatValue();
 						
-						
+						Paciente paciente = instancia.agregarPaciente(nombre, apellido, edad, cedula, sexo, peso, estatura, 
+								tipoSangre, direccion, telefono);
+
+						for (Map.Entry<JCheckBox, Vacuna> entry : vacunaChecks.entrySet()) {
+						    JCheckBox checkbox = entry.getKey();
+						    if (checkbox.isSelected()) {
+						        Vacuna v = entry.getValue();
+
+						        Vacuna copia = new Vacuna(v.getId(), v.getNombre(), v.getFabricante(), v.getDosis(), v.getDescripcion());
+						        copia.setAplicada(true);
+						        paciente.agregarVacuna(copia);
+						    }
+						}
+
 						 
 					}
 				});
