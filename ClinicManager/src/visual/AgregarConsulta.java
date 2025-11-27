@@ -27,6 +27,7 @@ import javax.swing.border.EmptyBorder;
 import com.formdev.flatlaf.FlatLightLaf;
 
 import logico.Clinica;
+import logico.Paciente;
 import logico.Vacuna;
 
 import javax.swing.JTable;
@@ -42,6 +43,8 @@ public class AgregarConsulta extends JDialog {
 	private JTextField textDiagnostico;
 	private JTable tableHistorial;
     private final Map<JCheckBox, Vacuna> vacunaChecks = new LinkedHashMap<>();
+    private static String citaId;
+    private static String idPaciente;
 
 
 	/**
@@ -50,7 +53,7 @@ public class AgregarConsulta extends JDialog {
 	public static void main(String[] args) {
 		try {
 			UIManager.setLookAndFeel(new FlatLightLaf());
-			AgregarConsulta dialog = new AgregarConsulta();
+			AgregarConsulta dialog = new AgregarConsulta(citaId, idPaciente);
 			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
 		} catch (Exception e) {
@@ -61,7 +64,7 @@ public class AgregarConsulta extends JDialog {
 	/**
 	 * Create the dialog.
 	 */
-	public AgregarConsulta() {
+	public AgregarConsulta(String citaId, String idPaciente) {
 		setTitle("Consulta");
 		setBounds(100, 100, 962, 436);
 		getContentPane().setLayout(new BorderLayout());

@@ -304,20 +304,27 @@ public class Clinica implements Serializable {
 		return null;
 	}
 	
-	public boolean verificarSiPacienteExiste(String cedula)
+	public String buscarPacientePorCedula(String cedula)
 	{
 		
 		for (Paciente p : pacientes)
 		{
 			if(p.getCedula().equalsIgnoreCase(cedula))
 			{
-				return true;
+				return p.getId();
 			}
 		}
 		
-		for (Medico m : medicos)
+		return null;
+	}
+}
+	
+	public boolean verificarSiPacienteExiste(String cedula)
+	{
+		
+		for (Paciente p : pacientes)
 		{
-			if(m.getId().equalsIgnoreCase(cedula))
+			if(p.getCedula().equalsIgnoreCase(cedula))
 			{
 				return true;
 			}

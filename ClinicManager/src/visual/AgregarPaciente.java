@@ -43,6 +43,9 @@ public class AgregarPaciente extends JDialog {
 	private JComboBox comboSexo;
 	private JTextField textTelefono;
 	private JTextField textDireccion;
+	private static String citaId;
+	private static String cedula;
+	private String createdPacienteId = null;
 
 	/**
 	 * Launch the application.
@@ -50,7 +53,7 @@ public class AgregarPaciente extends JDialog {
 	public static void main(String[] args) {
 		try {
 			UIManager.setLookAndFeel(new FlatLightLaf());
-			AgregarPaciente dialog = new AgregarPaciente();
+			AgregarPaciente dialog = new AgregarPaciente(citaId,cedula);
 			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 			dialog.setVisible(true);
 		} catch (Exception e) {
@@ -61,7 +64,7 @@ public class AgregarPaciente extends JDialog {
 	/**
 	 * Create the dialog.
 	 */
-	public AgregarPaciente() {
+	public AgregarPaciente(String citaId, String cedula) {
 		setResizable(false);
 		setTitle("Agregar Paciente");
 		setBounds(100, 100, 514, 800);
@@ -104,6 +107,8 @@ public class AgregarPaciente extends JDialog {
 			}
 			{
 				textCedula = new JTextField();
+				textCedula.setText(cedula);
+				textCedula.setEnabled(false);
 				textCedula.setBounds(119, 154, 270, 22);
 				panel.add(textCedula);
 				textCedula.setColumns(10);
@@ -152,7 +157,8 @@ public class AgregarPaciente extends JDialog {
 			panel.add(lbTipoSangre);
 			
 			String[] opcionesTipoSangre = { "A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"};
-			JComboBox<String> comboBoxTipoSangre = new JComboBox<>(opcionesTipoSangre);
+			DefaultComboBoxModel modeloComboTipoSangre = new DefaultComboBoxModel(opcionesTipoSangre);
+			JComboBox<String> comboBoxTipoSangre = new JComboBox<>(modeloComboTipoSangre);
 			comboBoxTipoSangre.setBounds(119, 310, 270, 22);
 			panel.add(comboBoxTipoSangre);
 			
@@ -270,4 +276,7 @@ public class AgregarPaciente extends JDialog {
 		}
 	}
  }
+	public String getCreatedPacienteId() {
+	    return createdPacienteId;
+	}
 }

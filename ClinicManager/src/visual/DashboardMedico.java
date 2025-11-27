@@ -283,12 +283,6 @@ public class DashboardMedico extends JFrame {
 					PosponerCita pantallaPosponerCita = new PosponerCita(id);
 					pantallaPosponerCita.setLocationRelativeTo(DashboardMedico.this); 
 					pantallaPosponerCita.setVisible(true);
-					
-					java.util.Date date = (java.util.Date) spinner.getValue();
-				    java.time.LocalDate localDate = date.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
-				    lbCitasNum.setText(String.valueOf(contarNumCitasHoy()));
-				    lbCitasGeneralsNum.setText(String.valueOf(contarNumCitasFuturas()));
-					cargarTablaCitas(localDate);
 				}
 				
 				
@@ -300,11 +294,12 @@ public class DashboardMedico extends JFrame {
 
 		contentPane.add(buttonBar, BorderLayout.SOUTH);
 		
-		JButton btnAtender = new JButton("Agregar");
+		JButton btnAtender = new JButton("Atender");
 		btnAtender.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				int citaTablaSeleccionado = tablaCitas.getSelectedRow();
-				int idCol = 3;
+				int idColCedula = 3;
+				int idColId = 0;
 				
 				if (citaTablaSeleccionado == -1)
 				{
@@ -312,17 +307,31 @@ public class DashboardMedico extends JFrame {
 				}
 				else
 				{
-					Object idTexto  = tablaCitas.getModel().getValueAt(citaTablaSeleccionado, idCol);
-					String id = String.valueOf(idTexto);
-					//buscar si esta el paciente creado
-					PosponerCita pantallaPosponerCita = new PosponerCita(id);
-					pantallaPosponerCita.setLocationRelativeTo(DashboardMedico.this); 
-					pantallaPosponerCita.setVisible(true);
+					Object cedulaTexto  = tablaCitas.getModel().getValueAt(citaTablaSeleccionado, idColCedula);
+					Object idTexto  = tablaCitas.getModel().getValueAt(citaTablaSeleccionado, idColId);
+					String cedula = String.valueOf(cedulaTexto);
+					String citaId = String.valueOf(idTexto);
+					boolean existe = instancia.verificarSiPacienteExiste(cedula);
 					
-
+					if(!existe)
+					{
+						AgregarPaciente pantallaAgregarPaciente = new AgregarPaciente(citaId, cedula);
+						pantallaAgregarPaciente.setLocationRelativeTo(DashboardMedico.this); 
+						String pacienteId = pantallaAgregarPaciente.getCreatedPacienteId();
+						pantallaAgregarPaciente.setVisible(true);
+						
+						AgregarConsulta pantallaAgregarConsulta = new AgregarConsulta(citaId, pacienteId);
+						pantallaAgregarConsulta.setLocationRelativeTo(DashboardMedico.this); 
+						pantallaAgregarConsulta.setVisible(true);
+					}
+					else
+					{
+						String pacienteId = instancia.buscarPacientePorCedula(cedula);
+						AgregarConsulta pantallaAgregarConsulta = new AgregarConsulta(citaId, pacienteId);
+						pantallaAgregarConsulta.setLocationRelativeTo(DashboardMedico.this); 
+						pantallaAgregarConsulta.setVisible(true);
+					}
 				}
-			    
-
 			}
 		});
 		buttonBar.add(btnAtender);
