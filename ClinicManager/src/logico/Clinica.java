@@ -16,12 +16,12 @@ public class Clinica implements Serializable {
     private ArrayList<Vacuna> catalogoVacunas;
     private ArrayList<EnfermedadBajoVigilancia> enfermedadesVigiladas;
     
-    private static int contadorPacientes = 1;
-    private static int contadorMedicos = 1;
-    private static int contadorConsultas = 1;
-    private static int contadorVacunas = 1;
-    private static int contadorEnfermedades = 1;
-    private static int contadorCitas = 1;
+    private int contadorPacientes = 1;
+    private int contadorMedicos = 1;
+    private int contadorConsultas = 1;
+    private int contadorVacunas = 1;
+    private int contadorEnfermedades = 1;
+    private int contadorCitas = 1;
     
     private Clinica() {
         pacientes = new ArrayList<>();
@@ -40,6 +40,12 @@ public class Clinica implements Serializable {
     	}
     	return instancia;
     }
+    
+    public static void setInstancia(Clinica c)
+    {
+    	instancia = c;
+    }
+    
     
     public Paciente agregarPaciente(String nombre, String apellido, int edad, String cedula,
     		String sexo, float peso, float estatura, String tipoSangre, String direccion, String telefono)
@@ -317,7 +323,6 @@ public class Clinica implements Serializable {
 		
 		return null;
 	}
-}
 	
 	public boolean verificarSiPacienteExiste(String cedula)
 	{
