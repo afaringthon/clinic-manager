@@ -65,6 +65,7 @@ public class AgregarPaciente extends JDialog {
 	 * Create the dialog.
 	 */
 	public AgregarPaciente(String citaId, String cedula) {
+		setModal(true);
 		setResizable(false);
 		setTitle("Agregar Paciente");
 		setBounds(100, 100, 514, 800);
@@ -242,21 +243,30 @@ public class AgregarPaciente extends JDialog {
 						Number e = (Number) spinnerEstatura.getValue();
 						float estatura = e.floatValue();
 						
-						Paciente paciente = instancia.agregarPaciente(nombre, apellido, edad, cedula, sexo, peso, estatura, 
-								tipoSangre, direccion, telefono);
-
-						for (Map.Entry<JCheckBox, Vacuna> entry : vacunaChecks.entrySet()) {
-						    JCheckBox checkbox = entry.getKey();
-						    if (checkbox.isSelected()) {
-						        Vacuna v = entry.getValue();
-
-						        Vacuna copia = new Vacuna(v.getId(), v.getNombre(), v.getFabricante(), v.getDosis(), v.getDescripcion());
-						        copia.setAplicada(true);
-						        paciente.agregarVacuna(copia);
-						    }
+						if(edad < 0 || nombre.isEmpty() || apellido.isEmpty() || cedula.isEmpty() || sexo.isEmpty() ||
+								telefono.isEmpty() || direccion.isEmpty() || tipoSangre.isEmpty() || peso < 0.1 || estatura < 0.1)
+						{
+							JOptionPane.showMessageDialog(AgregarPaciente.this, "Hay Campos vacios", "Alerta", JOptionPane.INFORMATION_MESSAGE);
 						}
+						else
+						{
+							Paciente paciente = instancia.agregarPaciente(nombre, apellido, edad, cedula, sexo, peso, estatura, 
+									tipoSangre, direccion, telefono);
 
-						 
+							for (Map.Entry<JCheckBox, Vacuna> entry : vacunaChecks.entrySet()) {
+							    JCheckBox checkbox = entry.getKey();
+							    if (checkbox.isSelected()) {
+							        Vacuna v = entry.getValue();
+							        Vacuna copia = new Vacuna(v.getId(), v.getNombre(), v.getFabricante(), v.getDosis(), v.getDescripcion());
+							        copia.setAplicada(true);
+							        paciente.agregarVacuna(copia);
+							    }
+							}
+							createdPacienteId = paciente.getId();
+							
+							JOptionPane.showMessageDialog(AgregarPaciente.this, "Paciente fue creado", "Alerta", JOptionPane.INFORMATION_MESSAGE);
+							dispose();
+						}
 					}
 				});
 				okButton.setActionCommand("OK");

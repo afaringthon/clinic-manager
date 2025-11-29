@@ -21,7 +21,9 @@ import javax.swing.border.EmptyBorder;
 import com.formdev.flatlaf.FlatLightLaf;
 
 import logico.Clinica;
+import logico.Control;
 import logico.Medico;
+import logico.Usuario;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -62,6 +64,7 @@ public class AgregarMedico extends JDialog {
 		contentPanel.setLayout(new CardLayout(0, 0));
 		
 		Clinica instancia = Clinica.getInstancia();
+		Control control = Control.getInstance(); //Usuarios
 		JSpinner spinnerEdad;
 		JComboBox<String> comboBoxSexo;
 		JComboBox<String> comboBoxEspecialidad;
@@ -246,8 +249,12 @@ public class AgregarMedico extends JDialog {
 						
 						else
 						{
-							instancia.agregarMedico(nombre, apellido, edad, cedula, sexo, especialidad, maxCitas);
-							JOptionPane.showMessageDialog(AgregarMedico.this, "Dr." + nombre + " Fue Creado", "Exito", JOptionPane.INFORMATION_MESSAGE);
+							Medico medico = instancia.agregarMedico(nombre, apellido, edad, cedula, sexo, especialidad, maxCitas);
+							Usuario nuevoMedico = new Usuario(nombre+"-"+medico.getId(), Control.md5("Doctor123456!"), "medico", medico.getId());
+							control.regUser(nuevoMedico);
+							control.guardarAlDisco();
+							JOptionPane.showMessageDialog(AgregarMedico.this, "Dr." + nombre + " Fue Creado" + "Usuario: " + 
+							nuevoMedico.getNombreUsuario() + " Clave: Doctor123456!", "Exito", JOptionPane.INFORMATION_MESSAGE);
 							dispose();
 						}
 						

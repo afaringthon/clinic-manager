@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 
 import javax.swing.BoxLayout;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
@@ -19,6 +20,7 @@ import java.awt.CardLayout;
 import java.awt.Dimension;
 
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.JComboBox;
 import javax.swing.JCheckBox;
@@ -26,7 +28,11 @@ import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import com.formdev.flatlaf.FlatLightLaf;
 
+import logico.Cita;
 import logico.Clinica;
+import logico.Consulta;
+import logico.EnfermedadBajoVigilancia;
+import logico.Medico;
 import logico.Paciente;
 import logico.Vacuna;
 
@@ -43,6 +49,8 @@ public class AgregarConsulta extends JDialog {
 	private JTextField textDiagnostico;
 	private JTable tableHistorial;
     private final Map<JCheckBox, Vacuna> vacunaChecks = new LinkedHashMap<>();
+    JComboBox comboBoxEnfermedades;
+    JCheckBox chckbxNewCheckBox_1;
     private static String citaId;
     private static String idPaciente;
 
@@ -65,12 +73,15 @@ public class AgregarConsulta extends JDialog {
 	 * Create the dialog.
 	 */
 	public AgregarConsulta(String citaId, String idPaciente) {
+		setModal(true);
 		setTitle("Consulta");
 		setBounds(100, 100, 962, 436);
 		getContentPane().setLayout(new BorderLayout());
 		contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		contentPanel.setLayout(new CardLayout(0, 0));
+		
+		Paciente paciente = instancia.buscarPacientePorId(idPaciente);
 		{
 			JPanel panel = new JPanel();
 			contentPanel.add(panel, "name_112449224634200");
@@ -82,6 +93,8 @@ public class AgregarConsulta extends JDialog {
 			}
 			{
 				textField = new JTextField();
+				textField.setEditable(false);
+				textField.setText(paciente.getNombre()+" " + paciente.getApellido());
 				textField.setBounds(23, 45, 285, 22);
 				panel.add(textField);
 				textField.setColumns(10);
@@ -116,7 +129,8 @@ public class AgregarConsulta extends JDialog {
 				panel.add(lbEnfermedades);
 			}
 			{
-				JComboBox comboBoxEnfermedades = new JComboBox();
+				comboBoxEnfermedades = new JComboBox();
+				cargarComboEnfermedades();
 				comboBoxEnfermedades.setBounds(23, 211, 180, 22);
 				panel.add(comboBoxEnfermedades);
 			}
@@ -128,7 +142,7 @@ public class AgregarConsulta extends JDialog {
 				
 			}
 			{
-				JCheckBox chckbxNewCheckBox_1 = new JCheckBox("Importante");
+				chckbxNewCheckBox_1 = new JCheckBox("Importante");
 				chckbxNewCheckBox_1.setBounds(216, 210, 92, 25);
 				panel.add(chckbxNewCheckBox_1);
 				
@@ -157,16 +171,23 @@ public class AgregarConsulta extends JDialog {
 	            {
 	            	for(Vacuna v : catalogoVacunas)
 	            	{
-	            		if(v == null || !v.isEsActivo())
-	            		{
-	            			continue;
-	            		}
+	            		if(v == null || !v.isEsActivo()) continue;
 	            		
 	            		JCheckBox checkBox = new JCheckBox(v.getNombre());
+	            		boolean aplicadaPorPaciente = false;
+	            		if (paciente != null && paciente.getVacunas() != null) {
+	            			
+	                        for (Vacuna pv : paciente.getVacunas()) {
+	                            if (pv.getId().equalsIgnoreCase(v.getId()) && pv.isAplicada()) {
+	                                aplicadaPorPaciente = true;
+	                                break;
+	                            }
+	                        }
+	                    }
 	                    checkBox.setBounds(x, y, 300, 25);
 	                    vacunaChecks.put(checkBox, v);
 	                    
-	                    if(checkBox.isSelected())
+	                    if(aplicadaPorPaciente)
 	                    {
 	    	                checkBox.setEnabled(false);
 	    	                checkBox.setSelected(true);
@@ -210,6 +231,44 @@ public class AgregarConsulta extends JDialog {
 				JButton okButton = new JButton("OK");
 				okButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
+						String sintomas = textSintomas.getText().trim();
+						String diagnostico = textDiagnostico.getText().trim();
+						EnfermedadBajoVigilancia enfermedad = (EnfermedadBajoVigilancia) comboBoxEnfermedades.getSelectedItem();
+						boolean check = chckbxNewCheckBox_1.isEnabled();
+						if(enfermedad!=null) check = true;
+						Cita cita = instancia.buscarCitaPorId(citaId);
+						Medico medico = cita.getMedico();
+						
+						if(sintomas.isEmpty() || diagnostico.isEmpty() || diagnostico == null)
+						{
+							JOptionPane.showMessageDialog(AgregarConsulta.this, "No hay Suministradores Creados", "Alerta", JOptionPane.ERROR_MESSAGE);					
+						}
+						else
+						{
+							cita.setEsActivo(false); //borrar
+							Consulta consulta = instancia.agregarConsulta(paciente, medico, sintomas, diagnostico, enfermedad, check);
+							paciente.agregarConsulta(consulta);
+							
+							for (Map.Entry<JCheckBox, Vacuna> entry : vacunaChecks.entrySet()) {
+							    JCheckBox checkbox = entry.getKey();
+							    if (checkbox.isSelected()) {
+							        Vacuna v = entry.getValue();
+							        Vacuna copia = new Vacuna(v.getId(), v.getNombre(), v.getFabricante(), v.getDosis(), v.getDescripcion());
+							        copia.setAplicada(true);
+							        //trata de borrarla lista
+							        paciente.agregarVacuna(copia);
+							    }
+							}
+							
+							System.out.println(paciente.getNombre() + enfermedad + check);
+							
+							for(Vacuna v : paciente.getVacunas())
+							{
+								System.out.println(v.getNombre());
+							}
+							
+							dispose();
+						}
 						
 						
 					}
@@ -225,4 +284,19 @@ public class AgregarConsulta extends JDialog {
 			}
 		}
 	}
+	
+	public void cargarComboEnfermedades()
+	{
+		ArrayList<EnfermedadBajoVigilancia> enfermedades = instancia.getEnfermedadesVigiladas();
+		DefaultComboBoxModel<EnfermedadBajoVigilancia> model = new DefaultComboBoxModel<>();
+		if(enfermedades != null)
+		{
+			for (EnfermedadBajoVigilancia e : enfermedades)
+			{
+				model.addElement(e);
+			}
+		}
+		comboBoxEnfermedades.setModel(model);
+	}
+
 }
