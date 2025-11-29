@@ -47,9 +47,7 @@ public final class Datos {
 logico.Datos.load();
 
 //opcional: hook de respaldo para guardar después si JVM finaliza
-Runtime.getRuntime().addShutdownHook(new Thread(() -> {
- logico.Datos.save();
-}));
+
 
 //luego crear y mostrar la UI:
 javax.swing.SwingUtilities.invokeLater(() -> {
