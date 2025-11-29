@@ -16,12 +16,12 @@ public class Servidor {
     private CopyOnWriteArrayList<ManejadorCliente> clientesConectados;
     private static Servidor instancia;
     private final String BACKUP_FILE = "backup_clinica.dat";
-    private final int INTERVALO_BACKUP = 5; // minutos
+    private final int INTERVALO_BACKUP = 5;
 
     public Servidor(int puerto) {
         try {
             serverSocket = new ServerSocket(puerto);
-            clinica = new Clinica();
+            clinica = Clinica.getInstancia();
             servidorActivo = true;
             scheduler = Executors.newScheduledThreadPool(2);
             clientesConectados = new CopyOnWriteArrayList<>();
@@ -29,10 +29,8 @@ public class Servidor {
             System.out.println("Servidor de Clinica Medica iniciado en puerto: " + puerto);
             System.out.println("IP del servidor: " + InetAddress.getLocalHost().getHostAddress());
             
-            // Cargar backup si existe
             cargarBackup();
             
-            // Programar backup automático
             programarBackupAutomatico();
             
             System.out.println("Esperando conexiones de clientes...");
@@ -61,11 +59,9 @@ public class Servidor {
                 System.out.println("Nuevo cliente conectado: " + direccionCliente + ":" + puertoCliente);
                 System.out.println("Total de clientes conectados: " + (clientesConectados.size() + 1));
                 
-                // Crear manejador para el cliente
                 ManejadorCliente manejador = new ManejadorCliente(clienteSocket, clinica, this);
                 clientesConectados.add(manejador);
                 
-                // Ejecutar en el pool de hilos
                 Executors.newSingleThreadExecutor().execute(manejador);
                 
             } catch (IOException e) {
@@ -104,20 +100,35 @@ public class Servidor {
     public synchronized boolean cargarBackup() {
         try {
             File file = new File(BACKUP_FILE);
+            if (!file.exists()) {
+                System.out.println("No existe archivo de backup, iniciando con datos nuevos");
+                return false;
+            }
+            
             FileInputStream fileIn = new FileInputStream(BACKUP_FILE);
             ObjectInputStream in = new ObjectInputStream(fileIn);
-            clinica = (Clinica) in.readObject();
+            Clinica clinicaCargada = (Clinica) in.readObject();
             in.close();
             fileIn.close();
             
-            System.out.println("Backup cargado exitosamente: " + BACKUP_FILE);
-            System.out.println("Datos cargados:");
-            System.out.println("- " + clinica.getMedicos().size() + " medicos");
-            System.out.println("- " + clinica.getPacientes().size() + " pacientes");
-            System.out.println("- " + clinica.getEnfermedadesVigiladas().size() + " enfermedades bajo vigilancia");
-            System.out.println("- " + clinica.getCatalogoVacunas().size() + " vacunas en catalogo");
-            
-            return true;
+            if (clinicaCargada != null) {
+                Clinica.setInstancia(clinicaCargada);
+                this.clinica = clinicaCargada;
+                
+                System.out.println("Backup cargado exitosamente: " + BACKUP_FILE);
+                System.out.println("Datos cargados:");
+                System.out.println("- " + clinica.getMedicos().size() + " medicos");
+                System.out.println("- " + clinica.getPacientes().size() + " pacientes");
+                System.out.println("- " + clinica.getCitas().size() + " citas");
+                System.out.println("- " + clinica.getConsultas().size() + " consultas");
+                System.out.println("- " + clinica.getEnfermedadesVigiladas().size() + " enfermedades bajo vigilancia");
+                System.out.println("- " + clinica.getCatalogoVacunas().size() + " vacunas en catalogo");
+                
+                return true;
+            } else {
+                System.out.println("Archivo de backup corrupto, iniciando con datos nuevos");
+                return false;
+            }
             
         } catch (IOException | ClassNotFoundException e) {
             System.err.println("Error cargando backup: " + e.getMessage());
@@ -126,14 +137,18 @@ public class Servidor {
     }
     
     public synchronized void removerCliente(ManejadorCliente cliente) {
-        clientesConectados.remove(cliente);
-        System.out.println("Clientes conectados: " + clientesConectados.size());
+        if (clientesConectados != null && cliente != null) {
+            clientesConectados.remove(cliente);
+            System.out.println("Clientes conectados: " + clientesConectados.size());
+        }
     }
     
     public void broadcast(String mensaje, ManejadorCliente emisor) {
+        if (clientesConectados == null) return;
+        
         int enviados = 0;
         for (ManejadorCliente cliente : clientesConectados) {
-            if (cliente != emisor) {
+            if (cliente != null && cliente != emisor) {
                 cliente.enviarMensajeBroadcast(mensaje);
                 enviados++;
             }
@@ -144,8 +159,12 @@ public class Servidor {
     }
     
     public void broadcastATodos(String mensaje) {
+        if (clientesConectados == null) return;
+        
         for (ManejadorCliente cliente : clientesConectados) {
-            cliente.enviarMensajeBroadcast(mensaje);
+            if (cliente != null) {
+                cliente.enviarMensajeBroadcast(mensaje);
+            }
         }
         System.out.println("Broadcast general enviado a " + clientesConectados.size() + " clientes");
     }
@@ -153,18 +172,16 @@ public class Servidor {
     public void detener() {
         servidorActivo = false;
         
-        // Guardar backup final
         guardarBackup();
         
-        // Notificar a todos los clientes
-        broadcastATodos("SERVIDOR_APAGADO:El servidor se esta apagando");
+        if (clientesConectados != null && !clientesConectados.isEmpty()) {
+            broadcastATodos("SERVIDOR_APAGADO:El servidor se esta apagando");
+        }
         
-        // Cerrar scheduler
         if (scheduler != null) {
             scheduler.shutdown();
         }
         
-        // Cerrar socket del servidor
         try {
             if (serverSocket != null && !serverSocket.isClosed()) {
                 serverSocket.close();
@@ -181,6 +198,6 @@ public class Servidor {
     }
     
     public int getClientesConectados() {
-        return clientesConectados.size();
+        return clientesConectados != null ? clientesConectados.size() : 0;
     }
 }

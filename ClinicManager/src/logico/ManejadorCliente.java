@@ -3,6 +3,7 @@ package logico;
 import java.io.*;
 import java.net.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 
 public class ManejadorCliente implements Runnable {
     private Socket clienteSocket;
@@ -26,22 +27,18 @@ public class ManejadorCliente implements Runnable {
         System.out.println("Hilo iniciado para cliente: " + direccionCliente);
         
         try {
-            // Crear streams
             output = new ObjectOutputStream(clienteSocket.getOutputStream());
             input = new ObjectInputStream(clienteSocket.getInputStream());
             
-
-            output.writeObject("CONEXION_EXITOSA:Bienvenido al Sistema Clinica");
+            output.writeObject("CONEXION_EXITOSA:Bienvenido al Sistema Doctor+");
             output.flush();
             
             while (conectado && !clienteSocket.isClosed()) {
-                // Recibir comando del cliente
                 Object comandoObj = input.readObject();
                 
                 if (comandoObj instanceof String) {
                     String comando = (String) comandoObj;
                     System.out.println("Comando de " + direccionCliente + ": " + comando);
-                    
                     procesarComando(comando);
                 }
             }
@@ -62,9 +59,9 @@ public class ManejadorCliente implements Runnable {
             switch (comando) {
                 case "AGREGAR_MEDICO":
                     Medico medico = (Medico) input.readObject();
-                    boolean resultadoMedico = clinica.agregarMedico(medico);
-                    output.writeObject(resultadoMedico);
-                    if (resultadoMedico) {
+                    clinica.getMedicos().add(medico);
+                    output.writeObject(true);
+                    if (medico != null) {
                         System.out.println("Medico agregado por: " + direccionCliente);
                         servidor.guardarBackup();
                         servidor.broadcast("ACTUALIZAR_MEDICOS", this);
@@ -73,15 +70,21 @@ public class ManejadorCliente implements Runnable {
                     
                 case "BUSCAR_MEDICO_POR_CEDULA":
                     String cedulaMedico = (String) input.readObject();
-                    Medico medicoEncontrado = clinica.buscarMedicoPorCedula(cedulaMedico);
+                    Medico medicoEncontrado = null;
+                    for (Medico m : clinica.getMedicos()) {
+                        if (m.getCedula().equals(cedulaMedico) && m.isActivo()) {
+                            medicoEncontrado = m;
+                            break;
+                        }
+                    }
                     output.writeObject(medicoEncontrado);
                     break;
                     
                 case "AGREGAR_PACIENTE":
                     Paciente paciente = (Paciente) input.readObject();
-                    boolean resultadoPaciente = clinica.agregarPaciente(paciente);
-                    output.writeObject(resultadoPaciente);
-                    if (resultadoPaciente) {
+                    clinica.getPacientes().add(paciente);
+                    output.writeObject(true);
+                    if (paciente != null) {
                         System.out.println("Paciente agregado por: " + direccionCliente);
                         servidor.guardarBackup();
                         servidor.broadcast("ACTUALIZAR_PACIENTES", this);
@@ -90,15 +93,21 @@ public class ManejadorCliente implements Runnable {
                     
                 case "BUSCAR_PACIENTE_POR_CEDULA":
                     String cedulaPaciente = (String) input.readObject();
-                    Paciente pacienteEncontrado = clinica.buscarPacientePorCedula(cedulaPaciente);
+                    Paciente pacienteEncontrado = null;
+                    for (Paciente p : clinica.getPacientes()) {
+                        if (p.getCedula().equals(cedulaPaciente) && p.isActivo()) {
+                            pacienteEncontrado = p;
+                            break;
+                        }
+                    }
                     output.writeObject(pacienteEncontrado);
                     break;
                     
                 case "AGENDAR_CITA":
                     Cita cita = (Cita) input.readObject();
-                    boolean resultadoCita = clinica.agendarCita(cita);
-                    output.writeObject(resultadoCita);
-                    if (resultadoCita) {
+                    clinica.getCitas().add(cita);
+                    output.writeObject(true);
+                    if (cita != null) {
                         System.out.println("Cita agendada por: " + direccionCliente);
                         servidor.guardarBackup();
                         servidor.broadcast("ACTUALIZAR_CITAS", this);
@@ -114,7 +123,13 @@ public class ManejadorCliente implements Runnable {
                     break;
                     
                 case "OBTENER_CITAS_ACTIVAS":
-                    output.writeObject(clinica.getCitasActivas());
+                	ArrayList<Cita> citasActivas = new ArrayList<>();
+                    for (Cita c : clinica.getCitas()) {
+                        if (c != null && c.isEsActivo()) {
+                            citasActivas.add(c);
+                        }
+                    }
+                    output.writeObject(citasActivas);
                     break;
                     
                 case "OBTENER_MEDICOS_DISPONIBLES":
@@ -124,7 +139,10 @@ public class ManejadorCliente implements Runnable {
                     
                 case "AGREGAR_CONSULTA":
                     Consulta consulta = (Consulta) input.readObject();
-                    clinica.agregarConsulta(consulta);
+                    clinica.getConsultas().add(consulta);
+                    if (consulta.getPaciente() != null) {
+                        consulta.getPaciente().agregarConsulta(consulta);
+                    }
                     output.writeObject(true);
                     System.out.println("Consulta agregada por: " + direccionCliente);
                     servidor.guardarBackup();
@@ -133,7 +151,7 @@ public class ManejadorCliente implements Runnable {
                     
                 case "AGREGAR_ENFERMEDAD_VIGILADA":
                     EnfermedadBajoVigilancia enfermedad = (EnfermedadBajoVigilancia) input.readObject();
-                    clinica.agregarEnfermedadVigilada(enfermedad);
+                    clinica.getEnfermedadesVigiladas().add(enfermedad);
                     output.writeObject(true);
                     System.out.println("Enfermedad vigilada agregada por: " + direccionCliente);
                     servidor.guardarBackup();
@@ -150,7 +168,7 @@ public class ManejadorCliente implements Runnable {
                     
                 case "EXISTE_PACIENTE":
                     String cedula = (String) input.readObject();
-                    boolean existe = clinica.existePaciente(cedula);
+                    boolean existe = clinica.verificarSiPacienteExiste(cedula);
                     output.writeObject(existe);
                     break;
                     
@@ -174,9 +192,6 @@ public class ManejadorCliente implements Runnable {
                     break;
             }
             output.flush();
-            
-        } catch (ClassNotFoundException e) {
-            output.writeObject("ERROR:" + e.getMessage());
         } catch (Exception e) {
             output.writeObject("ERROR:" + e.getMessage());
             e.printStackTrace();

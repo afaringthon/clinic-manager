@@ -30,6 +30,7 @@ public class Cliente {
             String respuesta = (String) input.readObject();
             System.out.println("Servidor: " + respuesta);
             
+            
             iniciarHiloEscucha();
             
             System.out.println("Conectado al servidor: " + host + ":" + puerto);
@@ -38,6 +39,39 @@ public class Cliente {
         } catch (IOException | ClassNotFoundException e) {
             System.err.println("Error conectando al servidor: " + e.getMessage());
             return false;
+        }
+    }
+    private void sincronizarDatosIniciales() {
+        try {
+            
+            ArrayList<Medico> medicosServidor = obtenerMedicos();
+            ArrayList<Paciente> pacientesServidor = obtenerPacientes();
+            ArrayList<EnfermedadBajoVigilancia> enfermedadesServidor = obtenerEnfermedadesVigiladas();
+            ArrayList<Vacuna> vacunasServidor = obtenerCatalogoVacunas();
+            
+            
+            Clinica clinicaLocal = Clinica.getInstancia();
+            
+            
+            clinicaLocal.getMedicos().clear();
+            clinicaLocal.getMedicos().addAll(medicosServidor);
+            
+            
+            clinicaLocal.getPacientes().clear();
+            clinicaLocal.getPacientes().addAll(pacientesServidor);
+            
+            
+            clinicaLocal.getEnfermedadesVigiladas().clear();
+            clinicaLocal.getEnfermedadesVigiladas().addAll(enfermedadesServidor);
+            
+            
+            clinicaLocal.getCatalogoVacunas().clear();
+            clinicaLocal.getCatalogoVacunas().addAll(vacunasServidor);
+            
+            System.out.println("Datos sincronizados con el servidor");
+            
+        } catch (Exception e) {
+            System.err.println("Error sincronizando datos: " + e.getMessage());
         }
     }
     
@@ -71,10 +105,6 @@ public class Cliente {
         if (mensaje.startsWith("BROADCAST:")) {
             String contenido = mensaje.substring(10);
             System.out.println("Broadcast recibido: " + contenido);
-            
-            if (contenido.startsWith("ACTUALIZAR_")) {
-                System.out.println("Actualizacion requerida: " + contenido);
-            }
         } else if (mensaje.equals("SERVIDOR_APAGADO:El servidor se esta apagando")) {
             System.out.println("El servidor se esta apagando. Desconectando...");
             desconectar();
@@ -100,7 +130,6 @@ public class Cliente {
             System.err.println("Error desconectando: " + e.getMessage());
         }
     }
-
 
     public boolean agregarMedico(Medico medico) {
         try {
@@ -281,6 +310,18 @@ public class Cliente {
     }
     
     public boolean estaConectado() {
-        return conectado && !socket.isClosed();
+        return conectado && socket != null && !socket.isClosed();
+    }
+    
+    @SuppressWarnings("unchecked")
+    public ArrayList<Cita> obtenerCitas() {
+        try {
+            output.writeObject("OBTENER_CITAS_ACTIVAS");
+            output.flush();
+            return (ArrayList<Cita>) input.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            System.err.println("Error obteniendo citas: " + e.getMessage());
+            return new ArrayList<>();
+        }
     }
 }
