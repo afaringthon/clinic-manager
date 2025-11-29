@@ -318,6 +318,10 @@ public class DashboardSecretaria extends JFrame {
 		});
 		buttonBar.add(btnAgregar);
 
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			 logico.Datos.guardar();
+			}));
+		
 		setLocationRelativeTo(null);
 	}
 	

@@ -33,8 +33,10 @@ import com.formdev.flatlaf.FlatLightLaf;
 
 import logico.Cita;
 import logico.Clinica;
+import logico.Control;
 import logico.Medico;
 import logico.Paciente;
+import logico.Usuario;
 
 import javax.swing.table.TableModel;
 import java.awt.SystemColor;
@@ -58,11 +60,14 @@ import javax.swing.event.ChangeEvent;
 public class DashboardMedico extends JFrame {
 
 	Clinica instancia = Clinica.getInstancia();
+	Control control = Control.getInstance();
 	private JPanel contentPane;
 	private JTable tablaCitas;
 	DefaultTableModel modelCitas;
 	LocalDate hoy = LocalDate.now();
 	Date fechaInicial = Date.from(hoy.atStartOfDay(ZoneId.systemDefault()).toInstant());
+	Usuario usuario = control.getLoggedUsuario();
+	Medico medicoActual = instancia.buscarMedicoPorId(usuario.getLinkId());
 
 	/**
 	 * Launch the application.
@@ -85,7 +90,7 @@ public class DashboardMedico extends JFrame {
 	 * Create the frame.
 	 */
 	public DashboardMedico() {
-		setTitle("Clinic Manager - Secretaria");
+		setTitle("Clinic Manager - Medico");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 1392, 822);
 		contentPane = new JPanel();
@@ -93,6 +98,8 @@ public class DashboardMedico extends JFrame {
 		contentPane.setBorder(new EmptyBorder(0, 0, 0, 0));
 		contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(contentPane);
+		
+		
 
 		JPanel navbar = new JPanel(new BorderLayout());
 		navbar.setBackground(SystemColor.textHighlight);
@@ -204,6 +211,7 @@ public class DashboardMedico extends JFrame {
 		cargarTablaCitas(hoy);
 		tablaCitas = new JTable(modelCitas);
 		tablaCitas.setDefaultEditor(Object.class, null);
+		
 
 
 		panelInferiorIzquierdo.add(headerPanel, BorderLayout.NORTH);
@@ -317,9 +325,10 @@ public class DashboardMedico extends JFrame {
 					{
 						AgregarPaciente pantallaAgregarPaciente = new AgregarPaciente(citaId, cedula);
 						pantallaAgregarPaciente.setLocationRelativeTo(DashboardMedico.this); 
-						String pacienteId = pantallaAgregarPaciente.getCreatedPacienteId();
+						pantallaAgregarPaciente.setModal(true);    
 						pantallaAgregarPaciente.setVisible(true);
 						
+						String pacienteId = pantallaAgregarPaciente.getCreatedPacienteId();
 						AgregarConsulta pantallaAgregarConsulta = new AgregarConsulta(citaId, pacienteId);
 						pantallaAgregarConsulta.setLocationRelativeTo(DashboardMedico.this); 
 						pantallaAgregarConsulta.setVisible(true);
@@ -337,6 +346,10 @@ public class DashboardMedico extends JFrame {
 		buttonBar.add(btnAtender);
 
 		setLocationRelativeTo(null);
+		
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			 logico.Datos.guardar();
+			}));
 	}
 	
 	private ImageIcon loadAndScaleIcon(String resourcePath, int width, int height) {
@@ -363,7 +376,7 @@ public class DashboardMedico extends JFrame {
 		return resized;
 	}
 	
-	private void cargarTablaCitas(LocalDate fecha) { //Cuando se haga el login hay que poner el id del doctor
+	private void cargarTablaCitas(LocalDate fecha) {
 	    modelCitas.setRowCount(0);
 	    ArrayList <Cita> citas = instancia.getCitas();
 
@@ -375,7 +388,7 @@ public class DashboardMedico extends JFrame {
 	        String apellido = c.getApellido();
 	        String cedula = c.getCedula();
 	        
-	        if(c.isEsActivo() && c.getFecha().equals(fecha))
+	        if(c.isEsActivo() && c.getFecha().equals(fecha) && c.getMedico().equals(medicoActual))
 	        {
 	        	modelCitas.addRow(new Object[] { id, nombre, apellido, cedula});
 	        }	        
@@ -388,7 +401,7 @@ public class DashboardMedico extends JFrame {
 		
 		for (Cita c : instancia.getCitas())
 		{
-			if(c.isEsActivo() && c.getFecha().equals(hoy))
+			if(c.isEsActivo() && c.getFecha().equals(hoy) && c.getMedico().equals(medicoActual))
 			{
 				contador++;
 			}
@@ -402,7 +415,7 @@ public class DashboardMedico extends JFrame {
 		
 		for (Cita c : instancia.getCitas())
 		{
-			if(c.isEsActivo() && c.getFecha().isAfter(hoy))
+			if(c.isEsActivo() && c.getFecha().isAfter(hoy) && c.getMedico().equals(medicoActual))
 			{
 				contador++;
 			}

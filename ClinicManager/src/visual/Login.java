@@ -13,18 +13,23 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import com.formdev.flatlaf.FlatLightLaf;
+
+import logico.Clinica;
 import logico.Control;
+import logico.Datos;
+import logico.Medico;
 import logico.Usuario;
 
 import javax.swing.JLabel;
 import javax.swing.JTextField;
+import javax.swing.UIManager;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 public class Login extends JFrame {
 
-	static Control control = Control.getInstance();
 	private JPanel contentPane;
 	private JTextField textUsuario;
 	private JTextField textClave;
@@ -40,18 +45,20 @@ public class Login extends JFrame {
 				ObjectInputStream usuariosLecSerialized;
 				ObjectOutputStream usuariosEscSerialized;
 				try {
+					Datos.cargar();
 					usuariosLec = new FileInputStream ("usuarios.dat");
 					usuariosLecSerialized = new ObjectInputStream(usuariosLec);
 					Control temp = (Control)usuariosLecSerialized.readObject(); //guarda el archivo en temp
-					control.setInstancia(temp); //lo pone en la instancia
+					Control.setInstancia(temp); //lo pone en la instancia
 					usuariosLec.close();
 					usuariosLecSerialized.close();
 				} catch (FileNotFoundException e) {
 					try {
 						usuariosEsc = new  FileOutputStream("usuarios.dat");
 						usuariosEscSerialized = new ObjectOutputStream(usuariosEsc);
-						Usuario aux = new Usuario("Administrador", Control.md5("123456"), "admin", "0");
-						control.regUser(aux);
+						Usuario aux = new Usuario("Administrador", Control.md5("123456"), "administrador", "0");
+						Usuario auxSec = new Usuario("Secretaria", Control.md5("123456"), "secretaria", "1");
+						Control.getInstance().regUser(aux); Control.getInstance().regUser(auxSec);
 						usuariosEscSerialized.writeObject(Control.getInstance());
 						usuariosEsc.close();
 						usuariosEscSerialized.close();
@@ -64,6 +71,7 @@ public class Login extends JFrame {
 				}
 				
 				try {
+					UIManager.setLookAndFeel(new FlatLightLaf());
 					Login pantallaLogin = new Login();
 					pantallaLogin.setVisible(true);
 				} catch (Exception e) {
@@ -111,12 +119,45 @@ public class Login extends JFrame {
 		JButton btnLogin = new JButton("Login");
 		btnLogin.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if(Control.getInstance().confirmLogin(textUsuario.getText(),textClave.getText())){
-					DashboardAdmin frame = new DashboardAdmin();
-					frame.setVisible(true);
-					dispose();
-					
-				};
+				String userInput = textUsuario.getText().trim();
+				String claveInput = textClave.getText().trim();
+				if (userInput == null) userInput = "";
+				if (userInput.isEmpty() || claveInput == null || claveInput.isEmpty()) {
+					javax.swing.JOptionPane.showMessageDialog(Login.this, "Introduce usuario y contraseña", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+
+				boolean ok = Control.getInstance().confirmLogin(userInput, claveInput);
+				if (ok) {
+					Usuario logged = Control.getLoggedUsuario();
+					String linkId = null;
+					if (logged != null) {
+						linkId = logged.getLinkId();
+					}
+
+					Usuario usuario = Control.getInstance().buscarUsuario(userInput);
+					Medico m = null;
+					if (linkId != null && !linkId.trim().isEmpty()) {
+						m = Clinica.getInstancia().buscarMedicoPorId(linkId.trim());
+					}
+					if (m != null) {
+						DashboardMedico pantallaDashboardMedico = new DashboardMedico();
+						pantallaDashboardMedico.setVisible(true);
+						dispose();
+					} else if(usuario.getRol().equalsIgnoreCase("administrador")){
+						DashboardAdmin pantallaDashboardAdmin = new DashboardAdmin();
+						pantallaDashboardAdmin.setVisible(true);
+						dispose();
+					} else
+					{
+						DashboardSecretaria pantallaDashboardSecretaria = new DashboardSecretaria();
+						pantallaDashboardSecretaria.setVisible(true);
+						dispose();
+					}
+				} else {
+					javax.swing.JOptionPane.showMessageDialog(Login.this, "Usuario o contraseña incorrectos", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+				}
+				
 				
 			}
 		});

@@ -422,6 +422,10 @@ public class DashboardAdmin extends JFrame {
 
 		contentPane.add(buttonBar, BorderLayout.SOUTH);
 
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+			 logico.Datos.guardar();
+			}));
+		
 		setLocationRelativeTo(null);
 	}
 	
