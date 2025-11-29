@@ -9,12 +9,12 @@ import javax.swing.DefaultComboBoxModel;
 public class Clinica implements Serializable {
 	private static final long serialVersionUID = 1L;
     private static Clinica instancia = null;
-    private ArrayList<Paciente> pacientes;
-    private ArrayList<Medico> medicos;
-    private ArrayList<Cita> citas;
-    private ArrayList<Consulta> consultas;
-    private ArrayList<Vacuna> catalogoVacunas;
-    private ArrayList<EnfermedadBajoVigilancia> enfermedadesVigiladas;
+    private ArrayList<Paciente> pacientes = new ArrayList<>();
+    private ArrayList<Medico> medicos = new ArrayList<>();
+    private ArrayList<Cita> citas = new ArrayList<>();
+    private ArrayList<Consulta> consultas = new ArrayList<>();
+    private ArrayList<Vacuna> catalogoVacunas = new ArrayList<>();
+    private ArrayList<EnfermedadBajoVigilancia> enfermedadesVigiladas = new ArrayList<>();
     
     private int contadorPacientes = 1;
     private int contadorMedicos = 1;
@@ -24,12 +24,6 @@ public class Clinica implements Serializable {
     private int contadorCitas = 1;
     
     private Clinica() {
-        pacientes = new ArrayList<>();
-        medicos = new ArrayList<>();
-        citas = new ArrayList<>();
-        consultas = new ArrayList<>();
-        catalogoVacunas = new ArrayList<>();
-        enfermedadesVigiladas = new ArrayList<>();
     }
     
     public static Clinica getInstancia()
@@ -50,7 +44,7 @@ public class Clinica implements Serializable {
     public Paciente agregarPaciente(String nombre, String apellido, int edad, String cedula,
     		String sexo, float peso, float estatura, String tipoSangre, String direccion, String telefono)
     {
-    	Paciente paciente = new Paciente("P" + contadorPacientes, nombre, apellido, edad, cedula, sexo, peso,
+    	Paciente paciente = new Paciente("PAC" + contadorPacientes, nombre, apellido, edad, cedula, sexo, peso,
     			estatura, tipoSangre, direccion, telefono);
     	pacientes.add(paciente);
     	contadorPacientes++;
@@ -58,35 +52,36 @@ public class Clinica implements Serializable {
     	
     }
     
-    public void agregarMedico(String nombre, String apellido, int edad, String cedula, String sexo,
+    public Medico agregarMedico(String nombre, String apellido, int edad, String cedula, String sexo,
     		String especialidad, int maxCitas)
     {
-    	Medico medico = new Medico ("M" + contadorMedicos, nombre, apellido, edad, cedula, sexo, especialidad, maxCitas);
+    	Medico medico = new Medico ("MED" + contadorMedicos, nombre, apellido, edad, cedula, sexo, especialidad, maxCitas);
     	medicos.add(medico);
     	contadorMedicos++;
-    	
+    	return medico;
     }
     
     public void agregarCita (String nombre, String apellido, String cedula, Medico medico, LocalDate fecha)
     {
-    	Cita cita = new Cita ("C" + contadorCitas, nombre, apellido, cedula, medico, fecha);
+    	Cita cita = new Cita ("CIT" + contadorCitas, nombre, apellido, cedula, medico, fecha);
     	citas.add(cita);
     	contadorCitas++;	
     }
     
-    public void agregarConsulta (String id, Paciente paciente, Medico medico, String sintomas, String diagnostico,
+    public Consulta agregarConsulta (Paciente paciente, Medico medico, String sintomas, String diagnostico,
     		EnfermedadBajoVigilancia enfermedadVigilada, boolean esImportante)
     {
-    	Consulta consulta = new Consulta(id, paciente, medico, sintomas, diagnostico, enfermedadVigilada,
+    	Consulta consulta = new Consulta("CON" + contadorConsultas, paciente, medico, sintomas, diagnostico, enfermedadVigilada,
     			esImportante);
     	consultas.add(consulta);
     	contadorConsultas++;
+    	return consulta;
     	
     }
     
     public void agregarEnfermedadVigilida(String nombre, String descripcion, String gravedad)
     {
-    	EnfermedadBajoVigilancia enfermedadVigilada = new EnfermedadBajoVigilancia("E" + contadorEnfermedades,nombre, descripcion, gravedad);
+    	EnfermedadBajoVigilancia enfermedadVigilada = new EnfermedadBajoVigilancia("ENF" + contadorEnfermedades,nombre, descripcion, gravedad);
     	enfermedadesVigiladas.add(enfermedadVigilada);
     	contadorEnfermedades++;
     	
@@ -94,7 +89,7 @@ public class Clinica implements Serializable {
     
     public void agregarVacuna (String nombre, String fabricante, float dosis, String descripcion)
     {
-    	Vacuna vacuna = new Vacuna ("V" + contadorVacunas, nombre, fabricante, dosis, descripcion);
+    	Vacuna vacuna = new Vacuna ("VAC" + contadorVacunas, nombre, fabricante, dosis, descripcion);
     	catalogoVacunas.add(vacuna);
     	contadorVacunas++;
     }

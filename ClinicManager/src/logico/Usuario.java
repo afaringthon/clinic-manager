@@ -7,6 +7,7 @@ public class Usuario implements Serializable {
 	private String clave;
 	private String linkId;
 	private String rol;
+	private String esActivo;
 
 	public Usuario(String nombreUsuario, String clave, String rol, String linkId) {
 		this.nombreUsuario = nombreUsuario;
@@ -45,6 +46,14 @@ public class Usuario implements Serializable {
 
 	public void setRol(String rol) {
 		this.rol = rol;
+	}
+
+	public String getEsActivo() {
+		return esActivo;
+	}
+
+	public void setEsActivo(String esActivo) {
+		this.esActivo = esActivo;
 	}
 
 }

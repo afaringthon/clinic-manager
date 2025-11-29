@@ -88,4 +88,9 @@ public class Paciente extends Persona implements Serializable {
 	public void setTipoSangre(String tipoSangre) {
 		this.tipoSangre = tipoSangre;
 	}
+	
+	public void agregarConsultaAlHistorial(Consulta consulta)
+	{
+		historial.add(consulta);
+;	}
 }

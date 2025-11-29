@@ -50,6 +50,12 @@ public class EnfermedadBajoVigilancia implements Serializable {
 	public void setEsActivo(boolean esActivo) {
 		this.esActivo = esActivo;
 	}
+	
+	@Override
+	public String toString() {
+        return nombre;
+    }
+
    
 
 }

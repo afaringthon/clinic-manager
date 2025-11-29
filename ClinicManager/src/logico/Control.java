@@ -61,9 +61,8 @@ public class Control implements Serializable {
         Control.loggedUsuario = loggedUsuario;
     }
 
-    public void regUser(Usuario loggedUsuario) {
-        if (loggedUsuario == null) return;
-        usuarios.add(loggedUsuario);
+    public void regUser(Usuario usuario) {
+        usuarios.add(usuario);
     }
 
     public boolean userNameExists(String username) {
@@ -108,6 +107,32 @@ public class Control implements Serializable {
             return false;
     	}
     	
+    }
+    
+    public String buscarUsuarioId(String nombreUsuario)
+    {
+    	for (Usuario u : usuarios)
+    	{
+    		if(u.getNombreUsuario().equalsIgnoreCase(nombreUsuario))
+    		{
+    			return u.getLinkId();
+    			
+    		}
+    	}
+    	return null;
+    }
+    
+    public Usuario buscarUsuario(String nombreUsuario)
+    {
+    	for (Usuario u : usuarios)
+    	{
+    		if(u.getNombreUsuario().equalsIgnoreCase(nombreUsuario))
+    		{
+    			return u;
+    		}
+    	}
+    	
+    	return null;
     }
     
     public static boolean cargarDelDisco()
