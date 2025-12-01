@@ -31,6 +31,7 @@ import com.formdev.flatlaf.FlatLightLaf;
 import logico.Cita;
 import logico.Clinica;
 import logico.Consulta;
+import logico.Control;
 import logico.EnfermedadBajoVigilancia;
 import logico.Medico;
 import logico.Paciente;
@@ -38,6 +39,7 @@ import logico.Vacuna;
 
 import javax.swing.JTable;
 import java.awt.event.ActionListener;
+import java.time.LocalDate;
 import java.awt.event.ActionEvent;
 
 public class AgregarConsulta extends JDialog {
@@ -51,6 +53,7 @@ public class AgregarConsulta extends JDialog {
     private final Map<JCheckBox, Vacuna> vacunaChecks = new LinkedHashMap<>();
     JComboBox comboBoxEnfermedades;
     JCheckBox chckbxNewCheckBox_1;
+    DefaultTableModel modelHistorial;
     private static String citaId;
     private static String idPaciente;
 
@@ -180,7 +183,6 @@ public class AgregarConsulta extends JDialog {
 	                        for (Vacuna pv : paciente.getVacunas()) {
 	                            if (pv.getId().equalsIgnoreCase(v.getId()) && pv.isAplicada()) {
 	                                aplicadaPorPaciente = true;
-	                                break;
 	                            }
 	                        }
 	                    }
@@ -206,7 +208,7 @@ public class AgregarConsulta extends JDialog {
 			panel.setLayout(null);
 
 			String[] historialCols = { "Sintomas", "Diagnostico", "Medico", "Enfermedad" };
-			DefaultTableModel modelHistorial = new DefaultTableModel(historialCols, 0);
+			modelHistorial = new DefaultTableModel(historialCols, 0);
 
 			tableHistorial = new JTable(modelHistorial);
 			JScrollPane scrollHistorial = new JScrollPane(tableHistorial);
@@ -255,19 +257,17 @@ public class AgregarConsulta extends JDialog {
 							        Vacuna v = entry.getValue();
 							        Vacuna copia = new Vacuna(v.getId(), v.getNombre(), v.getFabricante(), v.getDosis(), v.getDescripcion());
 							        copia.setAplicada(true);
-							        //trata de borrarla lista
-							        paciente.agregarVacuna(copia);
+							        
+							        if(!instancia.verificarVacunaRepetida(paciente, v.getId()))
+							        {
+							        	paciente.agregarVacuna(copia);
+							        }
+							        
 							    }
 							}
 							
-							System.out.println(paciente.getNombre() + enfermedad + check);
-							
-							for(Vacuna v : paciente.getVacunas())
-							{
-								System.out.println(v.getNombre());
-							}
-							
-							dispose();
+							cita.setEsActivo(false);
+
 						}
 						
 						
@@ -297,6 +297,26 @@ public class AgregarConsulta extends JDialog {
 			}
 		}
 		comboBoxEnfermedades.setModel(model);
+	}
+	
+	private void cargarTablaCitas() {
+		modelHistorial.setRowCount(0);
+	    ArrayList <Consulta> historial = instancia.buscarPacientePorId(idPaciente).getHistorial();
+
+
+	    if (historial == null) return;
+
+	    for (Consulta c : historial) {
+	        String sintomas = c.getSintomas();  
+	        String diagnostico = c.getDiagnostico();
+	        String medico = c.getMedico().getNombre();
+	        String enfermedad = c.getEnfermedadVigilada().toString();
+	        
+	        if(c.getMedico().equals(Control.getLoggedUsuario()) || c.isEsImportante())
+	        {
+	        	modelHistorial.addRow(new Object[] { sintomas, diagnostico, medico, enfermedad});
+	        }	        
+	    }
 	}
 
 }

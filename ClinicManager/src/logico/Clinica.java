@@ -332,4 +332,16 @@ public class Clinica implements Serializable {
 		
 		return false;
 	}
+	
+	public boolean verificarVacunaRepetida(Paciente paciente, String vacunaId) {
+	    if (paciente == null || vacunaId == null) return false;
+	    ArrayList<Vacuna> vacunasPaciente = paciente.getVacunas();
+	    if (vacunasPaciente == null) return false;
+	    for (Vacuna v : vacunasPaciente) {
+	        if (v != null && vacunaId.equalsIgnoreCase(v.getId())) {
+	            return true;
+	        }
+	    }
+	    return false;
+	}
 }
