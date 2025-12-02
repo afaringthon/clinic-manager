@@ -236,6 +236,9 @@ public class AgregarConsulta extends JDialog {
 						String sintomas = textSintomas.getText().trim();
 						String diagnostico = textDiagnostico.getText().trim();
 						EnfermedadBajoVigilancia enfermedad = (EnfermedadBajoVigilancia) comboBoxEnfermedades.getSelectedItem();
+						if (enfermedad != null && (enfermedad.getId() == null || "Ninguno".equalsIgnoreCase(enfermedad.getNombre()))) {
+						    enfermedad = null;
+						}
 						boolean check = chckbxNewCheckBox_1.isEnabled();
 						if(enfermedad!=null) check = true;
 						Cita cita = instancia.buscarCitaPorId(citaId);
@@ -265,8 +268,16 @@ public class AgregarConsulta extends JDialog {
 							        
 							    }
 							}
-							
+							JOptionPane.showMessageDialog(AgregarConsulta.this, "Consulta Terminada", "Informacion", JOptionPane.INFORMATION_MESSAGE);	
+							System.out.println(consulta.getEnfermedadVigilada() + consulta.getMedico().getNombre()
+							+ consulta.getPaciente().getNombre() + consulta.getPaciente().getHistorial().indexOf(0));
+							System.out.println(consulta.isEsImportante());
 							cita.setEsActivo(false);
+							dispose();
+							
+							
+							
+							
 
 						}
 						
@@ -289,6 +300,11 @@ public class AgregarConsulta extends JDialog {
 	{
 		ArrayList<EnfermedadBajoVigilancia> enfermedades = instancia.getEnfermedadesVigiladas();
 		DefaultComboBoxModel<EnfermedadBajoVigilancia> model = new DefaultComboBoxModel<>();
+	    EnfermedadBajoVigilancia defaultOpt = new EnfermedadBajoVigilancia(null, "Ninguno", null, null);
+
+		
+		model.addElement(defaultOpt);
+		
 		if(enfermedades != null)
 		{
 			for (EnfermedadBajoVigilancia e : enfermedades)

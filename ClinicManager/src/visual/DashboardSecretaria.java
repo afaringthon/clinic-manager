@@ -359,7 +359,7 @@ public class DashboardSecretaria extends JFrame {
 	        String id = c.getId();  
 	        String nombre = c.getNombre();
 	        String apellido = c.getApellido();
-	        String nombreMedico = c.getMedico().getNombre();
+	        String nombreMedico = c.getMedico().getNombre() + " " + c.getMedico().getApellido();
 	        
 	        if(c.isEsActivo() && c.getFecha().equals(fecha))
 	        {

@@ -127,33 +127,44 @@ public class Login extends JFrame {
 					return;
 				}
 
-				boolean ok = Control.getInstance().confirmLogin(userInput, claveInput);
+				boolean ok = Control.getInstance().confirmLogin(userInput, claveInput); // autenticar
 				if (ok) {
 					Usuario logged = Control.getLoggedUsuario();
+					String rol = null;
 					String linkId = null;
 					if (logged != null) {
+						rol = logged.getRol();
 						linkId = logged.getLinkId();
 					}
 
 					Usuario usuario = Control.getInstance().buscarUsuario(userInput);
-					Medico m = null;
-					if (linkId != null && !linkId.trim().isEmpty()) {
-						m = Clinica.getInstancia().buscarMedicoPorId(linkId.trim());
+
+					if (rol != null && rol.equalsIgnoreCase("administrador")) {
+						DashboardAdmin pantallaDashboardAdmin = new DashboardAdmin();
+						pantallaDashboardAdmin.setVisible(true);
+						dispose();
+						return;
 					}
-					if (m != null) {
+					if ((rol != null && rol.equalsIgnoreCase("medico"))) {
+						Medico m = null;
+						if (linkId != null && !linkId.trim().isEmpty()) {
+							m = Clinica.getInstancia().buscarMedicoPorId(linkId.trim());
+						}
+						
 						DashboardMedico pantallaDashboardMedico = new DashboardMedico();
 						pantallaDashboardMedico.setVisible(true);
 						dispose();
+						return;
 					} else if(usuario.getRol().equalsIgnoreCase("administrador")){
 						DashboardAdmin pantallaDashboardAdmin = new DashboardAdmin();
 						pantallaDashboardAdmin.setVisible(true);
 						dispose();
-					} else
-					{
-						DashboardSecretaria pantallaDashboardSecretaria = new DashboardSecretaria();
-						pantallaDashboardSecretaria.setVisible(true);
-						dispose();
 					}
+					
+					DashboardSecretaria pantallaDashboardSecretaria = new DashboardSecretaria();
+					pantallaDashboardSecretaria.setVisible(true);
+					dispose();
+					
 				} else {
 					javax.swing.JOptionPane.showMessageDialog(Login.this, "Usuario o contraseña incorrectos", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
 				}
