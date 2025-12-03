@@ -113,6 +113,20 @@ public class ListaVacunas extends JDialog {
 			}
 			{
 				JButton btnEditar = new JButton("Editar");
+				btnEditar.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent arg0) {
+						int seleccionado = tableVacunas.getSelectedRow();
+						int idCol = 0;
+						if(seleccionado == -1)
+						{
+							JOptionPane.showMessageDialog(ListaVacunas.this, "No hay nada Seleccionado", "Alerta", JOptionPane.ERROR_MESSAGE);
+						}
+						
+						Object idTexto  = tableVacunas.getModel().getValueAt(seleccionado, idCol);
+						String id = String.valueOf(idTexto);
+						EditarVacuna  pantallaEditarVacuna = new EditarVacuna(id);
+					}
+				});
 				buttonPane.add(btnEditar);
 			}
 			{

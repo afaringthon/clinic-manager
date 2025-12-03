@@ -114,6 +114,24 @@ public class ListaEnfermedades extends JDialog {
 			}
 			{
 				JButton btnEditar = new JButton("Editar");
+				btnEditar.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent arg0) {
+						int seleccionado = tableEnfermedades.getSelectedRow();
+						int idCol = 0;
+						if(seleccionado == -1)
+						{
+							JOptionPane.showMessageDialog(ListaEnfermedades.this, "No hay nada Seleccionado", "Alerta", JOptionPane.ERROR_MESSAGE);
+						}
+						
+						Object idTexto  = tableEnfermedades.getModel().getValueAt(seleccionado, idCol);
+						String id = String.valueOf(idTexto);
+						EditarEnfermedad pantallaAgregarEnfermedad = new EditarEnfermedad(id);
+						pantallaAgregarEnfermedad.setLocationRelativeTo(ListaEnfermedades.this); 
+						pantallaAgregarEnfermedad.setVisible(true);
+						cargarTablaEnfermedades();
+					
+					}
+				});
 				buttonPane.add(btnEditar);
 			}
 			{
