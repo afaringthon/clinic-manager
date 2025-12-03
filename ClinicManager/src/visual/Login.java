@@ -49,8 +49,8 @@ public class Login extends JFrame {
 					Datos.cargar();
 					usuariosLec = new FileInputStream ("usuarios.dat");
 					usuariosLecSerialized = new ObjectInputStream(usuariosLec);
-					Control temp = (Control)usuariosLecSerialized.readObject(); //guarda el archivo en temp
-					Control.setInstancia(temp); //lo pone en la instancia
+					Control temp = (Control)usuariosLecSerialized.readObject();
+					Control.setInstancia(temp);
 					usuariosLec.close();
 					usuariosLecSerialized.close();
 				} catch (FileNotFoundException e) {
