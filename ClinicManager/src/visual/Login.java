@@ -180,5 +180,16 @@ public class Login extends JFrame {
 		});
 		btnLogin.setBounds(164, 214, 89, 23);
 		panel.add(btnLogin);
+		
+		JButton btnNewButton = new JButton("Olvidaste la Clave?");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				RestablecerClave pantallaRestablecerClave = new RestablecerClave();
+				pantallaRestablecerClave.setLocationRelativeTo(Login.this); 
+				pantallaRestablecerClave.setVisible(true);
+				}
+		});
+		btnNewButton.setBounds(130, 253, 172, 25);
+		panel.add(btnNewButton);
 	}
 }

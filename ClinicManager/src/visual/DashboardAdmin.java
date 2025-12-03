@@ -129,6 +129,16 @@ public class DashboardAdmin extends JFrame {
 			}
 		});
 		mnAgregar.add(mnItemEnfermedad);
+		
+		JMenuItem mnItemSecretaria = new JMenuItem("Secretaria");
+		mnItemSecretaria.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				AgregarSecretaria pantallaAgregarSecretaria = new AgregarSecretaria();
+				pantallaAgregarSecretaria.setLocationRelativeTo(DashboardAdmin.this);
+				pantallaAgregarSecretaria.setVisible(true);
+			}
+		});
+		mnAgregar.add(mnItemSecretaria);
 
 		JMenu mnMenuVer = new JMenu("Ver");
 		menuBar.add(mnMenuVer);

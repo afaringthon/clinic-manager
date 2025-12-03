@@ -109,30 +109,28 @@ public class Control implements Serializable {
     	
     }
     
-    public String buscarUsuarioId(String nombreUsuario)
-    {
-    	for (Usuario u : usuarios)
-    	{
-    		if(u.getNombreUsuario().equalsIgnoreCase(nombreUsuario))
-    		{
-    			return u.getLinkId();
-    			
-    		}
-    	}
-    	return null;
+    public String buscarUsuarioId(String nombreUsuario) {
+        if (nombreUsuario == null) return null;
+        String normalized = nombreUsuario.trim().toLowerCase();
+        for (Usuario u : usuarios) {
+            if (u == null || u.getNombreUsuario() == null) continue;
+            if (u.getNombreUsuario().trim().equalsIgnoreCase(normalized)) {
+                return u.getLinkId();
+            }
+        }
+        return null;
     }
-    
-    public Usuario buscarUsuario(String nombreUsuario)
-    {
-    	for (Usuario u : usuarios)
-    	{
-    		if(u.getNombreUsuario().equalsIgnoreCase(nombreUsuario))
-    		{
-    			return u;
-    		}
-    	}
-    	
-    	return null;
+
+    public Usuario buscarUsuario(String nombreUsuario) {
+        if (nombreUsuario == null) return null;
+        String normalized = nombreUsuario.trim();
+        for (Usuario u : usuarios) {
+            if (u == null || u.getNombreUsuario() == null) continue;
+            if (u.getNombreUsuario().trim().equalsIgnoreCase(normalized)) {
+                return u;
+            }
+        }
+        return null;
     }
     
     public static boolean cargarDelDisco()
@@ -179,4 +177,5 @@ public class Control implements Serializable {
     		}
     	}
     }
+    
 }
