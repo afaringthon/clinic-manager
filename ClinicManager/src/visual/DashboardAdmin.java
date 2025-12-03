@@ -166,6 +166,16 @@ public class DashboardAdmin extends JFrame {
 			}
 		});
 		mnMenuVer.add(mnItemEnfermedades);
+		
+		JMenuItem mnSecretariaVer = new JMenuItem("Secretaria");
+		mnSecretariaVer.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				ListSecretaria pantallaListSecretaria = new ListSecretaria();
+				pantallaListSecretaria.setLocationRelativeTo(DashboardAdmin.this);
+				pantallaListSecretaria.setVisible(true);
+			}
+		});
+		mnMenuVer.add(mnSecretariaVer);
 
 		JMenu mnNewMenu = new JMenu("Backup");
 		menuBar.add(mnNewMenu);
@@ -368,6 +378,35 @@ public class DashboardAdmin extends JFrame {
 		buttonBar.setBackground(Color.WHITE);
 		buttonBar.setBorder(new EmptyBorder(8, 0, 12, 0));
 		JButton btnEditar = new JButton("Editar");
+		btnEditar.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				int doctorTablaSeleccionado = tablaDoctores.getSelectedRow();
+				int pacienteTablaSeleccionado = tablaPacientes.getSelectedRow();
+				int idCol = 0;
+
+				if (doctorTablaSeleccionado != -1) {
+					Object idTexto = tablaDoctores.getModel().getValueAt(doctorTablaSeleccionado, idCol);
+					String id = String.valueOf(idTexto);
+					Medico medico = instancia.buscarMedicoPorId(id);
+					if (medico != null) {
+						medico.setActivo(false);
+					}
+
+					EditarMedico pantallaEditarMedico = new EditarMedico(id); //id
+					pantallaEditarMedico.setLocationRelativeTo(DashboardAdmin.this);
+					pantallaEditarMedico.setVisible(true);
+					
+					lbDoctoresNum.setText(String.valueOf(contarNumMedicos()));
+					cargarTablaDoctores();
+				} else if (pacienteTablaSeleccionado != -1) {
+					JOptionPane.showMessageDialog(DashboardAdmin.this, "No puedes editar pacientes", "Alerta",
+							JOptionPane.ERROR_MESSAGE);
+				} else {
+					JOptionPane.showMessageDialog(DashboardAdmin.this, "No hay nada Seleccionado", "Alerta",
+							JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		});
 		JButton btnEliminar = new JButton("Eliminar");
 		btnEliminar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
