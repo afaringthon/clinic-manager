@@ -13,7 +13,7 @@ import java.util.ArrayList;
 
 public class Control implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 8332914665293201379L;
 
     private static Control control; //Instancia
     private ArrayList<Usuario> usuarios = new ArrayList<>();

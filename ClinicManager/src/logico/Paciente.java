@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.io.Serializable;
 
 public class Paciente extends Persona implements Serializable {
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 8332914665293201379L;
 	private float peso;
 	private float estatura;
 	private String tipoSangre;

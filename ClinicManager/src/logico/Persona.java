@@ -3,7 +3,7 @@ package logico;
 import java.io.Serializable;
 
 public abstract class Persona implements Serializable {
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 8332914665293201379L;
 	protected String id;
     protected String cedula;
     protected String nombre;

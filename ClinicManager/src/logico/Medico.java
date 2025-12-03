@@ -10,7 +10,7 @@ import java.io.Serializable;
 import logico.Clinica;
 
 public class Medico extends Persona implements Serializable {
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 8332914665293201379L;
     private String especialidad;
     private ArrayList<Cita> citas;
     private int maxCitas;

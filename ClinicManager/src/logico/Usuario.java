@@ -3,17 +3,19 @@ package logico;
 import java.io.Serializable;
 
 public class Usuario implements Serializable {
+	private static final long serialVersionUID = 8332914665293201379L;
 	private String nombreUsuario;
 	private String clave;
 	private String linkId;
 	private String rol;
-	private String esActivo;
+	private boolean esActivo;
 
 	public Usuario(String nombreUsuario, String clave, String rol, String linkId) {
 		this.nombreUsuario = nombreUsuario;
 		this.clave = clave;
 		this.rol = rol;
 		this.linkId = linkId;
+		this.esActivo = true;
 	}
 
 	public String getNombreUsuario() {
@@ -48,11 +50,11 @@ public class Usuario implements Serializable {
 		this.rol = rol;
 	}
 
-	public String getEsActivo() {
+	public boolean getEsActivo() {
 		return esActivo;
 	}
 
-	public void setEsActivo(String esActivo) {
+	public void setEsActivo(boolean esActivo) {
 		this.esActivo = esActivo;
 	}
 

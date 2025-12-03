@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import javax.swing.DefaultComboBoxModel;
 
 public class Clinica implements Serializable {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 8332914665293201379L;
     private static Clinica instancia = null;
     private ArrayList<Paciente> pacientes = new ArrayList<>();
     private ArrayList<Medico> medicos = new ArrayList<>();
