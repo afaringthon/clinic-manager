@@ -23,17 +23,23 @@ import logico.Usuario;
 
 import javax.swing.JLabel;
 import javax.swing.JTextField;
+import javax.swing.JPasswordField;
 import javax.swing.UIManager;
 import javax.swing.JButton;
+import javax.swing.SwingConstants;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import java.awt.SystemColor;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Cursor;
+import javax.swing.border.LineBorder;
 
 public class Login extends JFrame {
 
 	private JPanel contentPane;
 	private JTextField textUsuario;
-	private JTextField textClave;
+	private JPasswordField textClave;
+	private boolean passwordVisible = false;
 
 	/**
 	 * Launch the application.
@@ -86,50 +92,132 @@ public class Login extends JFrame {
 	 * Create the frame.
 	 */
 	public Login() {
-		setBackground(SystemColor.menu);
 		setResizable(false);
 		setTitle("Login - Clinic Manager");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 455, 408);
+		setBounds(100, 100, 480, 550);
 		contentPane = new JPanel();
-		contentPane.setBackground(SystemColor.textHighlight);
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		contentPane.setBackground(new Color(245, 245, 250));
+		contentPane.setBorder(new EmptyBorder(0, 0, 0, 0));
 		contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(contentPane);
 
+		// Panel superior con color de acento
+		JPanel headerPanel = new JPanel();
+		headerPanel.setBackground(new Color(66, 135, 245));
+		headerPanel.setPreferredSize(new java.awt.Dimension(0, 120));
+		contentPane.add(headerPanel, BorderLayout.NORTH);
+		headerPanel.setLayout(null);
+		
+		JLabel lblTitulo = new JLabel("Clinic Manager");
+		lblTitulo.setHorizontalAlignment(SwingConstants.CENTER);
+		lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 32));
+		lblTitulo.setForeground(Color.WHITE);
+		lblTitulo.setBounds(0, 35, 480, 50);
+		headerPanel.add(lblTitulo);
+		
+		JLabel lblSubtitulo = new JLabel("Sistema de Gestión Clínica");
+		lblSubtitulo.setHorizontalAlignment(SwingConstants.CENTER);
+		lblSubtitulo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+		lblSubtitulo.setForeground(new Color(220, 230, 255));
+		lblSubtitulo.setBounds(0, 85, 480, 20);
+		headerPanel.add(lblSubtitulo);
+
+		// Panel central con formulario
 		JPanel panel = new JPanel();
-		panel.setBackground(SystemColor.textHighlight);
+		panel.setBackground(new Color(245, 245, 250));
 		contentPane.add(panel, BorderLayout.CENTER);
 		panel.setLayout(null);
 		
+		// Título de login
+		JLabel lblLoginTitle = new JLabel("Iniciar Sesión");
+		lblLoginTitle.setHorizontalAlignment(SwingConstants.CENTER);
+		lblLoginTitle.setFont(new Font("Segoe UI", Font.BOLD, 20));
+		lblLoginTitle.setForeground(new Color(50, 50, 50));
+		lblLoginTitle.setBounds(0, 30, 480, 30);
+		panel.add(lblLoginTitle);
+		
+		// Label Usuario
 		JLabel lblUsuario = new JLabel("Usuario");
-		lblUsuario.setForeground(SystemColor.text);
-		lblUsuario.setBounds(101, 114, 60, 14);
+		lblUsuario.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+		lblUsuario.setForeground(new Color(70, 70, 70));
+		lblUsuario.setBounds(90, 85, 300, 20);
 		panel.add(lblUsuario);
 		
-		JLabel lblClave = new JLabel("Contrase\u00F1a");
-		lblClave.setForeground(SystemColor.text);
-		lblClave.setBounds(99, 165, 105, 14);
-		panel.add(lblClave);
-		
+		// Campo Usuario
 		textUsuario = new JTextField();
-		textUsuario.setBounds(99, 131, 229, 20);
+		textUsuario.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+		textUsuario.setBorder(new LineBorder(new Color(200, 200, 200), 1, true));
+		textUsuario.setBounds(90, 108, 300, 40);
 		panel.add(textUsuario);
 		textUsuario.setColumns(10);
 		
-		textClave = new JTextField();
-		textClave.setBounds(99, 181, 229, 20);
-		panel.add(textClave);
-		textClave.setColumns(10);
+		// Label Contraseña
+		JLabel lblClave = new JLabel("Contraseña");
+		lblClave.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+		lblClave.setForeground(new Color(70, 70, 70));
+		lblClave.setBounds(90, 165, 300, 20);
+		panel.add(lblClave);
 		
-		JButton btnLogin = new JButton("Login");
+		// Panel para contraseña con botón de mostrar/ocultar
+		JPanel passwordPanel = new JPanel();
+		passwordPanel.setLayout(null);
+		passwordPanel.setBackground(Color.WHITE);
+		passwordPanel.setBorder(new LineBorder(new Color(200, 200, 200), 1, true));
+		passwordPanel.setBounds(90, 188, 300, 40);
+		panel.add(passwordPanel);
+		
+		// Campo Contraseña
+		textClave = new JPasswordField();
+		textClave.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+		textClave.setBorder(new EmptyBorder(5, 10, 5, 45));
+		textClave.setBounds(0, 0, 300, 40);
+		passwordPanel.add(textClave);
+		
+		// Botón para mostrar/ocultar contraseña
+		JButton btnTogglePassword = new JButton("Mostrar");
+		btnTogglePassword.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+		btnTogglePassword.setForeground(new Color(66, 135, 245));
+		btnTogglePassword.setBackground(Color.WHITE);
+		btnTogglePassword.setBorder(new LineBorder(new Color(66, 135, 245), 1));
+		btnTogglePassword.setFocusPainted(false);
+		btnTogglePassword.setCursor(new Cursor(Cursor.HAND_CURSOR));
+		btnTogglePassword.setBounds(240, 7, 55, 26);
+		btnTogglePassword.setToolTipText("Mostrar/Ocultar contraseña");
+		passwordPanel.add(btnTogglePassword);
+		
+		btnTogglePassword.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				passwordVisible = !passwordVisible;
+				if (passwordVisible) {
+					textClave.setEchoChar((char) 0);
+					btnTogglePassword.setText("Ocultar");
+					btnTogglePassword.setForeground(new Color(220, 53, 69));
+					btnTogglePassword.setBorder(new LineBorder(new Color(220, 53, 69), 1));
+				} else {
+					textClave.setEchoChar('●');
+					btnTogglePassword.setText("Mostrar");
+					btnTogglePassword.setForeground(new Color(66, 135, 245));
+					btnTogglePassword.setBorder(new LineBorder(new Color(66, 135, 245), 1));
+				}
+			}
+		});
+		
+		// Botón Login
+		JButton btnLogin = new JButton("Iniciar Sesión");
+		btnLogin.setFont(new Font("Segoe UI", Font.BOLD, 15));
+		btnLogin.setForeground(Color.WHITE);
+		btnLogin.setBackground(new Color(66, 135, 245));
+		btnLogin.setBorder(new LineBorder(new Color(66, 135, 245), 1, true));
+		btnLogin.setFocusPainted(false);
+		btnLogin.setCursor(new Cursor(Cursor.HAND_CURSOR));
 		btnLogin.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String userInput = textUsuario.getText().trim();
-				String claveInput = textClave.getText().trim();
+				String claveInput = new String(textClave.getPassword()).trim();
 				if (userInput == null) userInput = "";
 				if (userInput.isEmpty() || claveInput == null || claveInput.isEmpty()) {
-					javax.swing.JOptionPane.showMessageDialog(Login.this, "Introduce usuario y contrase�a", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+					javax.swing.JOptionPane.showMessageDialog(Login.this, "Introduce usuario y contrase�a", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
 					return;
 				}
 
@@ -172,24 +260,36 @@ public class Login extends JFrame {
 					dispose();
 					
 				} else {
-					javax.swing.JOptionPane.showMessageDialog(Login.this, "Usuario o contrase�a incorrectos", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+					javax.swing.JOptionPane.showMessageDialog(Login.this, "Usuario o contrase�a incorrectos", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
 				}
 				
 				
 			}
 		});
-		btnLogin.setBounds(164, 214, 89, 23);
+		btnLogin.setBounds(90, 250, 300, 45);
 		panel.add(btnLogin);
 		
-		JButton btnNewButton = new JButton("Olvidaste la Clave?");
-		btnNewButton.addActionListener(new ActionListener() {
+		// Botón olvidaste contraseña
+		JButton btnOlvidasteClave = new JButton("¿Olvidaste tu contraseña?");
+		btnOlvidasteClave.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+		btnOlvidasteClave.setForeground(new Color(66, 135, 245));
+		btnOlvidasteClave.setBackground(new Color(245, 245, 250));
+		btnOlvidasteClave.setBorder(null);
+		btnOlvidasteClave.setFocusPainted(false);
+		btnOlvidasteClave.setCursor(new Cursor(Cursor.HAND_CURSOR));
+		btnOlvidasteClave.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				RestablecerClave pantallaRestablecerClave = new RestablecerClave();
 				pantallaRestablecerClave.setLocationRelativeTo(Login.this); 
 				pantallaRestablecerClave.setVisible(true);
-				}
+			}
 		});
-		btnNewButton.setBounds(130, 253, 172, 25);
-		panel.add(btnNewButton);
+		btnOlvidasteClave.setBounds(90, 310, 300, 25);
+		panel.add(btnOlvidasteClave);
+		
+	
+		
+		// Centrar ventana
+		setLocationRelativeTo(null);
 	}
 }
