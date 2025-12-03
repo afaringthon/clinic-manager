@@ -29,6 +29,7 @@ import javax.swing.UIManager;
 import com.formdev.flatlaf.FlatLightLaf;
 
 import logico.Clinica;
+import logico.Control;
 import logico.EnfermedadBajoVigilancia;
 import logico.Medico;
 import logico.Paciente;
@@ -171,26 +172,6 @@ public class DashboardAdmin extends JFrame {
 		
 		JMenuItem mntmNewMenuItem_1 = new JMenuItem("Reportes");
 		mnMenuStats.add(mntmNewMenuItem_1);
-		
-		JMenuItem mntmNewMenuItem_2 = new JMenuItem("Medico (Testing)");
-		mntmNewMenuItem_2.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				DashboardMedico pantallaDashboardMedico = new DashboardMedico();
-				pantallaDashboardMedico.setLocationRelativeTo(DashboardAdmin.this); 
-				pantallaDashboardMedico.setVisible(true);
-			}
-		});
-		mnMenuStats.add(mntmNewMenuItem_2);
-		
-		JMenuItem mnItemSecretaria = new JMenuItem("Secretaria (Testing)");
-		mnItemSecretaria.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				DashboardSecretaria pantallaDashboardSecretaria = new DashboardSecretaria();
-				pantallaDashboardSecretaria.setLocationRelativeTo(DashboardAdmin.this); 
-				pantallaDashboardSecretaria.setVisible(true);
-			}
-		});
-		mnMenuStats.add(mnItemSecretaria);
 		contentPane = new JPanel();
 		// Sin padding extra en el contentPane para que la navbar quede pegada
 		contentPane.setBorder(new EmptyBorder(0, 0, 0, 0));
@@ -356,7 +337,6 @@ public class DashboardAdmin extends JFrame {
 
 		gridPanelBottom.add(panelInferiorIzquierdo);
 
-		// ------------------ Panel con la tabla de PACIENTES (lado derecho del grid inferior) ------------------
 		JPanel panelInferiorDerecho = new JPanel(new BorderLayout());
 		panelInferiorDerecho.setBackground(Color.WHITE);
 
@@ -396,6 +376,7 @@ public class DashboardAdmin extends JFrame {
 					String id = String.valueOf(idTexto);
 					Medico medico = instancia.buscarMedicoPorId(id);
 					medico.setActivo(false);
+					Control.getInstance().borrarUsuarioPorLinkId(id);
 					lbDoctoresNum.setText(String.valueOf(contarNumMedicos()));
 					cargarTablaDoctores();
 

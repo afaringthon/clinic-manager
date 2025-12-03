@@ -262,6 +262,7 @@ public class AgregarPaciente extends JDialog {
 							        paciente.agregarVacuna(copia);
 							    }
 							}
+							
 							createdPacienteId = paciente.getId();
 							
 							JOptionPane.showMessageDialog(AgregarPaciente.this, "Paciente fue creado", "Alerta", JOptionPane.INFORMATION_MESSAGE);

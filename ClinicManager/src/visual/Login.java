@@ -27,6 +27,7 @@ import javax.swing.UIManager;
 import javax.swing.JButton;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.SystemColor;
 
 public class Login extends JFrame {
 
@@ -85,24 +86,29 @@ public class Login extends JFrame {
 	 * Create the frame.
 	 */
 	public Login() {
+		setBackground(SystemColor.menu);
 		setResizable(false);
 		setTitle("Login - Clinic Manager");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 455, 408);
 		contentPane = new JPanel();
+		contentPane.setBackground(SystemColor.textHighlight);
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(contentPane);
-		
+
 		JPanel panel = new JPanel();
+		panel.setBackground(SystemColor.textHighlight);
 		contentPane.add(panel, BorderLayout.CENTER);
 		panel.setLayout(null);
 		
 		JLabel lblUsuario = new JLabel("Usuario");
+		lblUsuario.setForeground(SystemColor.text);
 		lblUsuario.setBounds(101, 114, 60, 14);
 		panel.add(lblUsuario);
 		
 		JLabel lblClave = new JLabel("Contrase\u00F1a");
+		lblClave.setForeground(SystemColor.text);
 		lblClave.setBounds(99, 165, 105, 14);
 		panel.add(lblClave);
 		

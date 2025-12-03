@@ -66,9 +66,8 @@ public class DashboardMedico extends JFrame {
 	DefaultTableModel modelCitas;
 	LocalDate hoy = LocalDate.now();
 	Date fechaInicial = Date.from(hoy.atStartOfDay(ZoneId.systemDefault()).toInstant());
-	Usuario usuario = control.getLoggedUsuario();
-	Medico medicoActual = instancia.buscarMedicoPorId(usuario.getLinkId());
-
+	Usuario usuario = Control.getLoggedUsuario();
+	Medico medicoActual = null;
 	/**
 	 * Launch the application.
 	 */
@@ -99,7 +98,9 @@ public class DashboardMedico extends JFrame {
 		contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(contentPane);
 		
-		
+		if (usuario != null && usuario.getLinkId() != null && !usuario.getLinkId().trim().isEmpty()) {
+		    medicoActual = instancia.buscarMedicoPorId(usuario.getLinkId().trim());
+		}
 
 		JPanel navbar = new JPanel(new BorderLayout());
 		navbar.setBackground(SystemColor.textHighlight);
@@ -208,12 +209,10 @@ public class DashboardMedico extends JFrame {
 
 		String[] columnasCitas = { "ID", "Nombre", "Apellido", "Cedula" };
 		modelCitas = new DefaultTableModel(columnasCitas, 0);
-		cargarTablaCitas(hoy);
 		tablaCitas = new JTable(modelCitas);
 		tablaCitas.setDefaultEditor(Object.class, null);
+		cargarTablaCitas(hoy);
 		
-
-
 		panelInferiorIzquierdo.add(headerPanel, BorderLayout.NORTH);
 		
 		SpinnerDateModel dateModel = new SpinnerDateModel(fechaInicial, null, null, Calendar.DAY_OF_MONTH);
@@ -259,16 +258,20 @@ public class DashboardMedico extends JFrame {
 				else
 				{
 					Object idTexto  = tablaCitas.getModel().getValueAt(citaTablaSeleccionado, idCol);
-					String id = String.valueOf(idTexto);
-					Cita cita = instancia.buscarCitaPorId(id);
-					cita.setEsActivo(false);
-					java.util.Date date = (java.util.Date) spinner.getValue();
-				    java.time.LocalDate localDate = date.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
-				    lbCitasNum.setText(String.valueOf(contarNumCitasHoy()));
-					cargarTablaCitas(localDate);
-					lbCitasGeneralsNum.setText(String.valueOf(contarNumCitasFuturas()));
-					JOptionPane.showMessageDialog(DashboardMedico.this, "Cita Cancelada parra" + cita.getNombre(), "Alerta", JOptionPane.INFORMATION_MESSAGE);					
+		            String id = String.valueOf(idTexto);
+		            Cita cita = instancia.buscarCitaPorId(id);
+		            if (cita != null) {
+		                cita.setEsActivo(false);
+		            }
 
+		            java.util.Date date = (java.util.Date) spinner.getValue();
+		            java.time.LocalDate localDate = date.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+
+		            lbCitasNum.setText(String.valueOf(contarNumCitasHoy()));
+		            cargarTablaCitas(localDate);
+		            lbCitasGeneralsNum.setText(String.valueOf(contarNumCitasFuturas()));
+
+		            JOptionPane.showMessageDialog(DashboardMedico.this, "Cita cancelada para " + (cita != null ? cita.getNombre() : id), "Alerta", JOptionPane.INFORMATION_MESSAGE);
 				}
 				
 				
@@ -291,6 +294,13 @@ public class DashboardMedico extends JFrame {
 					PosponerCita pantallaPosponerCita = new PosponerCita(id);
 					pantallaPosponerCita.setLocationRelativeTo(DashboardMedico.this); 
 					pantallaPosponerCita.setVisible(true);
+					
+					java.util.Date date = (java.util.Date) spinner.getValue();
+				    java.time.LocalDate localDate = date.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+					cargarTablaCitas(localDate);
+					
+					lbCitasNum.setText(String.valueOf(contarNumCitasHoy()));
+					lbCitasGeneralsNum.setText(String.valueOf(contarNumCitasFuturas()));
 				}
 				
 				
@@ -320,6 +330,8 @@ public class DashboardMedico extends JFrame {
 					String cedula = String.valueOf(cedulaTexto);
 					String citaId = String.valueOf(idTexto);
 					boolean existe = instancia.verificarSiPacienteExiste(cedula);
+					System.out.println(existe);
+					System.out.println(instancia.verificarSiPacienteExiste(cedula));
 					
 					if(!existe)
 					{
@@ -332,6 +344,13 @@ public class DashboardMedico extends JFrame {
 						AgregarConsulta pantallaAgregarConsulta = new AgregarConsulta(citaId, pacienteId);
 						pantallaAgregarConsulta.setLocationRelativeTo(DashboardMedico.this); 
 						pantallaAgregarConsulta.setVisible(true);
+						
+						java.util.Date date = (java.util.Date) spinner.getValue();
+					    java.time.LocalDate localDate = date.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+						cargarTablaCitas(localDate);
+						
+						lbCitasNum.setText(String.valueOf(contarNumCitasHoy()));
+						lbCitasGeneralsNum.setText(String.valueOf(contarNumCitasFuturas()));
 					}
 					else
 					{
@@ -339,6 +358,11 @@ public class DashboardMedico extends JFrame {
 						AgregarConsulta pantallaAgregarConsulta = new AgregarConsulta(citaId, pacienteId);
 						pantallaAgregarConsulta.setLocationRelativeTo(DashboardMedico.this); 
 						pantallaAgregarConsulta.setVisible(true);
+						
+						java.util.Date date = (java.util.Date) spinner.getValue();
+					    java.time.LocalDate localDate = date.toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate();
+						cargarTablaCitas(localDate);
+						lbCitasGeneralsNum.setText(String.valueOf(contarNumCitasFuturas()));
 					}
 				}
 			}
@@ -388,39 +412,46 @@ public class DashboardMedico extends JFrame {
 	        String apellido = c.getApellido();
 	        String cedula = c.getCedula();
 	        
-	        if(c.isEsActivo() && c.getFecha().equals(fecha) && c.getMedico().equals(medicoActual))
+	        boolean mismoMedico = false;
+	        if (c.getMedico() != null && medicoActual != null && c.getMedico().getId() != null && medicoActual.getId() != null) {
+	            mismoMedico = c.getMedico().getId().equalsIgnoreCase(medicoActual.getId());
+	        }
+
+	        if(c.isEsActivo() && c.getFecha().equals(fecha) && mismoMedico)
 	        {
-	        	modelCitas.addRow(new Object[] { id, nombre, apellido, cedula});
-	        }	        
-	    }
+	            modelCitas.addRow(new Object[] { id, nombre, apellido, cedula});
+	        }
+	    }	        
 	}
 	
 	private int contarNumCitasHoy()
 	{
-		int contador = 0;
-		
-		for (Cita c : instancia.getCitas())
-		{
-			if(c.isEsActivo() && c.getFecha().equals(hoy) && c.getMedico().equals(medicoActual))
-			{
-				contador++;
-			}
-		}
-		return contador;
+	    int contador = 0;
+
+	    for (Cita c : instancia.getCitas())
+	    {
+	        if(c.isEsActivo() && c.getFecha().equals(hoy) && c.getMedico() != null && medicoActual != null
+	                && c.getMedico().getId().equalsIgnoreCase(medicoActual.getId()))
+	        {
+	            contador++;
+	        }
+	    }
+	    return contador;
 	}
-	
+
 	public int contarNumCitasFuturas()
 	{
-		int contador = 0;
-		
-		for (Cita c : instancia.getCitas())
-		{
-			if(c.isEsActivo() && c.getFecha().isAfter(hoy) && c.getMedico().equals(medicoActual))
-			{
-				contador++;
-			}
-		}
-		
-		return contador;
+	    int contador = 0;
+
+	    for (Cita c : instancia.getCitas())
+	    {
+	        if(c.isEsActivo() && c.getFecha().isAfter(hoy) && c.getMedico() != null && medicoActual != null
+	                && c.getMedico().getId().equalsIgnoreCase(medicoActual.getId()))
+	        {
+	            contador++;
+	        }
+	    }
+
+	    return contador;
 	}
 }

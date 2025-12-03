@@ -168,4 +168,15 @@ public class Control implements Serializable {
     	}
     	
     }
+    
+    public void borrarUsuarioPorLinkId(String linkId)
+    {
+    	for (Usuario u : usuarios)
+    	{
+    		if(u.getLinkId().equalsIgnoreCase(linkId))
+    		{
+    			usuarios.remove(u);
+    		}
+    	}
+    }
 }
