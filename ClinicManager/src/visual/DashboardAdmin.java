@@ -17,6 +17,7 @@ import javax.imageio.ImageIO;
 import javax.print.DocFlavor.URL;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
@@ -61,8 +62,6 @@ public class DashboardAdmin extends JFrame {
 	JLabel lblEnfermedadesNum;
 	DefaultTableModel modelDoctores;
 	DefaultTableModel modelPacientes;
-	
-
 
 	/**
 	 * Launch the application.
@@ -90,86 +89,83 @@ public class DashboardAdmin extends JFrame {
 		setBounds(100, 100, 1392, 822);
 		JMenuBar menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
-		
+
 		JMenu mnAgregar = new JMenu("Agregar");
 		menuBar.add(mnAgregar);
-		
+
 		JMenuItem mnItemMedico = new JMenuItem("Medico");
 		mnItemMedico.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				AgregarMedico pantallaAgregarMedico = new AgregarMedico();
-				pantallaAgregarMedico.setLocationRelativeTo(DashboardAdmin.this); 
+				pantallaAgregarMedico.setLocationRelativeTo(DashboardAdmin.this);
 				pantallaAgregarMedico.setVisible(true);
 				int totalDoctores = contarNumMedicos();
 				lbDoctoresNum.setText(String.valueOf(totalDoctores));
 				cargarTablaDoctores();
-				
-				
 			}
 		});
 		mnAgregar.add(mnItemMedico);
-		
+
 		JMenuItem mnItemVacuna = new JMenuItem("Vacuna");
 		mnItemVacuna.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				AgregarVacuna pantallaAgregarVacuna = new AgregarVacuna();
-				pantallaAgregarVacuna.setLocationRelativeTo(DashboardAdmin.this); 
+				pantallaAgregarVacuna.setLocationRelativeTo(DashboardAdmin.this);
 				pantallaAgregarVacuna.setVisible(true);
 				int numVacunas = contarNumVacunas();
 				lbVacunaNum.setText(String.valueOf(String.valueOf(numVacunas)));
-				}
+			}
 		});
 		mnAgregar.add(mnItemVacuna);
-		
+
 		JMenuItem mnItemEnfermedad = new JMenuItem("Enfermedad Vigilada");
 		mnItemEnfermedad.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				AgregarEnfermedad pantallaAgregarEnfermedad = new AgregarEnfermedad();
-				pantallaAgregarEnfermedad.setLocationRelativeTo(DashboardAdmin.this); 
+				pantallaAgregarEnfermedad.setLocationRelativeTo(DashboardAdmin.this);
 				pantallaAgregarEnfermedad.setVisible(true);
 				int numEnfermedades = instancia.getEnfermedadesVigiladas().size();
 				lblEnfermedadesNum.setText(String.valueOf(numEnfermedades));
 			}
 		});
 		mnAgregar.add(mnItemEnfermedad);
-		
+
 		JMenu mnMenuVer = new JMenu("Ver");
 		menuBar.add(mnMenuVer);
-		
+
 		JMenuItem mnMenuVacunas = new JMenuItem("Vacunas");
 		mnMenuVacunas.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				ListaVacunas pantallaListaVacunas = new ListaVacunas();
-				pantallaListaVacunas.setLocationRelativeTo(DashboardAdmin.this); 
+				pantallaListaVacunas.setLocationRelativeTo(DashboardAdmin.this);
 				pantallaListaVacunas.setVisible(true);
 				int numVacunas = contarNumVacunas();
 				lbVacunaNum.setText(String.valueOf(String.valueOf(numVacunas)));
 			}
 		});
 		mnMenuVer.add(mnMenuVacunas);
-		
+
 		JMenuItem mnItemEnfermedades = new JMenuItem("Enfermedades Vigiladas");
 		mnItemEnfermedades.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				ListaEnfermedades pantallaListaEnfermedades = new ListaEnfermedades();
-				pantallaListaEnfermedades.setLocationRelativeTo(DashboardAdmin.this); 
+				pantallaListaEnfermedades.setLocationRelativeTo(DashboardAdmin.this);
 				pantallaListaEnfermedades.setVisible(true);
 				int numEnfermedades = contarNumEnfermedades();
 				lblEnfermedadesNum.setText(String.valueOf(numEnfermedades));
-				
 			}
 		});
 		mnMenuVer.add(mnItemEnfermedades);
-		
+
 		JMenu mnNewMenu = new JMenu("Backup");
 		menuBar.add(mnNewMenu);
-		
+
 		JMenuItem mntmNewMenuItem = new JMenuItem("Hacer Respaldo");
 		mnNewMenu.add(mntmNewMenuItem);
-		
+
 		JMenu mnMenuStats = new JMenu("Stats");
 		menuBar.add(mnMenuStats);
-		
+
 		JMenuItem mntmNewMenuItem_1 = new JMenuItem("Reportes");
 		mnMenuStats.add(mntmNewMenuItem_1);
 		contentPane = new JPanel();
@@ -183,14 +179,14 @@ public class DashboardAdmin extends JFrame {
 		navbar.setPreferredSize(new Dimension(0, 72));
 		navbar.setBorder(new EmptyBorder(0, 0, 0, 0));
 		contentPane.add(navbar, BorderLayout.NORTH);
-		
-		//Logo
+
+		// Logo
 		ImageIcon logoIcon = loadAndScaleIcon("/visual/logo.png", 152, 34);
 		JLabel logoLabel = new JLabel(logoIcon);
 		logoLabel.setBorder(new EmptyBorder(8, 12, 8, 12));
 		navbar.add(logoLabel, BorderLayout.WEST);
-		
-		//Avatar
+
+		// Avatar
 		ImageIcon avatarIcon = loadAndScaleIcon("/visual/avatar.png", 48, 48);
 		JLabel labelAvatar = new JLabel((avatarIcon));
 		labelAvatar.setBorder(new EmptyBorder(8, 12, 8, 12));
@@ -202,10 +198,10 @@ public class DashboardAdmin extends JFrame {
 		centerContainer.setLayout(new BoxLayout(centerContainer, BoxLayout.Y_AXIS));
 		contentPane.add(centerContainer, BorderLayout.CENTER);
 
-		//Spacer
+		// Spacer
 		centerContainer.add(Box.createVerticalStrut(40));
 
-		//Superior
+		// Superior
 		JPanel gridPanel = new JPanel();
 		gridPanel.setOpaque(false);
 		Dimension gridTopSize = new Dimension(900, 120);
@@ -214,7 +210,7 @@ public class DashboardAdmin extends JFrame {
 		gridPanel.setLayout(new GridLayout(1, 0, 8, 8));
 		gridPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-		//KPI 1
+		// KPI 1
 		JPanel panelPacienteKPI = new JPanel();
 		panelPacienteKPI.setBackground(SystemColor.inactiveCaptionBorder);
 		panelPacienteKPI.setLayout(new BoxLayout(panelPacienteKPI, BoxLayout.Y_AXIS));
@@ -235,7 +231,7 @@ public class DashboardAdmin extends JFrame {
 
 		gridPanel.add(panelPacienteKPI);
 
-		//KPI 2
+		// KPI 2
 		JPanel panelDoctoresKPI = new JPanel();
 		panelDoctoresKPI.setBackground(SystemColor.inactiveCaptionBorder);
 		panelDoctoresKPI.setLayout(new BoxLayout(panelDoctoresKPI, BoxLayout.Y_AXIS));
@@ -256,7 +252,7 @@ public class DashboardAdmin extends JFrame {
 
 		gridPanel.add(panelDoctoresKPI);
 
-		//KPI 3
+		// KPI 3
 		JPanel panelEnfermedadesKPI = new JPanel();
 		panelEnfermedadesKPI.setBackground(SystemColor.inactiveCaptionBorder);
 		panelEnfermedadesKPI.setLayout(new BoxLayout(panelEnfermedadesKPI, BoxLayout.Y_AXIS));
@@ -277,13 +273,13 @@ public class DashboardAdmin extends JFrame {
 
 		gridPanel.add(panelEnfermedadesKPI);
 
-		//KPI 4
+		// KPI 4
 		JPanel panelVacunasKPI = new JPanel();
 		panelVacunasKPI.setBackground(SystemColor.inactiveCaptionBorder);
 		panelVacunasKPI.setLayout(new BoxLayout(panelVacunasKPI, BoxLayout.Y_AXIS));
 		panelVacunasKPI.setBorder(new EmptyBorder(12, 12, 12, 12));
 
-	    int numVacunas = contarNumVacunas();
+		int numVacunas = contarNumVacunas();
 		lbVacunaNum = new JLabel(String.valueOf(numVacunas));
 		lbVacunaNum.setForeground(SystemColor.textHighlight);
 		lbVacunaNum.setFont(new Font("Segoe UI", Font.BOLD, 48));
@@ -301,10 +297,10 @@ public class DashboardAdmin extends JFrame {
 		// Agrego el grid superior
 		centerContainer.add(gridPanel);
 
-		//Spacer del Medio
+		// Spacer del Medio
 		centerContainer.add(Box.createVerticalStrut(24));
 
-		//Grid Inferior
+		// Grid Inferior
 		JPanel gridPanelBottom = new JPanel();
 		gridPanelBottom.setOpaque(false);
 		Dimension gridBottomSize = new Dimension(900, 420);
@@ -319,12 +315,12 @@ public class DashboardAdmin extends JFrame {
 
 		JLabel lbDoctores = new JLabel("Doctores", SwingConstants.CENTER);
 		lbDoctores.setBorder(new EmptyBorder(6, 0, 6, 0));
-		panelInferiorIzquierdo.add(lbDoctores, BorderLayout.NORTH) ;
+		panelInferiorIzquierdo.add(lbDoctores, BorderLayout.NORTH);
 
 		// Modelo y tabla de ejemplo para DOCTORES
 		String[] columnasDoctores = { "ID", "Nombre", "Apellido", "Especialidad" };
 		modelDoctores = new DefaultTableModel(columnasDoctores, 0);
-		//Llenar
+		// Llenar
 		cargarTablaDoctores();
 		tablaDoctores = new JTable(modelDoctores);
 		tablaDoctores.setDefaultEditor(Object.class, null);
@@ -353,12 +349,11 @@ public class DashboardAdmin extends JFrame {
 		panelInferiorDerecho.add(scrollPacientes, BorderLayout.CENTER);
 		cargarTablaPacientes();
 
-
 		gridPanelBottom.add(panelInferiorDerecho);
 
 		centerContainer.add(gridPanelBottom);
 
-		//Botones
+		// Botones
 		JPanel buttonBar = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 12));
 		buttonBar.setBackground(Color.WHITE);
 		buttonBar.setBorder(new EmptyBorder(8, 0, 12, 0));
@@ -369,33 +364,31 @@ public class DashboardAdmin extends JFrame {
 				int doctorTablaSeleccionado = tablaDoctores.getSelectedRow();
 				int pacienteTablaSeleccionado = tablaPacientes.getSelectedRow();
 				int idCol = 0;
-				
-				if(doctorTablaSeleccionado != -1)
-				{
-					Object idTexto  = tablaDoctores.getModel().getValueAt(doctorTablaSeleccionado, idCol);
+
+				if (doctorTablaSeleccionado != -1) {
+					Object idTexto = tablaDoctores.getModel().getValueAt(doctorTablaSeleccionado, idCol);
 					String id = String.valueOf(idTexto);
 					Medico medico = instancia.buscarMedicoPorId(id);
-					medico.setActivo(false);
+					if (medico != null) {
+						medico.setActivo(false);
+					}
+
 					Control.getInstance().borrarUsuarioPorLinkId(id);
 					lbDoctoresNum.setText(String.valueOf(contarNumMedicos()));
 					cargarTablaDoctores();
-
-				}
-				else if (pacienteTablaSeleccionado != -1)
-				{
-					Object idTexto  = tablaPacientes.getModel().getValueAt(doctorTablaSeleccionado, idCol);
+				} else if (pacienteTablaSeleccionado != -1) {
+					Object idTexto = tablaPacientes.getModel().getValueAt(pacienteTablaSeleccionado, idCol);
 					String id = String.valueOf(idTexto);
 					Paciente paciente = instancia.buscarPacientePorId(id);
-					paciente.setActivo(false);
+					if (paciente != null) {
+						paciente.setActivo(false);
+					}
 					lbPacientesNum.setText(String.valueOf(contarNumPacientes()));
-					cargarTablaPacientes();	
+					cargarTablaPacientes();
+				} else {
+					JOptionPane.showMessageDialog(DashboardAdmin.this, "No hay nada Seleccionado", "Alerta",
+							JOptionPane.ERROR_MESSAGE);
 				}
-				else
-				{
-					JOptionPane.showMessageDialog(DashboardAdmin.this, "No hay nada Seleccionado", "Alerta", JOptionPane.ERROR_MESSAGE);
-				}
-			
-				
 			}
 		});
 		buttonBar.add(btnEditar);
@@ -404,35 +397,36 @@ public class DashboardAdmin extends JFrame {
 		contentPane.add(buttonBar, BorderLayout.SOUTH);
 
 		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			 logico.Datos.guardar();
-			}));
-		
+			logico.Datos.guardar();
+		}));
+
 		setLocationRelativeTo(null);
 	}
-	
+
 	private void cargarTablaPacientes() {
+		modelPacientes.setRowCount(0);
 		ArrayList<Paciente> pacientes = instancia.getPacientes();
-		if (pacientes == null) return;
-		
-		for (Paciente p : pacientes)
-		{
+		if (pacientes == null)
+			return;
+
+		for (Paciente p : pacientes) {
 			String id = p.getId();
 			String nombre = p.getNombre();
 			String apellido = p.getApellido();
 			String telefono = p.getTelefono();
 			String direccion = p.getDireccion();
-			
-			if(p.isActivo())
-			{
-				modelPacientes.addRow(new Object[] { id, nombre, apellido, telefono, direccion});
+
+			if (p.isActivo()) {
+				modelPacientes.addRow(new Object[] { id, nombre, apellido, telefono, direccion });
 			}
-			
+
 		}
 	}
 
 	private ImageIcon loadAndScaleIcon(String resourcePath, int width, int height) {
 		java.net.URL url = getClass().getResource(resourcePath);
-		if (url == null) return null;
+		if (url == null)
+			return null;
 		try {
 			BufferedImage img = ImageIO.read(url);
 			Image scaled = getScaledImage(img, width, height);
@@ -442,7 +436,7 @@ public class DashboardAdmin extends JFrame {
 			return null;
 		}
 	}
-	
+
 	private Image getScaledImage(BufferedImage src, int w, int h) {
 		BufferedImage resized = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g2 = resized.createGraphics();
@@ -453,82 +447,69 @@ public class DashboardAdmin extends JFrame {
 		g2.dispose();
 		return resized;
 	}
-	
+
 	private void cargarTablaDoctores() {
-	    modelDoctores.setRowCount(0);
-	    ArrayList <Medico> medicos = instancia.getMedicos();
+		modelDoctores.setRowCount(0);
+		ArrayList<Medico> medicos = instancia.getMedicos();
 
-	    if (medicos == null) return;
+		if (medicos == null)
+			return;
 
-	    for (Medico m : medicos) {
-	        String id = m.getId();  
-	        String nombre = m.getNombre();
-	        String apellido = m.getApellido();
-	        String especialidad = m.getEspecialidad();
-	        
-	        if(m.isActivo())
-	        {
-	        	modelDoctores.addRow(new Object[] { id, nombre, apellido, especialidad });
-	        }
+		for (Medico m : medicos) {
+			String id = m.getId();
+			String nombre = m.getNombre();
+			String apellido = m.getApellido();
+			String especialidad = m.getEspecialidad();
 
-	        
-	    }
+			if (m.isActivo()) {
+				modelDoctores.addRow(new Object[] { id, nombre, apellido, especialidad });
+			}
+
+		}
 	}
-	
-	private int contarNumPacientes()
-	{
+
+	private int contarNumPacientes() {
 		int contador = 0;
-		
-		for (Paciente p : instancia.getPacientes())
-		{
-			if(p.isActivo())
-			{
+
+		for (Paciente p : instancia.getPacientes()) {
+			if (p.isActivo()) {
 				contador++;
 			}
 		}
 		return contador;
 	}
-	
-	private int contarNumMedicos()
-	{
+
+	private int contarNumMedicos() {
 		int contador = 0;
-		
-		for (Medico m : instancia.getMedicos())
-		{
-			if(m.isActivo())
-			{
+
+		for (Medico m : instancia.getMedicos()) {
+			if (m.isActivo()) {
 				contador++;
 			}
 		}
 		return contador;
 	}
-	
-	private int contarNumVacunas()
-	{
+
+	private int contarNumVacunas() {
 		int contador = 0;
-		
-		for (Vacuna v : instancia.getCatalogoVacunas())
-		{
-			if(v.isEsActivo())
-			{
+
+		for (Vacuna v : instancia.getCatalogoVacunas()) {
+			if (v.isEsActivo()) {
 				contador++;
 			}
 		}
 		return contador;
 	}
-	
-	private int contarNumEnfermedades()
-	{
+
+	private int contarNumEnfermedades() {
 		int contador = 0;
-		
-		for (EnfermedadBajoVigilancia e : instancia.getEnfermedadesVigiladas())
-		{
-			if(e.isEsActivo())
-			{
+
+		for (EnfermedadBajoVigilancia e : instancia.getEnfermedadesVigiladas()) {
+			if (e.isEsActivo()) {
 				contador++;
 			}
 		}
 		return contador;
 	}
-	
+
 }

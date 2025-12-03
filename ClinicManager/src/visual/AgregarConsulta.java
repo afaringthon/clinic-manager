@@ -56,6 +56,7 @@ public class AgregarConsulta extends JDialog {
     DefaultTableModel modelHistorial;
     private static String citaId;
     private static String idPaciente;
+    Paciente paciente = instancia.buscarPacientePorId(idPaciente);
 
 
 	/**
@@ -212,6 +213,7 @@ public class AgregarConsulta extends JDialog {
 
 			tableHistorial = new JTable(modelHistorial);
 			JScrollPane scrollHistorial = new JScrollPane(tableHistorial);
+			cargarTablaCitas(idPaciente);
 			scrollHistorial.setBounds(332, 45, 583, 248);
 			panel.add(scrollHistorial);
 			panel.revalidate();
@@ -230,7 +232,7 @@ public class AgregarConsulta extends JDialog {
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 			getContentPane().add(buttonPane, BorderLayout.SOUTH);
 			{
-				JButton okButton = new JButton("OK");
+				JButton okButton = new JButton("Terminar");
 				okButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						String sintomas = textSintomas.getText().trim();
@@ -269,10 +271,17 @@ public class AgregarConsulta extends JDialog {
 							    }
 							}
 							JOptionPane.showMessageDialog(AgregarConsulta.this, "Consulta Terminada", "Informacion", JOptionPane.INFORMATION_MESSAGE);	
-							System.out.println(consulta.getEnfermedadVigilada() + consulta.getMedico().getNombre()
-							+ consulta.getPaciente().getNombre() + consulta.getPaciente().getHistorial().indexOf(0));
+							System.out.print(consulta.getSintomas() + consulta.getMedico().getNombre()+ consulta.getPaciente().getNombre() +
+									consulta.getEnfermedadVigilada().getNombre());
 							System.out.println(consulta.isEsImportante());
+							
+							for (Consulta c : paciente.getHistorial())
+							{
+								System.out.println(c.getDiagnostico() + c.isEsImportante());
+							}
 							cita.setEsActivo(false);
+							
+							
 							dispose();
 							
 							
@@ -289,7 +298,7 @@ public class AgregarConsulta extends JDialog {
 				getRootPane().setDefaultButton(okButton);
 			}
 			{
-				JButton cancelButton = new JButton("Cancel");
+				JButton cancelButton = new JButton("Cancelar");
 				cancelButton.setActionCommand("Cancel");
 				buttonPane.add(cancelButton);
 			}
@@ -315,9 +324,10 @@ public class AgregarConsulta extends JDialog {
 		comboBoxEnfermedades.setModel(model);
 	}
 	
-	private void cargarTablaCitas() {
+	private void cargarTablaCitas(String idPaciente) {
 		modelHistorial.setRowCount(0);
-	    ArrayList <Consulta> historial = instancia.buscarPacientePorId(idPaciente).getHistorial();
+		Paciente paciente = instancia.buscarPacientePorId(idPaciente);
+	    ArrayList <Consulta> historial = paciente.getHistorial();
 
 
 	    if (historial == null) return;
@@ -326,13 +336,15 @@ public class AgregarConsulta extends JDialog {
 	        String sintomas = c.getSintomas();  
 	        String diagnostico = c.getDiagnostico();
 	        String medico = c.getMedico().getNombre();
-	        String enfermedad = c.getEnfermedadVigilada().toString();
+	        String enfermedad = "";
+	        if (c.getEnfermedadVigilada() != null && c.getEnfermedadVigilada().getNombre() != null) {
+	            enfermedad = c.getEnfermedadVigilada().getNombre().trim();
+	        }
 	        
-	        if(c.getMedico().equals(Control.getLoggedUsuario()) || c.isEsImportante())
+	        if(c.getMedico().equals(c.getMedico().equals(Control.getInstance().getLoggedUsuario())) || c.isEsImportante())
 	        {
 	        	modelHistorial.addRow(new Object[] { sintomas, diagnostico, medico, enfermedad});
 	        }	        
 	    }
 	}
-
 }

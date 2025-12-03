@@ -183,19 +183,13 @@ public class CrearCita extends JDialog {
 						String apellido = textApellido.getText().trim();
 						Medico medico = (Medico) comboBoxDoctor.getSelectedItem();
 						String cedula = textCedula.getText().trim();
-						boolean cedulaRepetida = instancia.verificarCedula(cedula);
 						Date tmpfecha = (Date) spinnerFecha.getValue();
 						LocalDate fecha = tmpfecha.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 					
-						if(nombre.isEmpty() || apellido.isEmpty() || cedula.isEmpty() || cedulaRepetida || medico == null || fecha == null ||
+						if(nombre.isEmpty() || apellido.isEmpty() || cedula.isEmpty() || medico == null || fecha == null ||
 								!fecha.isAfter(hoy.minusDays(1)))
 						{
-							if(cedulaRepetida)
-							{
-								JOptionPane.showMessageDialog(CrearCita.this, "Ya hay alguien con esta cedula", "Alerta", JOptionPane.ERROR_MESSAGE);
-
-								
-							}
+						
 							if(!fecha.isAfter(hoy.minusDays(1)))
 							{
 								JOptionPane.showMessageDialog(CrearCita.this, "Fecha no puede ser antes de hoy", "Alerta", JOptionPane.ERROR_MESSAGE);
