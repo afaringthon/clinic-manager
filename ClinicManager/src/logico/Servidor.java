@@ -323,4 +323,68 @@ public class Servidor {
     public String getRutaArchivos() {
         return obtenerRutaRelativa("");
     }
+
+
+    public byte[] obtenerDatosSerializados() {
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            oos.writeObject(clinica);
+            oos.flush();
+            return baos.toByteArray();
+        } catch (IOException e) {
+            System.err.println("Error serializando datos: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public boolean restaurarDatosSerializados(byte[] datos) {
+        try {
+            ByteArrayInputStream bais = new ByteArrayInputStream(datos);
+            ObjectInputStream ois = new ObjectInputStream(bais);
+            Clinica clinicaRestaurada = (Clinica) ois.readObject();
+            if (clinicaRestaurada != null) {
+                this.clinica = clinicaRestaurada;
+                Clinica.setInstancia(clinicaRestaurada);
+                System.out.println("Datos del servidor restaurados exitosamente");
+                broadcastATodos("ACTUALIZAR_TODOS");
+                return true;
+            }
+            return false;
+        } catch (IOException | ClassNotFoundException e) {
+            System.err.println("Error restaurando datos: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public byte[] obtenerUsuariosSerializados() {
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            Control control = Control.getInstance();
+            oos.writeObject(control);
+            oos.flush();
+            return baos.toByteArray();
+        } catch (IOException e) {
+            System.err.println("Error serializando usuarios: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public boolean restaurarUsuariosSerializados(byte[] datos) {
+        try {
+            ByteArrayInputStream bais = new ByteArrayInputStream(datos);
+            ObjectInputStream ois = new ObjectInputStream(bais);
+            Control controlRestaurado = (Control) ois.readObject();
+            if (controlRestaurado != null) {
+                Control.setInstancia(controlRestaurado);
+                System.out.println("Usuarios del servidor restaurados exitosamente");
+                return true;
+            }
+            return false;
+        } catch (IOException | ClassNotFoundException e) {
+            System.err.println("Error restaurando usuarios: " + e.getMessage());
+            return false;
+        }
+    }
 }

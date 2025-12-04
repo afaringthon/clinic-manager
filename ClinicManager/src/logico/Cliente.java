@@ -540,4 +540,210 @@ public class Cliente {
         }
         return carpetaTemp.getAbsolutePath();
     }
+
+    public byte[] obtenerDatosServidor() {
+        if (!estaConectado()) return null;
+        
+        try {
+            output.writeObject("OBTENER_DATOS_SERVIDOR");
+            output.flush();
+            return (byte[]) input.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            System.err.println("Error obteniendo datos del servidor: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public boolean enviarDatosServidor(byte[] datos) {
+        if (!estaConectado()) return false;
+        
+        try {
+            output.writeObject("ENVIAR_DATOS_SERVIDOR");
+            output.writeObject(datos);
+            output.flush();
+            return (boolean) input.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            System.err.println("Error enviando datos al servidor: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public byte[] obtenerUsuariosServidor() {
+        if (!estaConectado()) return null;
+        
+        try {
+            output.writeObject("OBTENER_USUARIOS_SERVIDOR");
+            output.flush();
+            return (byte[]) input.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            System.err.println("Error obteniendo usuarios del servidor: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public boolean enviarUsuariosServidor(byte[] datos) {
+        if (!estaConectado()) return false;
+        
+        try {
+            output.writeObject("ENVIAR_USUARIOS_SERVIDOR");
+            output.writeObject(datos);
+            output.flush();
+            return (boolean) input.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            System.err.println("Error enviando usuarios al servidor: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean hacerRespaldoServidor() {
+        if (!estaConectado()) return false;
+        
+        try {
+            output.writeObject("HACER_RESPALDO_SERVIDOR");
+            output.flush();
+            return (boolean) input.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            System.err.println("Error haciendo respaldo en servidor: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean restaurarRespaldoServidor(String nombreRespaldo) {
+        if (!estaConectado()) return false;
+        
+        try {
+            output.writeObject("RESTAURAR_RESPALDO_SERVIDOR");
+            output.writeObject(nombreRespaldo);
+            output.flush();
+            return (boolean) input.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            System.err.println("Error restaurando respaldo en servidor: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public byte[] serializarClinicaLocal() {
+        try {
+            Clinica clinica = Clinica.getInstancia();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            oos.writeObject(clinica);
+            oos.flush();
+            return baos.toByteArray();
+        } catch (IOException e) {
+            System.err.println("Error serializando clínica local: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public byte[] serializarUsuariosLocal() {
+        try {
+            Control control = Control.getInstance();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
+            oos.writeObject(control);
+            oos.flush();
+            return baos.toByteArray();
+        } catch (IOException e) {
+            System.err.println("Error serializando usuarios locales: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public boolean restaurarClinicaLocal(byte[] datos) {
+        try {
+            ByteArrayInputStream bais = new ByteArrayInputStream(datos);
+            ObjectInputStream ois = new ObjectInputStream(bais);
+            Clinica clinicaRestaurada = (Clinica) ois.readObject();
+            if (clinicaRestaurada != null) {
+                Clinica.setInstancia(clinicaRestaurada);
+                return true;
+            }
+            return false;
+        } catch (IOException | ClassNotFoundException e) {
+            System.err.println("Error restaurando clínica local: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    @SuppressWarnings("unchecked")
+    public ArrayList<String> listarRespaldosServidor() {
+        if (!estaConectado()) return new ArrayList<>();
+        
+        try {
+            output.writeObject("LISTAR_RESPALDOS_SERVIDOR");
+            output.flush();
+            return (ArrayList<String>) input.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            System.err.println("Error listando respaldos del servidor: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+
+    public boolean restaurarUsuariosLocal(byte[] datos) {
+        try {
+            ByteArrayInputStream bais = new ByteArrayInputStream(datos);
+            ObjectInputStream ois = new ObjectInputStream(bais);
+            Control controlRestaurado = (Control) ois.readObject();
+            if (controlRestaurado != null) {
+                Control.setInstancia(controlRestaurado);
+                return true;
+            }
+            return false;
+        } catch (IOException | ClassNotFoundException e) {
+            System.err.println("Error restaurando usuarios locales: " + e.getMessage());
+            return false;
+        }
+    }
+
+    public boolean sincronizarConServidor() {
+        if (!estaConectado()) return false;
+        
+        try {
+            byte[] datosClinica = obtenerDatosServidor();
+            byte[] datosUsuarios = obtenerUsuariosServidor();
+            
+            if (datosClinica != null) {
+                restaurarClinicaLocal(datosClinica);
+            }
+            
+            if (datosUsuarios != null) {
+                restaurarUsuariosLocal(datosUsuarios);
+            }
+            
+            return datosClinica != null || datosUsuarios != null;
+            
+        } catch (Exception e) {
+            System.err.println("Error sincronizando con servidor: " + e.getMessage());
+            return false;
+        }
+    }
+
+
+    public boolean subirDatosAlServidor() {
+        if (!estaConectado()) return false;
+        
+        try {
+            byte[] datosClinica = serializarClinicaLocal();
+            byte[] datosUsuarios = serializarUsuariosLocal();
+            
+            boolean clinicaEnviada = false;
+            boolean usuariosEnviados = false;
+            
+            if (datosClinica != null) {
+                clinicaEnviada = enviarDatosServidor(datosClinica);
+            }
+            
+            if (datosUsuarios != null) {
+                usuariosEnviados = enviarUsuariosServidor(datosUsuarios);
+            }
+            
+            return clinicaEnviada || usuariosEnviados;
+            
+        } catch (Exception e) {
+            System.err.println("Error subiendo datos al servidor: " + e.getMessage());
+            return false;
+        }
+    }
 }

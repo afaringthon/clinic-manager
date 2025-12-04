@@ -3,7 +3,12 @@ package logico;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
-
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.IOException;
 import javax.swing.DefaultComboBoxModel;
 
 public class Clinica implements Serializable {
@@ -343,5 +348,80 @@ public class Clinica implements Serializable {
 	        }
 	    }
 	    return false;
+	}
+
+	public boolean guardarRespaldo() {
+	    try {
+	        File carpetaRespaldos = new File("respaldos");
+	        if (!carpetaRespaldos.exists()) {
+	            carpetaRespaldos.mkdirs();
+	        }
+	        
+	        String timestamp = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
+	        String nombreArchivo = "respaldo_" + timestamp + ".dat";
+	        File archivoRespaldo = new File(carpetaRespaldos, nombreArchivo);
+	        
+	        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(archivoRespaldo))) {
+	            oos.writeObject(this);
+	            System.out.println("Respaldo guardado: " + nombreArchivo);
+	            return true;
+	        }
+	    } catch (IOException e) {
+	        System.err.println("Error guardando respaldo: " + e.getMessage());
+	        return false;
+	    }
+	}
+
+	public boolean restaurarRespaldo(String nombreRespaldo) {
+	    try {
+	        File carpetaRespaldos = new File("respaldos");
+	        File archivoRespaldo = new File(carpetaRespaldos, nombreRespaldo);
+	        
+	        if (!archivoRespaldo.exists()) {
+	            System.err.println("Archivo de respaldo no encontrado: " + nombreRespaldo);
+	            return false;
+	        }
+	        
+	        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(archivoRespaldo))) {
+	            Clinica clinicaRestaurada = (Clinica) ois.readObject();
+	            
+	            this.pacientes = clinicaRestaurada.pacientes;
+	            this.medicos = clinicaRestaurada.medicos;
+	            this.citas = clinicaRestaurada.citas;
+	            this.consultas = clinicaRestaurada.consultas;
+	            this.catalogoVacunas = clinicaRestaurada.catalogoVacunas;
+	            this.enfermedadesVigiladas = clinicaRestaurada.enfermedadesVigiladas;
+	            
+	            this.contadorPacientes = clinicaRestaurada.contadorPacientes;
+	            this.contadorMedicos = clinicaRestaurada.contadorMedicos;
+	            this.contadorConsultas = clinicaRestaurada.contadorConsultas;
+	            this.contadorVacunas = clinicaRestaurada.contadorVacunas;
+	            this.contadorEnfermedades = clinicaRestaurada.contadorEnfermedades;
+	            this.contadorCitas = clinicaRestaurada.contadorCitas;
+	            
+	            System.out.println("Respaldo restaurado: " + nombreRespaldo);
+	            return true;
+	        }
+	    } catch (IOException | ClassNotFoundException e) {
+	        System.err.println("Error restaurando respaldo: " + e.getMessage());
+	        return false;
+	    }
+	}
+
+	public ArrayList<String> listarRespaldos() {
+	    ArrayList<String> respaldos = new ArrayList<>();
+	    File carpetaRespaldos = new File("respaldos");
+	    
+	    if (carpetaRespaldos.exists() && carpetaRespaldos.isDirectory()) {
+	        File[] archivos = carpetaRespaldos.listFiles((dir, name) -> name.startsWith("respaldo_") && name.endsWith(".dat"));
+	        
+	        if (archivos != null) {
+	            for (File archivo : archivos) {
+	                respaldos.add(archivo.getName());
+	            }
+	        }
+	    }
+	    
+	    return respaldos;
 	}
 }

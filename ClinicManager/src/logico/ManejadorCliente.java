@@ -58,6 +58,61 @@ public class ManejadorCliente implements Runnable {
     private void procesarComando(String comando) throws IOException {
         try {
             switch (comando) {
+                case "OBTENER_DATOS_SERVIDOR":
+                    byte[] datosServidor = servidor.obtenerDatosSerializados();
+                    output.writeObject(datosServidor);
+                    output.flush();
+                    break;
+                    
+                case "ENVIAR_DATOS_SERVIDOR":
+                    byte[] datosRecibidos = (byte[]) input.readObject();
+                    boolean resultado = servidor.restaurarDatosSerializados(datosRecibidos);
+                    output.writeObject(resultado);
+                    output.flush();
+                    if (resultado) {
+                        System.out.println("Datos recibidos y restaurados desde cliente: " + direccionCliente);
+                        servidor.broadcast("ACTUALIZAR_TODOS", this);
+                    }
+                    break;
+                    
+                case "OBTENER_USUARIOS_SERVIDOR":
+                    byte[] usuariosServidor = servidor.obtenerUsuariosSerializados();
+                    output.writeObject(usuariosServidor);
+                    output.flush();
+                    break;
+                    
+                case "ENVIAR_USUARIOS_SERVIDOR":
+                    byte[] usuariosRecibidos = (byte[]) input.readObject();
+                    boolean resultadoUsuarios = servidor.restaurarUsuariosSerializados(usuariosRecibidos);
+                    output.writeObject(resultadoUsuarios);
+                    output.flush();
+                    if (resultadoUsuarios) {
+                        System.out.println("Usuarios recibidos y restaurados desde cliente: " + direccionCliente);
+                    }
+                    break;
+                    
+                case "HACER_RESPALDO_SERVIDOR":
+                    boolean respaldoExitoso = clinica.guardarRespaldo();
+                    output.writeObject(respaldoExitoso);
+                    output.flush();
+                    break;
+                
+                case "LISTAR_RESPALDOS_SERVIDOR":
+                    ArrayList<String> listaRespaldos = clinica.listarRespaldos();
+                    output.writeObject(listaRespaldos);
+                    output.flush();
+                    break;
+                    
+                case "RESTAURAR_RESPALDO_SERVIDOR":
+                    String nombreRespaldo = (String) input.readObject();
+                    boolean restauracionExitosa = clinica.restaurarRespaldo(nombreRespaldo);
+                    output.writeObject(restauracionExitosa);
+                    output.flush();
+                    if (restauracionExitosa) {
+                        servidor.broadcast("ACTUALIZAR_TODOS", this);
+                    }
+                    break;
+                    
                 case "AGREGAR_MEDICO":
                     Medico medico = (Medico) input.readObject();
                     clinica.getMedicos().add(medico);
@@ -266,15 +321,12 @@ public class ManejadorCliente implements Runnable {
     
     private String obtenerRutaArchivoTemporal(String nombreOriginal) {
         String directorioActual = System.getProperty("user.dir");
-        
         File carpetaTemp = new File(directorioActual + File.separator + "temp");
         if (!carpetaTemp.exists()) {
             carpetaTemp.mkdirs();
         }
-        
         String timestamp = String.valueOf(System.currentTimeMillis());
         String nombreArchivo = "temp_" + timestamp + "_" + nombreOriginal;
-        
         return carpetaTemp.getAbsolutePath() + File.separator + nombreArchivo;
     }
     
@@ -282,14 +334,9 @@ public class ManejadorCliente implements Runnable {
         try {
             File archivo = new File(rutaArchivo);
             if (archivo.exists()) {
-                if (archivo.delete()) {
-                    System.out.println("Archivo temporal eliminado: " + rutaArchivo);
-                } else {
-                    System.err.println("No se pudo eliminar el archivo temporal: " + rutaArchivo);
-                }
+                archivo.delete();
             }
         } catch (SecurityException e) {
-            System.err.println("Error de seguridad al eliminar archivo temporal: " + e.getMessage());
         }
     }
     
@@ -317,29 +364,16 @@ public class ManejadorCliente implements Runnable {
         conectado = false;
         try {
             if (input != null) {
-                try {
-                    input.close();
-                } catch (IOException e) {
-
-                }
+                try { input.close(); } catch (IOException e) { }
             }
             if (output != null) {
-                try {
-                    output.close();
-                } catch (IOException e) {
-
-                }
+                try { output.close(); } catch (IOException e) { }
             }
             if (clienteSocket != null && !clienteSocket.isClosed()) {
-                try {
-                    clienteSocket.close();
-                } catch (IOException e) {
-                }
+                try { clienteSocket.close(); } catch (IOException e) { }
             }
-            
             servidor.removerCliente(this);
             System.out.println("Cliente desconectado: " + direccionCliente);
-            
         } catch (Exception e) {
             System.err.println("Error cerrando conexion: " + e.getMessage());
         }
