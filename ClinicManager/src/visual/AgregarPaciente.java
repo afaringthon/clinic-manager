@@ -172,7 +172,7 @@ public class AgregarPaciente extends JDialog {
 			panel.add(lbEstatura);
 			
 			
-			SpinnerNumberModel estaturaModel = new SpinnerNumberModel(0, 0, 120, 1);
+			SpinnerNumberModel estaturaModel = new SpinnerNumberModel(1, 1, 120, 1);
 			JSpinner spinnerEstatura = new JSpinner(estaturaModel);
 			spinnerEdad.setEditor(new JSpinner.NumberEditor(spinnerEdad, "#")); 
 			spinnerEstatura.setBounds(119, 363, 66, 22);
@@ -187,7 +187,7 @@ public class AgregarPaciente extends JDialog {
 			lbPeso.setBounds(119, 398, 56, 16);
 			panel.add(lbPeso);
 			
-			SpinnerNumberModel pesoModel = new SpinnerNumberModel(25, 0, 120, 1);
+			SpinnerNumberModel pesoModel = new SpinnerNumberModel(1, 1, 120, 1);
 			JSpinner spinnerPeso = new JSpinner(pesoModel);
 			spinnerPeso.setEditor(new JSpinner.NumberEditor(spinnerEdad, "#")); 
 

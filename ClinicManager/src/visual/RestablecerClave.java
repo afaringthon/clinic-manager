@@ -277,7 +277,7 @@ public class RestablecerClave extends JDialog {
 				Control.getInstance().guardarAlDisco();
 				
 				JOptionPane.showMessageDialog(RestablecerClave.this, 
-					"Clave restablecida exitosamente!\nYa puedes iniciar sesión con tu nueva clave", 
+					"Clave restablecida exitosamente!\nYa puedes iniciar sesion con tu nueva clave", 
 					"Exito", 
 					JOptionPane.INFORMATION_MESSAGE);
 				dispose();

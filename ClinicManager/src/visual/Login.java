@@ -130,7 +130,7 @@ public class Login extends JFrame {
 		panel.setLayout(null);
 		
 		// Título de login
-		JLabel lblLoginTitle = new JLabel("Iniciar Sesión");
+		JLabel lblLoginTitle = new JLabel("Iniciar Sesion");
 		lblLoginTitle.setHorizontalAlignment(SwingConstants.CENTER);
 		lblLoginTitle.setFont(new Font("Segoe UI", Font.BOLD, 20));
 		lblLoginTitle.setForeground(new Color(50, 50, 50));
@@ -159,22 +159,21 @@ public class Login extends JFrame {
 		lblClave.setBounds(90, 165, 300, 20);
 		panel.add(lblClave);
 		
-		// Panel para contraseña con botón de mostrar/ocultar
+
 		JPanel passwordPanel = new JPanel();
 		passwordPanel.setLayout(null);
 		passwordPanel.setBackground(Color.WHITE);
 		passwordPanel.setBorder(new LineBorder(new Color(200, 200, 200), 1, true));
 		passwordPanel.setBounds(90, 188, 300, 40);
 		panel.add(passwordPanel);
-		
-		// Campo Contraseña
+
 		textClave = new JPasswordField();
 		textClave.setFont(new Font("Segoe UI", Font.PLAIN, 14));
 		textClave.setBorder(new EmptyBorder(5, 10, 5, 45));
 		textClave.setBounds(0, 0, 300, 40);
 		passwordPanel.add(textClave);
 		
-		// Botón para mostrar/ocultar contraseña
+
 		JButton btnTogglePassword = new JButton("Mostrar");
 		btnTogglePassword.setFont(new Font("Segoe UI", Font.PLAIN, 11));
 		btnTogglePassword.setForeground(new Color(66, 135, 245));
@@ -183,7 +182,7 @@ public class Login extends JFrame {
 		btnTogglePassword.setFocusPainted(false);
 		btnTogglePassword.setCursor(new Cursor(Cursor.HAND_CURSOR));
 		btnTogglePassword.setBounds(240, 7, 55, 26);
-		btnTogglePassword.setToolTipText("Mostrar/Ocultar contraseña");
+		btnTogglePassword.setToolTipText("Mostrar/Ocultar contrasena");
 		passwordPanel.add(btnTogglePassword);
 		
 		btnTogglePassword.addActionListener(new ActionListener() {
@@ -217,7 +216,7 @@ public class Login extends JFrame {
 				String claveInput = new String(textClave.getPassword()).trim();
 				if (userInput == null) userInput = "";
 				if (userInput.isEmpty() || claveInput == null || claveInput.isEmpty()) {
-					javax.swing.JOptionPane.showMessageDialog(Login.this, "Introduce usuario y contrase�a", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
+					javax.swing.JOptionPane.showMessageDialog(Login.this, "Introduce usuario y contrasena", "Error", javax.swing.JOptionPane.ERROR_MESSAGE);
 					return;
 				}
 
@@ -268,8 +267,7 @@ public class Login extends JFrame {
 		});
 		btnLogin.setBounds(90, 250, 300, 45);
 		panel.add(btnLogin);
-		
-		// Botón olvidaste contraseña
+
 		JButton btnOlvidasteClave = new JButton("¿Olvidaste tu contraseña?");
 		btnOlvidasteClave.setFont(new Font("Segoe UI", Font.PLAIN, 12));
 		btnOlvidasteClave.setForeground(new Color(66, 135, 245));
@@ -286,10 +284,7 @@ public class Login extends JFrame {
 		});
 		btnOlvidasteClave.setBounds(90, 310, 300, 25);
 		panel.add(btnOlvidasteClave);
-		
 	
-		
-		// Centrar ventana
 		setLocationRelativeTo(null);
 	}
 }

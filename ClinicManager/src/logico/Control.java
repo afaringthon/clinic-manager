@@ -178,6 +178,17 @@ public class Control implements Serializable {
     	}
     }
     
+    public void borrarUsuarioPorNombreUsuario(String nombreUsuario)
+    {
+    	for (Usuario u : usuarios)
+    	{
+    		if(u.getNombreUsuario().equalsIgnoreCase(nombreUsuario))
+    		{
+    			usuarios.remove(u);
+    		}
+    	}
+    }
+    
     public static void logout()
     {
     	loggedUsuario = null;

@@ -125,6 +125,10 @@ public class ListaVacunas extends JDialog {
 						Object idTexto  = tableVacunas.getModel().getValueAt(seleccionado, idCol);
 						String id = String.valueOf(idTexto);
 						EditarVacuna  pantallaEditarVacuna = new EditarVacuna(id);
+						pantallaEditarVacuna.setLocationRelativeTo(ListaVacunas.this); 
+						pantallaEditarVacuna.setVisible(true);
+						cargarTablaVacunas();
+						
 					}
 				});
 				buttonPane.add(btnEditar);

@@ -92,7 +92,7 @@ public class AgregarVacuna extends JDialog {
 				panel.add(lbDosis);
 			}
 			{
-				SpinnerNumberModel dosisModel = new SpinnerNumberModel(Double.valueOf(0.0), 0.0, null, Double.valueOf(0.1));
+				SpinnerNumberModel dosisModel = new SpinnerNumberModel(Double.valueOf(0.1), 0.1, null, Double.valueOf(0.1));
 				spinnerDosis = new JSpinner(dosisModel);
 				spinnerDosis.setBounds(85, 182, 67, 22);
 				panel.add(spinnerDosis);

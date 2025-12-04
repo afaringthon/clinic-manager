@@ -106,7 +106,7 @@ public class AgregarMedico extends JDialog {
 				panel.add(lbEdad);
 			}
 			{
-				SpinnerNumberModel edadModel = new SpinnerNumberModel(0, 0, null, 1);
+				SpinnerNumberModel edadModel = new SpinnerNumberModel(25, 25, null, 1);
 				spinnerEdad = new JSpinner(edadModel);
 				spinnerEdad.setBounds(82, 263, 56, 22);
 				spinnerEdad.setEditor(new JSpinner.NumberEditor(spinnerEdad, "#")); 
@@ -183,7 +183,7 @@ public class AgregarMedico extends JDialog {
 				panel.add(lbMaxCitas);
 			}
 			{
-				SpinnerNumberModel maxCitasModel = new SpinnerNumberModel(0, 0, null, 1);
+				SpinnerNumberModel maxCitasModel = new SpinnerNumberModel(1, 1, 20, 1);
 				spinnerMaxCitas = new JSpinner(maxCitasModel);
 				spinnerMaxCitas.setBounds(82, 371, 56, 22);
 				panel.add(spinnerMaxCitas);
@@ -197,7 +197,7 @@ public class AgregarMedico extends JDialog {
 			textCedula.setBounds(82, 159, 264, 22);
 			textCedula.setColumns(10);
 			
-			int maxCedulaLength = 12; // cambia a lo que necesites, o pon Integer.MAX_VALUE para sin límite
+			int maxCedulaLength = 12;
 			textCedula.setDocument(new javax.swing.text.PlainDocument() {
 			    @Override
 			    public void insertString(int offs, String str, javax.swing.text.AttributeSet a) throws javax.swing.text.BadLocationException {
@@ -278,8 +278,8 @@ public class AgregarMedico extends JDialog {
 							Usuario nuevoMedico = new Usuario(nombre+"-"+medico.getId(), Control.md5("Doctor123456!"), "medico", medico.getId());
 							control.regUser(nuevoMedico);
 							control.guardarAlDisco();
-							JOptionPane.showMessageDialog(AgregarMedico.this, "Dr." + nombre + " Fue Creado" + "Usuario: " + 
-							nuevoMedico.getNombreUsuario() + " Clave: Doctor123456!", "Exito", JOptionPane.INFORMATION_MESSAGE);
+							JOptionPane.showMessageDialog(AgregarMedico.this, "Medico Creado /n Usuario: " + 
+							nuevoMedico.getNombreUsuario() + "  Clave: Doctor123456!", "Exito", JOptionPane.INFORMATION_MESSAGE);
 							dispose();
 						}
 						

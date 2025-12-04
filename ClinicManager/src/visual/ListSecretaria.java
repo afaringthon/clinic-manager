@@ -106,16 +106,12 @@ public class ListSecretaria extends JDialog {
 						
 						Object idTexto  = tableVacunas.getModel().getValueAt(seleccionado, idCol);
 						String id = String.valueOf(idTexto);
-						Vacuna vacuna = instancia.buscarVacunaPorId(id);
-						vacuna.setEsActivo(false);
+						Control.getInstance().borrarUsuarioPorNombreUsuario(id);
+						Control.getInstance().guardarAlDisco();
 						cargarTablaSecretaria();
 					}
 				});
 				buttonPane.add(btnEliminar);
-			}
-			{
-				JButton btnEditar = new JButton("Editar");
-				buttonPane.add(btnEditar);
 			}
 			{
 				JButton btnAgregar = new JButton("Agregar");
@@ -137,8 +133,7 @@ public class ListSecretaria extends JDialog {
 	public void cargarTablaSecretaria()
 	{
 		modelSecretaria.setRowCount(0);
-		ArrayList<Vacuna> vacunas = instancia.getCatalogoVacunas();
-		
+				
 		for (Usuario u : Control.getInstance().getMisUsuarios())
 		{
 			String nombreUsuario = u.getNombreUsuario();

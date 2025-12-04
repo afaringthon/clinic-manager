@@ -277,6 +277,7 @@ public class AgregarConsulta extends JDialog {
 							        
 							    }
 							}
+							JOptionPane.showMessageDialog(AgregarConsulta.this, "Consulta fue completada", "Informacion", JOptionPane.INFORMATION_MESSAGE);					
 							dispose();
 						}
 						

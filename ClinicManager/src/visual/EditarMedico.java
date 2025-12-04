@@ -111,7 +111,7 @@ public class EditarMedico extends JDialog {
 				panel.add(lbEdad);
 			}
 			{
-				SpinnerNumberModel edadModel = new SpinnerNumberModel(25, 0, 120, 1);
+				SpinnerNumberModel edadModel = new SpinnerNumberModel(25, 25, 120, 1);
 				spinnerEdad = new JSpinner(edadModel);
 				spinnerEdad.setBounds(82, 263, 56, 22);
 				spinnerEdad.setEditor(new JSpinner.NumberEditor(spinnerEdad, "#")); 
@@ -190,7 +190,7 @@ public class EditarMedico extends JDialog {
 				panel.add(lbMaxCitas);
 			}
 			{
-				SpinnerNumberModel edadModel = new SpinnerNumberModel(25, 0, 120, 1);
+				SpinnerNumberModel edadModel = new SpinnerNumberModel(1, 1, 20, 1);
 				spinnerMaxCitas = new JSpinner(edadModel);
 				spinnerMaxCitas.setBounds(82, 371, 56, 22);
 				panel.add(spinnerMaxCitas);
@@ -238,15 +238,10 @@ public class EditarMedico extends JDialog {
 						
 						if (especialidad.isEmpty()|| edad < 25 || maxCitas < 1)
 						{
-							if(edad < 25)
-							{
-								JOptionPane.showMessageDialog(EditarMedico.this, "Medico no puede ser menos de 25", "Alerta", JOptionPane.ERROR_MESSAGE);
-								
-							}
-							else
-							{
-								JOptionPane.showMessageDialog(EditarMedico.this, "hay campos vacios", "Alerta", JOptionPane.ERROR_MESSAGE);
-							}
+							
+							
+						JOptionPane.showMessageDialog(EditarMedico.this, "hay campos vacios", "Alerta", JOptionPane.ERROR_MESSAGE);
+							
 						}
 						
 						else
