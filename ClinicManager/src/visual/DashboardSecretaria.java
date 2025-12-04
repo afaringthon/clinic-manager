@@ -33,6 +33,7 @@ import com.formdev.flatlaf.FlatLightLaf;
 
 import logico.Cita;
 import logico.Clinica;
+import logico.Control;
 import logico.Medico;
 import logico.Paciente;
 
@@ -96,6 +97,7 @@ public class DashboardSecretaria extends JFrame {
 		contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(contentPane);
 
+		
 		JPanel navbar = new JPanel(new BorderLayout());
 		navbar.setBackground(SystemColor.textHighlight);
 		navbar.setPreferredSize(new Dimension(0, 72));
@@ -112,7 +114,15 @@ public class DashboardSecretaria extends JFrame {
 		ImageIcon avatarIcon = loadAndScaleIcon("/visual/avatar.png", 48, 48);
 		JLabel labelAvatar = new JLabel((avatarIcon));
 		labelAvatar.setBorder(new EmptyBorder(8, 12, 8, 12));
-		navbar.add(labelAvatar, BorderLayout.EAST);
+		JPanel avatarPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 8));
+		avatarPanel.setOpaque(false);
+		
+		JLabel lblUserName = new JLabel(Control.getLoggedUsuario().getNombreUsuario());
+		lblUserName.setForeground(Color.WHITE);
+		lblUserName.setFont(new Font("Segoe UI", Font.BOLD, 15));
+		avatarPanel.add(lblUserName);
+		avatarPanel.add(labelAvatar);
+		navbar.add(avatarPanel, BorderLayout.EAST);
 
 		// Contenedor central
 		JPanel centerContainer = new JPanel();
@@ -296,6 +306,17 @@ public class DashboardSecretaria extends JFrame {
 				
 			}
 		});
+		
+		JButton btnSalir = new JButton("Salir");
+		btnSalir.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Control.logout();
+				Login pantallaLogin = new Login();
+				pantallaLogin.setVisible(true);
+				dispose();
+			}
+		});
+		buttonBar.add(btnSalir);
 
 		buttonBar.add(btnCancelar);
 		buttonBar.add(btnPosponer);

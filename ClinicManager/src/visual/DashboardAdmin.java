@@ -180,12 +180,6 @@ public class DashboardAdmin extends JFrame {
 		});
 		mnMenuVer.add(mnSecretariaVer);
 
-		JMenu mnNewMenu = new JMenu("Backup");
-		menuBar.add(mnNewMenu);
-
-		JMenuItem mntmNewMenuItem = new JMenuItem("Hacer Respaldo");
-		mnNewMenu.add(mntmNewMenuItem);
-
 		JMenu mnMenuStats = new JMenu("Stats");
 		menuBar.add(mnMenuStats);
 
@@ -198,6 +192,23 @@ public class DashboardAdmin extends JFrame {
 			}
 		});
 		mnMenuStats.add(mntmNewMenuItem_1);
+		
+				JMenu mnNewMenu = new JMenu("Session");
+				menuBar.add(mnNewMenu);
+				
+				JMenuItem mntmNewMenuItem_2 = new JMenuItem("Salir");
+				mntmNewMenuItem_2.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						Control.logout();
+						Login pantallaLogin = new Login();
+						pantallaLogin.setVisible(true);
+						dispose();
+					}
+				});
+				mnNewMenu.add(mntmNewMenuItem_2);
+				
+						JMenuItem mntmNewMenuItem = new JMenuItem("Hacer Respaldo");
+						mnNewMenu.add(mntmNewMenuItem);
 		contentPane = new JPanel();
 		// Sin padding extra en el contentPane para que la navbar quede pegada
 		contentPane.setBorder(new EmptyBorder(0, 0, 0, 0));
@@ -220,7 +231,15 @@ public class DashboardAdmin extends JFrame {
 		ImageIcon avatarIcon = loadAndScaleIcon("/visual/avatar.png", 48, 48);
 		JLabel labelAvatar = new JLabel((avatarIcon));
 		labelAvatar.setBorder(new EmptyBorder(8, 12, 8, 12));
-		navbar.add(labelAvatar, BorderLayout.EAST);
+		JPanel avatarPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 8));
+		avatarPanel.setOpaque(false);
+		JLabel lblUserName = new JLabel(Control.getLoggedUsuario().getNombreUsuario());
+		lblUserName.setForeground(Color.WHITE);
+		lblUserName.setFont(new Font("Segoe UI", Font.BOLD, 15));
+		avatarPanel.add(lblUserName);
+		avatarPanel.add(labelAvatar);
+		navbar.add(avatarPanel, BorderLayout.EAST);
+		
 
 		// Contenedor central
 		JPanel centerContainer = new JPanel();

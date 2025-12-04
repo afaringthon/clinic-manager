@@ -69,7 +69,7 @@ public class RestablecerClave extends JDialog {
 		getContentPane().add(contentPanel, BorderLayout.CENTER);
 		contentPanel.setLayout(null);
 		
-		// Header
+
 		JPanel headerPanel = new JPanel();
 		headerPanel.setBackground(new Color(66, 135, 245));
 		headerPanel.setBounds(0, 0, 500, 100);
@@ -90,14 +90,13 @@ public class RestablecerClave extends JDialog {
 		lblSubtitulo.setBounds(0, 65, 500, 20);
 		headerPanel.add(lblSubtitulo);
 		
-		// Label Usuario
+
 		JLabel lblNombre = new JLabel("Nombre de Usuario");
 		lblNombre.setFont(new Font("Segoe UI", Font.PLAIN, 14));
 		lblNombre.setForeground(new Color(70, 70, 70));
 		lblNombre.setBounds(75, 130, 350, 20);
 		contentPanel.add(lblNombre);
 		
-		// Campo Usuario
 		textNombreUsuario = new JTextField();
 		textNombreUsuario.setFont(new Font("Segoe UI", Font.PLAIN, 14));
 		textNombreUsuario.setBorder(new LineBorder(new Color(200, 200, 200), 1, true));
@@ -105,14 +104,13 @@ public class RestablecerClave extends JDialog {
 		contentPanel.add(textNombreUsuario);
 		textNombreUsuario.setColumns(10);
 		
-		// Label Nueva Contraseña
+
 		JLabel lbClave = new JLabel("Nueva Contraseña");
 		lbClave.setFont(new Font("Segoe UI", Font.PLAIN, 14));
 		lbClave.setForeground(new Color(70, 70, 70));
 		lbClave.setBounds(75, 215, 350, 20);
 		contentPanel.add(lbClave);
 		
-		// Panel para primera contraseña
 		JPanel passwordPanel1 = new JPanel();
 		passwordPanel1.setLayout(null);
 		passwordPanel1.setBackground(Color.WHITE);
@@ -126,7 +124,7 @@ public class RestablecerClave extends JDialog {
 		passwordField.setBounds(0, 0, 350, 40);
 		passwordPanel1.add(passwordField);
 		
-		// Botón mostrar/ocultar contraseña 1
+
 		JButton btnTogglePassword1 = new JButton("Mostrar");
 		btnTogglePassword1.setFont(new Font("Segoe UI", Font.PLAIN, 11));
 		btnTogglePassword1.setForeground(new Color(66, 135, 245));
@@ -176,7 +174,6 @@ public class RestablecerClave extends JDialog {
 		passwordField_1.setBounds(0, 0, 350, 40);
 		passwordPanel2.add(passwordField_1);
 		
-		// Botón mostrar/ocultar contraseña 2
 		JButton btnTogglePassword2 = new JButton("Mostrar");
 		btnTogglePassword2.setFont(new Font("Segoe UI", Font.PLAIN, 11));
 		btnTogglePassword2.setForeground(new Color(66, 135, 245));
@@ -237,14 +234,14 @@ public class RestablecerClave extends JDialog {
 				if(nombreUsuario.isEmpty()) {
 					JOptionPane.showMessageDialog(RestablecerClave.this, 
 						"Por favor ingresa el nombre de usuario", 
-						"Campo Vacío", 
+						"Campo Vacio", 
 						JOptionPane.WARNING_MESSAGE);
 					return;
 				}
 				
 				if(!Control.getInstance().userNameExists(nombreUsuario)) {
 					JOptionPane.showMessageDialog(RestablecerClave.this, 
-						"El usuario no existe en el sistema", 
+						"El usuario no existe", 
 						"Usuario no encontrado", 
 						JOptionPane.ERROR_MESSAGE);
 					return;
@@ -252,24 +249,24 @@ public class RestablecerClave extends JDialog {
 				
 				if(clave.isEmpty() || claveRepetida.isEmpty()) {
 					JOptionPane.showMessageDialog(RestablecerClave.this, 
-						"Por favor completa ambos campos de contraseña", 
-						"Campos Vacíos", 
+						"Por favor completa ambos campos de clave", 
+						"Campos Vacios", 
 						JOptionPane.WARNING_MESSAGE);
 					return;
 				}
 				
 				if(clave.length() < 6) {
 					JOptionPane.showMessageDialog(RestablecerClave.this, 
-						"La contraseña debe tener al menos 6 caracteres", 
-						"Contraseña muy corta", 
+						"La clave debe tener al menos 6 caracteres", 
+						"Clave muy corta", 
 						JOptionPane.WARNING_MESSAGE);
 					return;
 				}
 				
 				if(!clave.equals(claveRepetida)) {
 					JOptionPane.showMessageDialog(RestablecerClave.this, 
-						"Las contraseñas no coinciden. Por favor verifica", 
-						"Contraseñas diferentes", 
+						"Las claves no coinciden. Por favor verifica", 
+						"Claves diferentes", 
 						JOptionPane.ERROR_MESSAGE);
 					return;
 				}
@@ -280,8 +277,8 @@ public class RestablecerClave extends JDialog {
 				Control.getInstance().guardarAlDisco();
 				
 				JOptionPane.showMessageDialog(RestablecerClave.this, 
-					"¡Contraseña restablecida exitosamente!\nYa puedes iniciar sesión con tu nueva contraseña", 
-					"Éxito", 
+					"Clave restablecida exitosamente!\nYa puedes iniciar sesión con tu nueva clave", 
+					"Exito", 
 					JOptionPane.INFORMATION_MESSAGE);
 				dispose();
 			}

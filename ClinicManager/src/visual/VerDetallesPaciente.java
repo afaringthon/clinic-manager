@@ -97,6 +97,7 @@ public class VerDetallesPaciente extends JDialog {
 			}
 			{
 				textApellido = new JTextField();
+				textApellido.setEnabled(false);
 				textApellido.setText(paciente.getApellido());
 				textApellido.setBounds(119, 102, 270, 22);
 				panel.add(textApellido);
@@ -181,6 +182,7 @@ public class VerDetallesPaciente extends JDialog {
 			panel.add(lbEstatura);
 			
 			JSpinner spinnerEstatura = new JSpinner();
+			spinnerEstatura.setValue(paciente.getEstatura());
 			spinnerEstatura.setEnabled(false);
 			spinnerEstatura.setBounds(119, 363, 66, 22);
 			panel.add(spinnerEstatura);
@@ -190,6 +192,7 @@ public class VerDetallesPaciente extends JDialog {
 			panel.add(lbPeso);
 			
 			JSpinner spinnerPeso = new JSpinner();
+			spinnerPeso.setValue(paciente.getPeso());
 			spinnerPeso.setEnabled(false);
 			spinnerPeso.setBounds(118, 414, 67, 22);
 			panel.add(spinnerPeso);

@@ -178,4 +178,9 @@ public class Control implements Serializable {
     	}
     }
     
+    public static void logout()
+    {
+    	loggedUsuario = null;
+    }
+    
 }

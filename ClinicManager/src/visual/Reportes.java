@@ -99,14 +99,6 @@ public class Reportes extends JDialog {
 		ChartPanel enfPanel = new ChartPanel(enfChart);
 		enfPanel.setPreferredSize(new Dimension(600, 360));
 		panel.add(enfPanel);
-
-		JPanel buttonPane = new JPanel();
-		buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
-		getContentPane().add(buttonPane, BorderLayout.SOUTH);
-		JButton cancelButton = new JButton("Salir");
-		cancelButton.setActionCommand("Cancel");
-		cancelButton.addActionListener(ev -> dispose());
-		buttonPane.add(cancelButton);
 	}
 
 	/* -----------------------
