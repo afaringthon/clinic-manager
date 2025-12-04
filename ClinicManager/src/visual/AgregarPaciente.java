@@ -19,6 +19,7 @@ import logico.Vacuna;
 
 import java.awt.CardLayout;
 import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JSpinner;
@@ -120,8 +121,11 @@ public class AgregarPaciente extends JDialog {
 				panel.add(lblEdad);
 			}
 			
-			spinnerEdad = new JSpinner();
+			
+			SpinnerNumberModel edadModel = new SpinnerNumberModel(25, 0, 120, 1); // initial, min, max, step
+			spinnerEdad = new JSpinner(edadModel);
 			spinnerEdad.setBounds(119, 207, 66, 22);
+			spinnerEdad.setEditor(new JSpinner.NumberEditor(spinnerEdad, "#")); 
 			panel.add(spinnerEdad);
 			
 			JLabel lblSexo = new JLabel("Sexo");
@@ -167,15 +171,26 @@ public class AgregarPaciente extends JDialog {
 			lbEstatura.setBounds(119, 345, 56, 16);
 			panel.add(lbEstatura);
 			
-			JSpinner spinnerEstatura = new JSpinner();
+			
+			SpinnerNumberModel estaturaModel = new SpinnerNumberModel(0, 0, 120, 1);
+			JSpinner spinnerEstatura = new JSpinner(estaturaModel);
+			spinnerEdad.setEditor(new JSpinner.NumberEditor(spinnerEdad, "#")); 
 			spinnerEstatura.setBounds(119, 363, 66, 22);
 			panel.add(spinnerEstatura);
 			
+			
+			spinnerEdad = new JSpinner(edadModel);
+			spinnerEdad.setBounds(119, 207, 66, 22);
+			spinnerEdad.setEditor(new JSpinner.NumberEditor(spinnerEdad, "#")); 
+			panel.add(spinnerEdad);
 			JLabel lbPeso = new JLabel("Peso");
 			lbPeso.setBounds(119, 398, 56, 16);
 			panel.add(lbPeso);
 			
-			JSpinner spinnerPeso = new JSpinner();
+			SpinnerNumberModel pesoModel = new SpinnerNumberModel(25, 0, 120, 1);
+			JSpinner spinnerPeso = new JSpinner(pesoModel);
+			spinnerPeso.setEditor(new JSpinner.NumberEditor(spinnerEdad, "#")); 
+
 			spinnerPeso.setBounds(118, 414, 67, 22);
 			panel.add(spinnerPeso);
 			
@@ -227,7 +242,7 @@ public class AgregarPaciente extends JDialog {
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 			getContentPane().add(buttonPane, BorderLayout.SOUTH);
 			{
-				JButton okButton = new JButton("OK");
+				JButton okButton = new JButton("Agregar");
 				okButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent arg0) {
 						int edad = (Integer) spinnerEdad.getValue();

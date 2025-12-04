@@ -8,6 +8,8 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.AbstractDocument;
+
 import java.awt.CardLayout;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -27,6 +29,10 @@ import logico.Usuario;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+
+import javax.swing.text.DocumentFilter;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
 
 public class AgregarMedico extends JDialog {
 
@@ -189,8 +195,30 @@ public class AgregarMedico extends JDialog {
 			
 			textCedula = new JTextField();
 			textCedula.setBounds(82, 159, 264, 22);
-			panel.add(textCedula);
 			textCedula.setColumns(10);
+			
+			int maxCedulaLength = 12; // cambia a lo que necesites, o pon Integer.MAX_VALUE para sin límite
+			textCedula.setDocument(new javax.swing.text.PlainDocument() {
+			    @Override
+			    public void insertString(int offs, String str, javax.swing.text.AttributeSet a) throws javax.swing.text.BadLocationException {
+			        if (str == null) return;
+			        StringBuilder filtered = new StringBuilder();
+			        for (int i = 0; i < str.length(); i++) {
+			            char ch = str.charAt(i);
+			            if (Character.isDigit(ch)) filtered.append(ch);
+			        }
+			        int currentLength = getLength();
+			        String toInsert = filtered.toString();
+			        if (toInsert.length() + currentLength > maxCedulaLength) {
+			            int allowed = maxCedulaLength - currentLength;
+			            if (allowed <= 0) return;
+			            toInsert = toInsert.substring(0, allowed);
+			        }
+			        super.insertString(offs, toInsert, a);
+			    }
+			});
+			
+			panel.add(textCedula);
 			
 			JLabel lbSexo = new JLabel("Sexo");
 			lbSexo.setBounds(82, 194, 56, 16);
@@ -207,7 +235,7 @@ public class AgregarMedico extends JDialog {
 			buttonPane.setLayout(new FlowLayout(FlowLayout.RIGHT));
 			getContentPane().add(buttonPane, BorderLayout.SOUTH);
 			{
-				JButton okButton = new JButton("OK");
+				JButton okButton = new JButton("Agregar");
 				okButton.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent arg0) {
 						String nombre = textNombre.getText().trim();
@@ -231,14 +259,11 @@ public class AgregarMedico extends JDialog {
 							if (maxCitas < 1)
 							{
 								JOptionPane.showMessageDialog(AgregarMedico.this, "Tienes que tener almenos 1 cita al dia", "Alerta", JOptionPane.ERROR_MESSAGE);
-								
 							}
 							
 							if(repetido)
 							{
 								JOptionPane.showMessageDialog(AgregarMedico.this, "Ya hay alguien con esa cedula", "Alerta", JOptionPane.ERROR_MESSAGE);
-
-								
 							}
 							
 							else

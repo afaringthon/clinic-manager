@@ -224,6 +224,13 @@ public class AgregarConsulta extends JDialog {
 			panel.add(lbHistorial);
 			
 			JButton btnDetalesPacientes = new JButton("Detalles del Paciente");
+			btnDetalesPacientes.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					VerDetallesPaciente pantallaVerDetallesPaciente = new VerDetallesPaciente(idPaciente);
+					pantallaVerDetallesPaciente.setLocationRelativeTo(AgregarConsulta.this); 
+					pantallaVerDetallesPaciente.setVisible(true);
+				}
+			});
 			btnDetalesPacientes.setBounds(715, 306, 200, 25);
 			panel.add(btnDetalesPacientes);
 		}
@@ -270,24 +277,7 @@ public class AgregarConsulta extends JDialog {
 							        
 							    }
 							}
-							JOptionPane.showMessageDialog(AgregarConsulta.this, "Consulta Terminada", "Informacion", JOptionPane.INFORMATION_MESSAGE);	
-							System.out.print(consulta.getSintomas() + consulta.getMedico().getNombre()+ consulta.getPaciente().getNombre() +
-									consulta.getEnfermedadVigilada().getNombre());
-							System.out.println(consulta.isEsImportante());
-							
-							for (Consulta c : paciente.getHistorial())
-							{
-								System.out.println(c.getDiagnostico() + c.isEsImportante());
-							}
-							cita.setEsActivo(false);
-							
-							
 							dispose();
-							
-							
-							
-							
-
 						}
 						
 						
@@ -299,6 +289,11 @@ public class AgregarConsulta extends JDialog {
 			}
 			{
 				JButton cancelButton = new JButton("Cancelar");
+				cancelButton.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						dispose();
+					}
+				});
 				cancelButton.setActionCommand("Cancel");
 				buttonPane.add(cancelButton);
 			}

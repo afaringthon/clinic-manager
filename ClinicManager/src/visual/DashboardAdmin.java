@@ -90,6 +90,9 @@ public class DashboardAdmin extends JFrame {
 		JMenuBar menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
 
+		setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
+		setResizable(true);
+		
 		JMenu mnAgregar = new JMenu("Agregar");
 		menuBar.add(mnAgregar);
 
@@ -187,6 +190,13 @@ public class DashboardAdmin extends JFrame {
 		menuBar.add(mnMenuStats);
 
 		JMenuItem mntmNewMenuItem_1 = new JMenuItem("Reportes");
+		mntmNewMenuItem_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				Reportes pantallaReportes = new Reportes();
+				pantallaReportes.setLocationRelativeTo(DashboardAdmin.this);
+				pantallaReportes.setVisible(true);
+			}
+		});
 		mnMenuStats.add(mntmNewMenuItem_1);
 		contentPane = new JPanel();
 		// Sin padding extra en el contentPane para que la navbar quede pegada

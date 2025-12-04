@@ -93,7 +93,10 @@ public class DashboardMedico extends JFrame {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 1392, 822);
 		contentPane = new JPanel();
-		// Sin padding extra en el contentPane para que la navbar quede pegada
+
+		setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
+		setResizable(true);
+		
 		contentPane.setBorder(new EmptyBorder(0, 0, 0, 0));
 		contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(contentPane);

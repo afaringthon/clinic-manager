@@ -129,7 +129,6 @@ public class ListaEnfermedades extends JDialog {
 						pantallaAgregarEnfermedad.setLocationRelativeTo(ListaEnfermedades.this); 
 						pantallaAgregarEnfermedad.setVisible(true);
 						cargarTablaEnfermedades();
-					
 					}
 				});
 				buttonPane.add(btnEditar);

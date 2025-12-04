@@ -165,8 +165,32 @@ public class CrearCita extends JDialog {
 			
 			textCedula = new JTextField();
 			textCedula.setBounds(79, 170, 274, 22);
-			panel.add(textCedula);
 			textCedula.setColumns(10);
+			
+			int maxCedulaLength = 12; // cambia a lo que necesites, o pon Integer.MAX_VALUE para sin límite
+			textCedula.setDocument(new javax.swing.text.PlainDocument() {
+			    @Override
+			    public void insertString(int offs, String str, javax.swing.text.AttributeSet a) throws javax.swing.text.BadLocationException {
+			        if (str == null) return;
+			        StringBuilder filtered = new StringBuilder();
+			        for (int i = 0; i < str.length(); i++) {
+			            char ch = str.charAt(i);
+			            if (Character.isDigit(ch)) filtered.append(ch);
+			        }
+			        int currentLength = getLength();
+			        String toInsert = filtered.toString();
+			        if (toInsert.length() + currentLength > maxCedulaLength) {
+			            int allowed = maxCedulaLength - currentLength;
+			            if (allowed <= 0) return;
+			            toInsert = toInsert.substring(0, allowed);
+			        }
+			        super.insertString(offs, toInsert, a);
+			    }
+			});
+			
+			panel.add(textCedula);
+
+			
 			
 			actualizarComboMedicos(hoy);
 	
@@ -193,11 +217,11 @@ public class CrearCita extends JDialog {
 							if(!fecha.isAfter(hoy.minusDays(1)))
 							{
 								JOptionPane.showMessageDialog(CrearCita.this, "Fecha no puede ser antes de hoy", "Alerta", JOptionPane.ERROR_MESSAGE);
-								return;
-
 							}
-							JOptionPane.showMessageDialog(CrearCita.this, "Hay Campos Vacios", "Alerta", JOptionPane.ERROR_MESSAGE);
-							
+							else
+							{
+								JOptionPane.showMessageDialog(CrearCita.this, "Hay Campos Vacios", "Alerta", JOptionPane.ERROR_MESSAGE);						
+							}
 						}
 						
 						else

@@ -111,7 +111,7 @@ public class EditarMedico extends JDialog {
 				panel.add(lbEdad);
 			}
 			{
-				SpinnerNumberModel edadModel = new SpinnerNumberModel(0, 0, null, 1);
+				SpinnerNumberModel edadModel = new SpinnerNumberModel(25, 0, 120, 1);
 				spinnerEdad = new JSpinner(edadModel);
 				spinnerEdad.setBounds(82, 263, 56, 22);
 				spinnerEdad.setEditor(new JSpinner.NumberEditor(spinnerEdad, "#")); 
@@ -190,8 +190,8 @@ public class EditarMedico extends JDialog {
 				panel.add(lbMaxCitas);
 			}
 			{
-				SpinnerNumberModel maxCitasModel = new SpinnerNumberModel(0, 0, null, 1);
-				spinnerMaxCitas = new JSpinner(maxCitasModel);
+				SpinnerNumberModel edadModel = new SpinnerNumberModel(25, 0, 120, 1);
+				spinnerMaxCitas = new JSpinner(edadModel);
 				spinnerMaxCitas.setBounds(82, 371, 56, 22);
 				panel.add(spinnerMaxCitas);
 			}
