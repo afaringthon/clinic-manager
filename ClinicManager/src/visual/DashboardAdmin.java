@@ -1,6 +1,8 @@
 package visual;
 
 import java.awt.BorderLayout;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Color;
@@ -13,6 +15,7 @@ import java.awt.FlowLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
 import javax.imageio.ImageIO;
 import javax.print.DocFlavor.URL;
 import javax.swing.Box;
@@ -26,6 +29,10 @@ import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.JButton;
 import javax.swing.UIManager;
+import javax.swing.JDialog;
+import javax.swing.JTextArea;
+import javax.swing.Timer;
+import javax.swing.BorderFactory;
 
 import com.formdev.flatlaf.FlatLightLaf;
 
@@ -35,10 +42,13 @@ import logico.EnfermedadBajoVigilancia;
 import logico.Medico;
 import logico.Paciente;
 import logico.Vacuna;
+import logico.Servidor;
+import logico.Cliente;
 
 import javax.swing.table.TableModel;
 import java.awt.SystemColor;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.awt.Font;
@@ -53,541 +63,782 @@ import java.awt.event.ActionEvent;
 
 public class DashboardAdmin extends JFrame {
 
-	Clinica instancia = Clinica.getInstancia();
-	private JPanel contentPane;
-	private JTable tablaDoctores;
-	private JTable tablaPacientes;
-	JLabel lbDoctoresNum;
-	JLabel lbVacunaNum;
-	JLabel lblEnfermedadesNum;
-	DefaultTableModel modelDoctores;
-	DefaultTableModel modelPacientes;
-
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					UIManager.setLookAndFeel(new FlatLightLaf());
-					DashboardAdmin frame = new DashboardAdmin();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-
-	/**
-	 * Create the frame.
-	 */
-	public DashboardAdmin() {
-		setTitle("Clinic Manager - Admin");
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 1392, 822);
-		JMenuBar menuBar = new JMenuBar();
-		setJMenuBar(menuBar);
-
-		setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
-		setResizable(true);
-		
-		JMenu mnAgregar = new JMenu("Agregar");
-		menuBar.add(mnAgregar);
-
-		JMenuItem mnItemMedico = new JMenuItem("Medico");
-		mnItemMedico.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				AgregarMedico pantallaAgregarMedico = new AgregarMedico();
-				pantallaAgregarMedico.setLocationRelativeTo(DashboardAdmin.this);
-				pantallaAgregarMedico.setVisible(true);
-				int totalDoctores = contarNumMedicos();
-				lbDoctoresNum.setText(String.valueOf(totalDoctores));
-				cargarTablaDoctores();
-			}
-		});
-		mnAgregar.add(mnItemMedico);
-
-		JMenuItem mnItemVacuna = new JMenuItem("Vacuna");
-		mnItemVacuna.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				AgregarVacuna pantallaAgregarVacuna = new AgregarVacuna();
-				pantallaAgregarVacuna.setLocationRelativeTo(DashboardAdmin.this);
-				pantallaAgregarVacuna.setVisible(true);
-				int numVacunas = contarNumVacunas();
-				lbVacunaNum.setText(String.valueOf(String.valueOf(numVacunas)));
-			}
-		});
-		mnAgregar.add(mnItemVacuna);
-
-		JMenuItem mnItemEnfermedad = new JMenuItem("Enfermedad Vigilada");
-		mnItemEnfermedad.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				AgregarEnfermedad pantallaAgregarEnfermedad = new AgregarEnfermedad();
-				pantallaAgregarEnfermedad.setLocationRelativeTo(DashboardAdmin.this);
-				pantallaAgregarEnfermedad.setVisible(true);
-				int numEnfermedades = instancia.getEnfermedadesVigiladas().size();
-				lblEnfermedadesNum.setText(String.valueOf(numEnfermedades));
-			}
-		});
-		mnAgregar.add(mnItemEnfermedad);
-		
-		JMenuItem mnItemSecretaria = new JMenuItem("Secretaria");
-		mnItemSecretaria.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				AgregarSecretaria pantallaAgregarSecretaria = new AgregarSecretaria();
-				pantallaAgregarSecretaria.setLocationRelativeTo(DashboardAdmin.this);
-				pantallaAgregarSecretaria.setVisible(true);
-			}
-		});
-		mnAgregar.add(mnItemSecretaria);
-
-		JMenu mnMenuVer = new JMenu("Ver");
-		menuBar.add(mnMenuVer);
-
-		JMenuItem mnMenuVacunas = new JMenuItem("Vacunas");
-		mnMenuVacunas.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				ListaVacunas pantallaListaVacunas = new ListaVacunas();
-				pantallaListaVacunas.setLocationRelativeTo(DashboardAdmin.this);
-				pantallaListaVacunas.setVisible(true);
-				int numVacunas = contarNumVacunas();
-				lbVacunaNum.setText(String.valueOf(String.valueOf(numVacunas)));
-			}
-		});
-		mnMenuVer.add(mnMenuVacunas);
-
-		JMenuItem mnItemEnfermedades = new JMenuItem("Enfermedades Vigiladas");
-		mnItemEnfermedades.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				ListaEnfermedades pantallaListaEnfermedades = new ListaEnfermedades();
-				pantallaListaEnfermedades.setLocationRelativeTo(DashboardAdmin.this);
-				pantallaListaEnfermedades.setVisible(true);
-				int numEnfermedades = contarNumEnfermedades();
-				lblEnfermedadesNum.setText(String.valueOf(numEnfermedades));
-			}
-		});
-		mnMenuVer.add(mnItemEnfermedades);
-		
-		JMenuItem mnSecretariaVer = new JMenuItem("Secretaria");
-		mnSecretariaVer.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				ListSecretaria pantallaListSecretaria = new ListSecretaria();
-				pantallaListSecretaria.setLocationRelativeTo(DashboardAdmin.this);
-				pantallaListSecretaria.setVisible(true);
-			}
-		});
-		mnMenuVer.add(mnSecretariaVer);
-
-		JMenu mnMenuStats = new JMenu("Stats");
-		menuBar.add(mnMenuStats);
-
-		JMenuItem mntmNewMenuItem_1 = new JMenuItem("Reportes");
-		mntmNewMenuItem_1.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				Reportes pantallaReportes = new Reportes();
-				pantallaReportes.setLocationRelativeTo(DashboardAdmin.this);
-				pantallaReportes.setVisible(true);
-			}
-		});
-		mnMenuStats.add(mntmNewMenuItem_1);
-		
-				JMenu mnNewMenu = new JMenu("Session");
-				menuBar.add(mnNewMenu);
-				
-				JMenuItem mntmNewMenuItem_2 = new JMenuItem("Salir");
-				mntmNewMenuItem_2.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
-						Control.logout();
-						Login pantallaLogin = new Login();
-						pantallaLogin.setVisible(true);
-						dispose();
-					}
-				});
-				mnNewMenu.add(mntmNewMenuItem_2);
-				
-						JMenuItem mntmNewMenuItem = new JMenuItem("Hacer Respaldo");
-						mnNewMenu.add(mntmNewMenuItem);
-		contentPane = new JPanel();
-		// Sin padding extra en el contentPane para que la navbar quede pegada
-		contentPane.setBorder(new EmptyBorder(0, 0, 0, 0));
-		contentPane.setLayout(new BorderLayout(0, 0));
-		setContentPane(contentPane);
-
-		JPanel navbar = new JPanel(new BorderLayout());
-		navbar.setBackground(SystemColor.textHighlight);
-		navbar.setPreferredSize(new Dimension(0, 72));
-		navbar.setBorder(new EmptyBorder(0, 0, 0, 0));
-		contentPane.add(navbar, BorderLayout.NORTH);
-
-		// Logo
-		ImageIcon logoIcon = loadAndScaleIcon("/visual/logo.png", 152, 34);
-		JLabel logoLabel = new JLabel(logoIcon);
-		logoLabel.setBorder(new EmptyBorder(8, 12, 8, 12));
-		navbar.add(logoLabel, BorderLayout.WEST);
-
-		// Avatar
-		ImageIcon avatarIcon = loadAndScaleIcon("/visual/avatar.png", 48, 48);
-		JLabel labelAvatar = new JLabel((avatarIcon));
-		labelAvatar.setBorder(new EmptyBorder(8, 12, 8, 12));
-		JPanel avatarPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 8));
-		avatarPanel.setOpaque(false);
-		JLabel lblUserName = new JLabel(Control.getLoggedUsuario().getNombreUsuario());
-		lblUserName.setForeground(Color.WHITE);
-		lblUserName.setFont(new Font("Segoe UI", Font.BOLD, 15));
-		avatarPanel.add(lblUserName);
-		avatarPanel.add(labelAvatar);
-		navbar.add(avatarPanel, BorderLayout.EAST);
-		
-
-		// Contenedor central
-		JPanel centerContainer = new JPanel();
-		centerContainer.setBackground(Color.WHITE);
-		centerContainer.setLayout(new BoxLayout(centerContainer, BoxLayout.Y_AXIS));
-		contentPane.add(centerContainer, BorderLayout.CENTER);
-
-		// Spacer
-		centerContainer.add(Box.createVerticalStrut(40));
-
-		// Superior
-		JPanel gridPanel = new JPanel();
-		gridPanel.setOpaque(false);
-		Dimension gridTopSize = new Dimension(900, 120);
-		gridPanel.setPreferredSize(gridTopSize);
-		gridPanel.setMaximumSize(new Dimension(1200, 120));
-		gridPanel.setLayout(new GridLayout(1, 0, 8, 8));
-		gridPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-		// KPI 1
-		JPanel panelPacienteKPI = new JPanel();
-		panelPacienteKPI.setBackground(SystemColor.inactiveCaptionBorder);
-		panelPacienteKPI.setLayout(new BoxLayout(panelPacienteKPI, BoxLayout.Y_AXIS));
-		panelPacienteKPI.setBorder(new EmptyBorder(12, 12, 12, 12)); // padding interno
-
-		int numPacientes = contarNumPacientes();
-		JLabel lbPacientesNum = new JLabel(String.valueOf(numPacientes));
-		lbPacientesNum.setForeground(SystemColor.textHighlight);
-		lbPacientesNum.setFont(new Font("Segoe UI", Font.BOLD, 48));
-		lbPacientesNum.setAlignmentX(Component.CENTER_ALIGNMENT);
-		panelPacienteKPI.add(lbPacientesNum);
-
-		panelPacienteKPI.add(Box.createVerticalStrut(4));
-
-		JLabel lblTitlePacientes = new JLabel("Pacientes");
-		lblTitlePacientes.setAlignmentX(Component.CENTER_ALIGNMENT);
-		panelPacienteKPI.add(lblTitlePacientes);
-
-		gridPanel.add(panelPacienteKPI);
-
-		// KPI 2
-		JPanel panelDoctoresKPI = new JPanel();
-		panelDoctoresKPI.setBackground(SystemColor.inactiveCaptionBorder);
-		panelDoctoresKPI.setLayout(new BoxLayout(panelDoctoresKPI, BoxLayout.Y_AXIS));
-		panelDoctoresKPI.setBorder(new EmptyBorder(12, 12, 12, 12));
-
-		int numMedicos = contarNumMedicos();
-		lbDoctoresNum = new JLabel(String.valueOf(numMedicos));
-		lbDoctoresNum.setForeground(SystemColor.textHighlight);
-		lbDoctoresNum.setFont(new Font("Segoe UI", Font.BOLD, 48));
-		lbDoctoresNum.setAlignmentX(Component.CENTER_ALIGNMENT);
-		panelDoctoresKPI.add(lbDoctoresNum);
-
-		panelDoctoresKPI.add(Box.createVerticalStrut(4));
-
-		JLabel lblTitleDoctores = new JLabel("Doctores");
-		lblTitleDoctores.setAlignmentX(Component.CENTER_ALIGNMENT);
-		panelDoctoresKPI.add(lblTitleDoctores);
-
-		gridPanel.add(panelDoctoresKPI);
-
-		// KPI 3
-		JPanel panelEnfermedadesKPI = new JPanel();
-		panelEnfermedadesKPI.setBackground(SystemColor.inactiveCaptionBorder);
-		panelEnfermedadesKPI.setLayout(new BoxLayout(panelEnfermedadesKPI, BoxLayout.Y_AXIS));
-		panelEnfermedadesKPI.setBorder(new EmptyBorder(12, 12, 12, 12));
-
-		int numEnfermedades = contarNumEnfermedades();
-		lblEnfermedadesNum = new JLabel(String.valueOf(numEnfermedades));
-		lblEnfermedadesNum.setForeground(SystemColor.textHighlight);
-		lblEnfermedadesNum.setFont(new Font("Segoe UI", Font.BOLD, 48));
-		lblEnfermedadesNum.setAlignmentX(Component.CENTER_ALIGNMENT);
-		panelEnfermedadesKPI.add(lblEnfermedadesNum);
-
-		panelEnfermedadesKPI.add(Box.createVerticalStrut(4));
-
-		JLabel lblTitleEnfermedades = new JLabel("Enfermedades");
-		lblTitleEnfermedades.setAlignmentX(Component.CENTER_ALIGNMENT);
-		panelEnfermedadesKPI.add(lblTitleEnfermedades);
-
-		gridPanel.add(panelEnfermedadesKPI);
-
-		// KPI 4
-		JPanel panelVacunasKPI = new JPanel();
-		panelVacunasKPI.setBackground(SystemColor.inactiveCaptionBorder);
-		panelVacunasKPI.setLayout(new BoxLayout(panelVacunasKPI, BoxLayout.Y_AXIS));
-		panelVacunasKPI.setBorder(new EmptyBorder(12, 12, 12, 12));
-
-		int numVacunas = contarNumVacunas();
-		lbVacunaNum = new JLabel(String.valueOf(numVacunas));
-		lbVacunaNum.setForeground(SystemColor.textHighlight);
-		lbVacunaNum.setFont(new Font("Segoe UI", Font.BOLD, 48));
-		lbVacunaNum.setAlignmentX(Component.CENTER_ALIGNMENT);
-		panelVacunasKPI.add(lbVacunaNum);
-
-		panelVacunasKPI.add(Box.createVerticalStrut(4));
-
-		JLabel lbTitleVacunas = new JLabel("Vacunas");
-		lbTitleVacunas.setAlignmentX(Component.CENTER_ALIGNMENT);
-		panelVacunasKPI.add(lbTitleVacunas);
-
-		gridPanel.add(panelVacunasKPI);
-
-		// Agrego el grid superior
-		centerContainer.add(gridPanel);
-
-		// Spacer del Medio
-		centerContainer.add(Box.createVerticalStrut(24));
-
-		// Grid Inferior
-		JPanel gridPanelBottom = new JPanel();
-		gridPanelBottom.setOpaque(false);
-		Dimension gridBottomSize = new Dimension(900, 420);
-		gridPanelBottom.setPreferredSize(new Dimension(1200, 420));
-		gridPanelBottom.setMaximumSize(new Dimension(1200, 420));
-		gridPanelBottom.setLayout(new GridLayout(1, 0, 8, 8));
-		gridPanelBottom.setAlignmentX(Component.CENTER_ALIGNMENT);
-
-		// Panel 1
-		JPanel panelInferiorIzquierdo = new JPanel(new BorderLayout());
-		panelInferiorIzquierdo.setBackground(Color.WHITE);
-
-		JLabel lbDoctores = new JLabel("Doctores", SwingConstants.CENTER);
-		lbDoctores.setBorder(new EmptyBorder(6, 0, 6, 0));
-		panelInferiorIzquierdo.add(lbDoctores, BorderLayout.NORTH);
-
-		// Modelo y tabla de ejemplo para DOCTORES
-		String[] columnasDoctores = { "ID", "Nombre", "Apellido", "Especialidad" };
-		modelDoctores = new DefaultTableModel(columnasDoctores, 0);
-		// Llenar
-		cargarTablaDoctores();
-		tablaDoctores = new JTable(modelDoctores);
-		tablaDoctores.setDefaultEditor(Object.class, null);
-		tablaDoctores.setShowGrid(false);
-
-		JScrollPane scrollDoctores = new JScrollPane(tablaDoctores);
-		// ajustar tamaño preferido del scroll para que ocupe bien la tarjeta
-		scrollDoctores.setPreferredSize(new Dimension(860, 300));
-		panelInferiorIzquierdo.add(scrollDoctores, BorderLayout.CENTER);
-
-		gridPanelBottom.add(panelInferiorIzquierdo);
-
-		JPanel panelInferiorDerecho = new JPanel(new BorderLayout());
-		panelInferiorDerecho.setBackground(Color.WHITE);
-
-		JLabel lbPacientes = new JLabel("Pacientes", SwingConstants.CENTER);
-		lbPacientes.setBorder(new EmptyBorder(6, 0, 6, 0));
-		panelInferiorDerecho.add(lbPacientes, BorderLayout.NORTH);
-
-		String[] columnasPacientes = { "ID", "Nombre", "Edad", "Telefono", "Direccion" };
-		modelPacientes = new DefaultTableModel(columnasPacientes, 0);
-		tablaPacientes = new JTable(modelPacientes);
-		tablaPacientes.setDefaultEditor(Object.class, null);
-		JScrollPane scrollPacientes = new JScrollPane(tablaPacientes);
-		scrollPacientes.setPreferredSize(new Dimension(860, 300));
-		panelInferiorDerecho.add(scrollPacientes, BorderLayout.CENTER);
-		cargarTablaPacientes();
-
-		gridPanelBottom.add(panelInferiorDerecho);
-
-		centerContainer.add(gridPanelBottom);
-
-		// Botones
-		JPanel buttonBar = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 12));
-		buttonBar.setBackground(Color.WHITE);
-		buttonBar.setBorder(new EmptyBorder(8, 0, 12, 0));
-		JButton btnEditar = new JButton("Editar");
-		btnEditar.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				int doctorTablaSeleccionado = tablaDoctores.getSelectedRow();
-				int pacienteTablaSeleccionado = tablaPacientes.getSelectedRow();
-				int idCol = 0;
-
-				if (doctorTablaSeleccionado != -1) {
-					Object idTexto = tablaDoctores.getModel().getValueAt(doctorTablaSeleccionado, idCol);
-					String id = String.valueOf(idTexto);
-					Medico medico = instancia.buscarMedicoPorId(id);
-					if (medico != null) {
-						medico.setActivo(false);
-					}
-
-					EditarMedico pantallaEditarMedico = new EditarMedico(id); //id
-					pantallaEditarMedico.setLocationRelativeTo(DashboardAdmin.this);
-					pantallaEditarMedico.setVisible(true);
-					
-					lbDoctoresNum.setText(String.valueOf(contarNumMedicos()));
-					cargarTablaDoctores();
-				} else if (pacienteTablaSeleccionado != -1) {
-					JOptionPane.showMessageDialog(DashboardAdmin.this, "No puedes editar pacientes", "Alerta",
-							JOptionPane.ERROR_MESSAGE);
-				} else {
-					JOptionPane.showMessageDialog(DashboardAdmin.this, "No hay nada Seleccionado", "Alerta",
-							JOptionPane.ERROR_MESSAGE);
-				}
-			}
-		});
-		JButton btnEliminar = new JButton("Eliminar");
-		btnEliminar.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				int doctorTablaSeleccionado = tablaDoctores.getSelectedRow();
-				int pacienteTablaSeleccionado = tablaPacientes.getSelectedRow();
-				int idCol = 0;
-
-				if (doctorTablaSeleccionado != -1) {
-					Object idTexto = tablaDoctores.getModel().getValueAt(doctorTablaSeleccionado, idCol);
-					String id = String.valueOf(idTexto);
-					Medico medico = instancia.buscarMedicoPorId(id);
-					if (medico != null) {
-						medico.setActivo(false);
-					}
-
-					Control.getInstance().borrarUsuarioPorLinkId(id);
-					lbDoctoresNum.setText(String.valueOf(contarNumMedicos()));
-					cargarTablaDoctores();
-				} else if (pacienteTablaSeleccionado != -1) {
-					Object idTexto = tablaPacientes.getModel().getValueAt(pacienteTablaSeleccionado, idCol);
-					String id = String.valueOf(idTexto);
-					Paciente paciente = instancia.buscarPacientePorId(id);
-					if (paciente != null) {
-						paciente.setActivo(false);
-					}
-					lbPacientesNum.setText(String.valueOf(contarNumPacientes()));
-					cargarTablaPacientes();
-				} else {
-					JOptionPane.showMessageDialog(DashboardAdmin.this, "No hay nada Seleccionado", "Alerta",
-							JOptionPane.ERROR_MESSAGE);
-				}
-			}
-		});
-		buttonBar.add(btnEditar);
-		buttonBar.add(btnEliminar);
-
-		contentPane.add(buttonBar, BorderLayout.SOUTH);
-
-		Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-			logico.Datos.guardar();
-		}));
-
-		setLocationRelativeTo(null);
-	}
-
-	private void cargarTablaPacientes() {
-		modelPacientes.setRowCount(0);
-		ArrayList<Paciente> pacientes = instancia.getPacientes();
-		if (pacientes == null)
-			return;
-
-		for (Paciente p : pacientes) {
-			String id = p.getId();
-			String nombre = p.getNombre();
-			String apellido = p.getApellido();
-			String telefono = p.getTelefono();
-			String direccion = p.getDireccion();
-
-			if (p.isActivo()) {
-				modelPacientes.addRow(new Object[] { id, nombre, apellido, telefono, direccion });
-			}
-
-		}
-	}
-
-	private ImageIcon loadAndScaleIcon(String resourcePath, int width, int height) {
-		java.net.URL url = getClass().getResource(resourcePath);
-		if (url == null)
-			return null;
-		try {
-			BufferedImage img = ImageIO.read(url);
-			Image scaled = getScaledImage(img, width, height);
-			return new ImageIcon(scaled);
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-
-	private Image getScaledImage(BufferedImage src, int w, int h) {
-		BufferedImage resized = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-		Graphics2D g2 = resized.createGraphics();
-		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-		g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		g2.drawImage(src, 0, 0, w, h, null);
-		g2.dispose();
-		return resized;
-	}
-
-	private void cargarTablaDoctores() {
-		modelDoctores.setRowCount(0);
-		ArrayList<Medico> medicos = instancia.getMedicos();
-
-		if (medicos == null)
-			return;
-
-		for (Medico m : medicos) {
-			String id = m.getId();
-			String nombre = m.getNombre();
-			String apellido = m.getApellido();
-			String especialidad = m.getEspecialidad();
-
-			if (m.isActivo()) {
-				modelDoctores.addRow(new Object[] { id, nombre, apellido, especialidad });
-			}
-
-		}
-	}
-
-	private int contarNumPacientes() {
-		int contador = 0;
-
-		for (Paciente p : instancia.getPacientes()) {
-			if (p.isActivo()) {
-				contador++;
-			}
-		}
-		return contador;
-	}
-
-	private int contarNumMedicos() {
-		int contador = 0;
-
-		for (Medico m : instancia.getMedicos()) {
-			if (m.isActivo()) {
-				contador++;
-			}
-		}
-		return contador;
-	}
-
-	private int contarNumVacunas() {
-		int contador = 0;
-
-		for (Vacuna v : instancia.getCatalogoVacunas()) {
-			if (v.isEsActivo()) {
-				contador++;
-			}
-		}
-		return contador;
-	}
-
-	private int contarNumEnfermedades() {
-		int contador = 0;
-
-		for (EnfermedadBajoVigilancia e : instancia.getEnfermedadesVigiladas()) {
-			if (e.isEsActivo()) {
-				contador++;
-			}
-		}
-		return contador;
-	}
-
+    Clinica instancia = Clinica.getInstancia();
+    private JPanel contentPane;
+    private JTable tablaDoctores;
+    private JTable tablaPacientes;
+    JLabel lbDoctoresNum;
+    JLabel lbVacunaNum;
+    JLabel lblEnfermedadesNum;
+    DefaultTableModel modelDoctores;
+    DefaultTableModel modelPacientes;
+
+    /**
+     * Launch the application.
+     */
+    public static void main(String[] args) {
+        EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                try {
+                    UIManager.setLookAndFeel(new FlatLightLaf());
+                    DashboardAdmin frame = new DashboardAdmin();
+                    frame.setVisible(true);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    /**
+     * Create the frame.
+     */
+    public DashboardAdmin() {
+        setTitle("Clinic Manager - Admin");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setBounds(100, 100, 1392, 822);
+        JMenuBar menuBar = new JMenuBar();
+        setJMenuBar(menuBar);
+
+        JMenu mnServidor = new JMenu("Servidor");
+        menuBar.add(mnServidor);
+
+        JMenuItem mntmManagerServidor = new JMenuItem("Administrar Servidor");
+        mntmManagerServidor.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JDialog servidorDialog = new JDialog(DashboardAdmin.this, "Gestión de Servidor", true);
+                servidorDialog.setSize(500, 400);
+                servidorDialog.setLocationRelativeTo(DashboardAdmin.this);
+                servidorDialog.setLayout(new BorderLayout(10, 10));
+                
+                JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+                mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+                
+                JPanel statusPanel = new JPanel(new GridLayout(3, 1, 5, 5));
+                statusPanel.setBorder(BorderFactory.createTitledBorder("Estado"));
+                
+                JLabel lblEstado = new JLabel("Servidor: INACTIVO");
+                lblEstado.setForeground(Color.RED);
+                lblEstado.setFont(new Font("Segoe UI", Font.BOLD, 14));
+                
+                JLabel lblClientes = new JLabel("Clientes conectados: 0");
+                JLabel lblInfo = new JLabel("Puerto: 7000 | IP: localhost");
+                
+                statusPanel.add(lblEstado);
+                statusPanel.add(lblClientes);
+                statusPanel.add(lblInfo);
+                
+                JPanel buttonPanel = new JPanel(new GridLayout(2, 2, 10, 10));
+                buttonPanel.setBorder(BorderFactory.createTitledBorder("Acciones"));
+                
+                JButton btnIniciar = new JButton("Iniciar Servidor");
+                btnIniciar.setBackground(new Color(46, 204, 113));
+                btnIniciar.setForeground(Color.WHITE);
+                
+                JButton btnDetener = new JButton("Detener Servidor");
+                btnDetener.setBackground(new Color(231, 76, 60));
+                btnDetener.setForeground(Color.WHITE);
+                btnDetener.setEnabled(false);
+                
+                JButton btnExportar = new JButton("Exportar Enfermedades");
+                JButton btnImportar = new JButton("Importar Enfermedades");
+                
+                buttonPanel.add(btnIniciar);
+                buttonPanel.add(btnDetener);
+                buttonPanel.add(btnExportar);
+                buttonPanel.add(btnImportar);
+                
+                JTextArea txtLog = new JTextArea(8, 40);
+                txtLog.setEditable(false);
+                JScrollPane scrollLog = new JScrollPane(txtLog);
+                scrollLog.setBorder(BorderFactory.createTitledBorder("Registro"));
+                
+                mainPanel.add(statusPanel, BorderLayout.NORTH);
+                mainPanel.add(buttonPanel, BorderLayout.CENTER);
+                mainPanel.add(scrollLog, BorderLayout.SOUTH);
+                
+                servidorDialog.add(mainPanel);
+                
+                // iniciar servidor
+                btnIniciar.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent ev) {
+                        try {
+                            Servidor servidor = Servidor.getInstance(7000);
+                            servidor.iniciar();
+                            
+                            lblEstado.setText("Servidor: ACTIVO");
+                            lblEstado.setForeground(new Color(46, 204, 113));
+                            btnIniciar.setEnabled(false);
+                            btnDetener.setEnabled(true);
+                            
+                            txtLog.append("[INFO] Servidor iniciado en puerto 7000\n");
+                            
+                            
+                            Timer timer = new Timer(2000, new ActionListener() {
+                                public void actionPerformed(ActionEvent e) {
+                                    lblClientes.setText("Clientes conectados: " + servidor.getClientesConectados());
+                                }
+                            });
+                            timer.start();
+                            
+                        } catch (Exception ex) {
+                            txtLog.append("[ERROR] " + ex.getMessage() + "\n");
+                            JOptionPane.showMessageDialog(servidorDialog, 
+                                "Error iniciando servidor: " + ex.getMessage(), 
+                                "Error", 
+                                JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                });
+                
+                //detener servidor
+                btnDetener.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent ev) {
+                        try {
+                            Servidor servidor = Servidor.getInstance(7000);
+                            servidor.detener();
+                            
+                            lblEstado.setText("Servidor: INACTIVO");
+                            lblEstado.setForeground(Color.RED);
+                            btnIniciar.setEnabled(true);
+                            btnDetener.setEnabled(false);
+                            lblClientes.setText("Clientes conectados: 0");
+                            
+                            txtLog.append("[INFO] Servidor detenido\n");
+                            
+                        } catch (Exception ex) {
+                            txtLog.append("[ERROR] " + ex.getMessage() + "\n");
+                        }
+                    }
+                });
+                
+                // exportar enfermedades
+                btnExportar.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent ev) {
+                        JFileChooser fileChooser = new JFileChooser();
+                        fileChooser.setDialogTitle("Exportar Enfermedades");
+                        fileChooser.setSelectedFile(new File("enfermedades.txt"));
+                        
+                        if (fileChooser.showSaveDialog(servidorDialog) == JFileChooser.APPROVE_OPTION) {
+                            File archivo = fileChooser.getSelectedFile();
+                            if (!archivo.getName().endsWith(".txt")) {
+                                archivo = new File(archivo.getAbsolutePath() + ".txt");
+                            }
+                            
+                            try {
+                                Servidor servidor = Servidor.getInstance(7000);
+                                boolean resultado = servidor.exportarEnfermedadesATxt(archivo.getAbsolutePath());
+                                
+                                if (resultado) {
+                                    txtLog.append("[INFO] Enfermedades exportadas a: " + archivo.getAbsolutePath() + "\n");
+                                    JOptionPane.showMessageDialog(servidorDialog, 
+                                        "Enfermedades exportadas exitosamente!", 
+                                        "Éxito", 
+                                        JOptionPane.INFORMATION_MESSAGE);
+                                } else {
+                                    txtLog.append("[ERROR] Error exportando enfermedades\n");
+                                }
+                            } catch (Exception ex) {
+                                txtLog.append("[ERROR] " + ex.getMessage() + "\n");
+                            }
+                        }
+                    }
+                });
+                
+                // importar enfermedades
+                btnImportar.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent ev) {
+                        JFileChooser fileChooser = new JFileChooser();
+                        fileChooser.setDialogTitle("Importar Enfermedades");
+                        
+                        if (fileChooser.showOpenDialog(servidorDialog) == JFileChooser.APPROVE_OPTION) {
+                            File archivo = fileChooser.getSelectedFile();
+                            
+                            try {
+                                Servidor servidor = Servidor.getInstance(7000);
+                                int importadas = servidor.importarEnfermedadesDesdeTxt(archivo.getAbsolutePath());
+                                
+                                txtLog.append("[INFO] Se importaron " + importadas + " enfermedades\n");
+                                JOptionPane.showMessageDialog(servidorDialog, 
+                                    "Se importaron " + importadas + " enfermedades exitosamente", 
+                                    "Importación Completada", 
+                                    JOptionPane.INFORMATION_MESSAGE);
+                                    
+                                // Actualizar contador en dashboard
+                                int numEnfermedades = instancia.getEnfermedadesVigiladas().size();
+                                lblEnfermedadesNum.setText(String.valueOf(numEnfermedades));
+                                
+                            } catch (Exception ex) {
+                                txtLog.append("[ERROR] " + ex.getMessage() + "\n");
+                            }
+                        }
+                    }
+                });
+                
+                servidorDialog.setVisible(true);
+            }
+        });
+
+        JMenuItem mntmConectarCliente = new JMenuItem("Conectar como Cliente");
+        mntmConectarCliente.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String ip = JOptionPane.showInputDialog(DashboardAdmin.this, 
+                    "Ingrese la IP del servidor:", 
+                    "localhost");
+                
+                if (ip == null) return;
+                
+                if (ip.trim().isEmpty()) {
+                    ip = "localhost";
+                }
+                
+                try {
+                    Cliente cliente = new Cliente(ip, 7000);
+                    if (cliente.conectar()) {
+                        JOptionPane.showMessageDialog(DashboardAdmin.this, 
+                            "Conectado exitosamente al servidor " + ip, 
+                            "Conexión Exitosa", 
+                            JOptionPane.INFORMATION_MESSAGE);
+                        
+                        // Sincronizar datos del servidor
+                        ArrayList<EnfermedadBajoVigilancia> enfermedadesServidor = cliente.obtenerEnfermedadesVigiladas();
+                        instancia.getEnfermedadesVigiladas().clear();
+                        instancia.getEnfermedadesVigiladas().addAll(enfermedadesServidor);
+                        
+                        ArrayList<Vacuna> vacunasServidor = cliente.obtenerCatalogoVacunas();
+                        instancia.getCatalogoVacunas().clear();
+                        instancia.getCatalogoVacunas().addAll(vacunasServidor);
+                        
+                        ArrayList<Medico> medicosServidor = cliente.obtenerMedicos();
+                        instancia.getMedicos().clear();
+                        instancia.getMedicos().addAll(medicosServidor);
+                        
+                        lblEnfermedadesNum.setText(String.valueOf(instancia.getEnfermedadesVigiladas().size()));
+                        lbVacunaNum.setText(String.valueOf(instancia.getCatalogoVacunas().size()));
+                        lbDoctoresNum.setText(String.valueOf(instancia.getMedicos().size()));
+                        
+                        cargarTablaDoctores();
+                        cargarTablaPacientes();
+                        
+                    } else {
+                        JOptionPane.showMessageDialog(DashboardAdmin.this, 
+                            "No se pudo conectar al servidor " + ip, 
+                            "Error de Conexión", 
+                            JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(DashboardAdmin.this, 
+                        "Error: " + ex.getMessage(), 
+                        "Error", 
+                        JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        mnServidor.add(mntmManagerServidor);
+        mnServidor.add(mntmConectarCliente);
+        
+        setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
+        setResizable(true);
+        
+        JMenu mnAgregar = new JMenu("Agregar");
+        menuBar.add(mnAgregar);
+
+        JMenuItem mnItemMedico = new JMenuItem("Medico");
+        mnItemMedico.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                AgregarMedico pantallaAgregarMedico = new AgregarMedico();
+                pantallaAgregarMedico.setLocationRelativeTo(DashboardAdmin.this);
+                pantallaAgregarMedico.setVisible(true);
+                int totalDoctores = contarNumMedicos();
+                lbDoctoresNum.setText(String.valueOf(totalDoctores));
+                cargarTablaDoctores();
+            }
+        });
+        mnAgregar.add(mnItemMedico);
+
+        JMenuItem mnItemVacuna = new JMenuItem("Vacuna");
+        mnItemVacuna.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                AgregarVacuna pantallaAgregarVacuna = new AgregarVacuna();
+                pantallaAgregarVacuna.setLocationRelativeTo(DashboardAdmin.this);
+                pantallaAgregarVacuna.setVisible(true);
+                int numVacunas = contarNumVacunas();
+                lbVacunaNum.setText(String.valueOf(numVacunas));
+            }
+        });
+        mnAgregar.add(mnItemVacuna);
+
+        JMenuItem mnItemEnfermedad = new JMenuItem("Enfermedad Vigilada");
+        mnItemEnfermedad.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                AgregarEnfermedad pantallaAgregarEnfermedad = new AgregarEnfermedad();
+                pantallaAgregarEnfermedad.setLocationRelativeTo(DashboardAdmin.this);
+                pantallaAgregarEnfermedad.setVisible(true);
+                int numEnfermedades = instancia.getEnfermedadesVigiladas().size();
+                lblEnfermedadesNum.setText(String.valueOf(numEnfermedades));
+            }
+        });
+        mnAgregar.add(mnItemEnfermedad);
+        
+        JMenuItem mnItemSecretaria = new JMenuItem("Secretaria");
+        mnItemSecretaria.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent arg0) {
+                AgregarSecretaria pantallaAgregarSecretaria = new AgregarSecretaria();
+                pantallaAgregarSecretaria.setLocationRelativeTo(DashboardAdmin.this);
+                pantallaAgregarSecretaria.setVisible(true);
+            }
+        });
+        mnAgregar.add(mnItemSecretaria);
+
+        JMenu mnMenuVer = new JMenu("Ver");
+        menuBar.add(mnMenuVer);
+
+        JMenuItem mnMenuVacunas = new JMenuItem("Vacunas");
+        mnMenuVacunas.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                ListaVacunas pantallaListaVacunas = new ListaVacunas();
+                pantallaListaVacunas.setLocationRelativeTo(DashboardAdmin.this);
+                pantallaListaVacunas.setVisible(true);
+                int numVacunas = contarNumVacunas();
+                lbVacunaNum.setText(String.valueOf(numVacunas));
+            }
+        });
+        mnMenuVer.add(mnMenuVacunas);
+
+        JMenuItem mnItemEnfermedades = new JMenuItem("Enfermedades Vigiladas");
+        mnItemEnfermedades.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                ListaEnfermedades pantallaListaEnfermedades = new ListaEnfermedades();
+                pantallaListaEnfermedades.setLocationRelativeTo(DashboardAdmin.this);
+                pantallaListaEnfermedades.setVisible(true);
+                int numEnfermedades = contarNumEnfermedades();
+                lblEnfermedadesNum.setText(String.valueOf(numEnfermedades));
+            }
+        });
+        mnMenuVer.add(mnItemEnfermedades);
+        
+        JMenuItem mnSecretariaVer = new JMenuItem("Secretaria");
+        mnSecretariaVer.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent arg0) {
+                ListSecretaria pantallaListSecretaria = new ListSecretaria();
+                pantallaListSecretaria.setLocationRelativeTo(DashboardAdmin.this);
+                pantallaListSecretaria.setVisible(true);
+            }
+        });
+        mnMenuVer.add(mnSecretariaVer);
+
+        JMenu mnMenuStats = new JMenu("Stats");
+        menuBar.add(mnMenuStats);
+
+        JMenuItem mntmNewMenuItem_1 = new JMenuItem("Reportes");
+        mntmNewMenuItem_1.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent arg0) {
+                Reportes pantallaReportes = new Reportes();
+                pantallaReportes.setLocationRelativeTo(DashboardAdmin.this);
+                pantallaReportes.setVisible(true);
+            }
+        });
+        mnMenuStats.add(mntmNewMenuItem_1);
+        
+        JMenu mnNewMenu = new JMenu("Session");
+        menuBar.add(mnNewMenu);
+        
+        JMenuItem mntmNewMenuItem_2 = new JMenuItem("Salir");
+        mntmNewMenuItem_2.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                Control.logout();
+                Login pantallaLogin = new Login();
+                pantallaLogin.setVisible(true);
+                dispose();
+            }
+        });
+        mnNewMenu.add(mntmNewMenuItem_2);
+        
+        JMenuItem mntmNewMenuItem = new JMenuItem("Hacer Respaldo");
+        mnNewMenu.add(mntmNewMenuItem);
+        
+        contentPane = new JPanel();
+        contentPane.setBorder(new EmptyBorder(0, 0, 0, 0));
+        contentPane.setLayout(new BorderLayout(0, 0));
+        setContentPane(contentPane);
+
+        JPanel navbar = new JPanel(new BorderLayout());
+        navbar.setBackground(SystemColor.textHighlight);
+        navbar.setPreferredSize(new Dimension(0, 72));
+        navbar.setBorder(new EmptyBorder(0, 0, 0, 0));
+        contentPane.add(navbar, BorderLayout.NORTH);
+
+        // Logo
+        ImageIcon logoIcon = loadAndScaleIcon("/visual/logo.png", 152, 34);
+        JLabel logoLabel = new JLabel(logoIcon);
+        logoLabel.setBorder(new EmptyBorder(8, 12, 8, 12));
+        navbar.add(logoLabel, BorderLayout.WEST);
+
+        // Avatar
+        ImageIcon avatarIcon = loadAndScaleIcon("/visual/avatar.png", 48, 48);
+        JLabel labelAvatar = new JLabel(avatarIcon);
+        labelAvatar.setBorder(new EmptyBorder(8, 12, 8, 12));
+        JPanel avatarPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 8));
+        avatarPanel.setOpaque(false);
+        JLabel lblUserName = new JLabel(Control.getLoggedUsuario().getNombreUsuario());
+        lblUserName.setForeground(Color.WHITE);
+        lblUserName.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        avatarPanel.add(lblUserName);
+        avatarPanel.add(labelAvatar);
+        navbar.add(avatarPanel, BorderLayout.EAST);
+        
+
+        // Contenedor central
+        JPanel centerContainer = new JPanel();
+        centerContainer.setBackground(Color.WHITE);
+        centerContainer.setLayout(new BoxLayout(centerContainer, BoxLayout.Y_AXIS));
+        contentPane.add(centerContainer, BorderLayout.CENTER);
+
+        // Spacer
+        centerContainer.add(Box.createVerticalStrut(40));
+
+        // Superior
+        JPanel gridPanel = new JPanel();
+        gridPanel.setOpaque(false);
+        Dimension gridTopSize = new Dimension(900, 120);
+        gridPanel.setPreferredSize(gridTopSize);
+        gridPanel.setMaximumSize(new Dimension(1200, 120));
+        gridPanel.setLayout(new GridLayout(1, 0, 8, 8));
+        gridPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        // KPI 1
+        JPanel panelPacienteKPI = new JPanel();
+        panelPacienteKPI.setBackground(SystemColor.inactiveCaptionBorder);
+        panelPacienteKPI.setLayout(new BoxLayout(panelPacienteKPI, BoxLayout.Y_AXIS));
+        panelPacienteKPI.setBorder(new EmptyBorder(12, 12, 12, 12));
+
+        int numPacientes = contarNumPacientes();
+        JLabel lbPacientesNum = new JLabel(String.valueOf(numPacientes));
+        lbPacientesNum.setForeground(SystemColor.textHighlight);
+        lbPacientesNum.setFont(new Font("Segoe UI", Font.BOLD, 48));
+        lbPacientesNum.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panelPacienteKPI.add(lbPacientesNum);
+
+        panelPacienteKPI.add(Box.createVerticalStrut(4));
+
+        JLabel lblTitlePacientes = new JLabel("Pacientes");
+        lblTitlePacientes.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panelPacienteKPI.add(lblTitlePacientes);
+
+        gridPanel.add(panelPacienteKPI);
+
+        // KPI 2
+        JPanel panelDoctoresKPI = new JPanel();
+        panelDoctoresKPI.setBackground(SystemColor.inactiveCaptionBorder);
+        panelDoctoresKPI.setLayout(new BoxLayout(panelDoctoresKPI, BoxLayout.Y_AXIS));
+        panelDoctoresKPI.setBorder(new EmptyBorder(12, 12, 12, 12));
+
+        int numMedicos = contarNumMedicos();
+        lbDoctoresNum = new JLabel(String.valueOf(numMedicos));
+        lbDoctoresNum.setForeground(SystemColor.textHighlight);
+        lbDoctoresNum.setFont(new Font("Segoe UI", Font.BOLD, 48));
+        lbDoctoresNum.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panelDoctoresKPI.add(lbDoctoresNum);
+
+        panelDoctoresKPI.add(Box.createVerticalStrut(4));
+
+        JLabel lblTitleDoctores = new JLabel("Doctores");
+        lblTitleDoctores.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panelDoctoresKPI.add(lblTitleDoctores);
+
+        gridPanel.add(panelDoctoresKPI);
+
+        // KPI 3
+        JPanel panelEnfermedadesKPI = new JPanel();
+        panelEnfermedadesKPI.setBackground(SystemColor.inactiveCaptionBorder);
+        panelEnfermedadesKPI.setLayout(new BoxLayout(panelEnfermedadesKPI, BoxLayout.Y_AXIS));
+        panelEnfermedadesKPI.setBorder(new EmptyBorder(12, 12, 12, 12));
+
+        int numEnfermedades = contarNumEnfermedades();
+        lblEnfermedadesNum = new JLabel(String.valueOf(numEnfermedades));
+        lblEnfermedadesNum.setForeground(SystemColor.textHighlight);
+        lblEnfermedadesNum.setFont(new Font("Segoe UI", Font.BOLD, 48));
+        lblEnfermedadesNum.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panelEnfermedadesKPI.add(lblEnfermedadesNum);
+
+        panelEnfermedadesKPI.add(Box.createVerticalStrut(4));
+
+        JLabel lblTitleEnfermedades = new JLabel("Enfermedades");
+        lblTitleEnfermedades.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panelEnfermedadesKPI.add(lblTitleEnfermedades);
+
+        gridPanel.add(panelEnfermedadesKPI);
+
+        // KPI 4
+        JPanel panelVacunasKPI = new JPanel();
+        panelVacunasKPI.setBackground(SystemColor.inactiveCaptionBorder);
+        panelVacunasKPI.setLayout(new BoxLayout(panelVacunasKPI, BoxLayout.Y_AXIS));
+        panelVacunasKPI.setBorder(new EmptyBorder(12, 12, 12, 12));
+
+        int numVacunas = contarNumVacunas();
+        lbVacunaNum = new JLabel(String.valueOf(numVacunas));
+        lbVacunaNum.setForeground(SystemColor.textHighlight);
+        lbVacunaNum.setFont(new Font("Segoe UI", Font.BOLD, 48));
+        lbVacunaNum.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panelVacunasKPI.add(lbVacunaNum);
+
+        panelVacunasKPI.add(Box.createVerticalStrut(4));
+
+        JLabel lbTitleVacunas = new JLabel("Vacunas");
+        lbTitleVacunas.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panelVacunasKPI.add(lbTitleVacunas);
+
+        gridPanel.add(panelVacunasKPI);
+
+        // Agrego el grid superior
+        centerContainer.add(gridPanel);
+
+        // Spacer del Medio
+        centerContainer.add(Box.createVerticalStrut(24));
+
+        // Grid Inferior
+        JPanel gridPanelBottom = new JPanel();
+        gridPanelBottom.setOpaque(false);
+        Dimension gridBottomSize = new Dimension(900, 420);
+        gridPanelBottom.setPreferredSize(new Dimension(1200, 420));
+        gridPanelBottom.setMaximumSize(new Dimension(1200, 420));
+        gridPanelBottom.setLayout(new GridLayout(1, 0, 8, 8));
+        gridPanelBottom.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        // Panel 1
+        JPanel panelInferiorIzquierdo = new JPanel(new BorderLayout());
+        panelInferiorIzquierdo.setBackground(Color.WHITE);
+
+        JLabel lbDoctores = new JLabel("Doctores", SwingConstants.CENTER);
+        lbDoctores.setBorder(new EmptyBorder(6, 0, 6, 0));
+        panelInferiorIzquierdo.add(lbDoctores, BorderLayout.NORTH);
+
+        // Modelo y tabla de ejemplo para DOCTORES
+        String[] columnasDoctores = { "ID", "Nombre", "Apellido", "Especialidad" };
+        modelDoctores = new DefaultTableModel(columnasDoctores, 0);
+        // Llenar
+        cargarTablaDoctores();
+        tablaDoctores = new JTable(modelDoctores);
+        tablaDoctores.setDefaultEditor(Object.class, null);
+        tablaDoctores.setShowGrid(false);
+
+        JScrollPane scrollDoctores = new JScrollPane(tablaDoctores);
+        scrollDoctores.setPreferredSize(new Dimension(860, 300));
+        panelInferiorIzquierdo.add(scrollDoctores, BorderLayout.CENTER);
+
+        gridPanelBottom.add(panelInferiorIzquierdo);
+
+        JPanel panelInferiorDerecho = new JPanel(new BorderLayout());
+        panelInferiorDerecho.setBackground(Color.WHITE);
+
+        JLabel lbPacientes = new JLabel("Pacientes", SwingConstants.CENTER);
+        lbPacientes.setBorder(new EmptyBorder(6, 0, 6, 0));
+        panelInferiorDerecho.add(lbPacientes, BorderLayout.NORTH);
+
+        String[] columnasPacientes = { "ID", "Nombre", "Edad", "Telefono", "Direccion" };
+        modelPacientes = new DefaultTableModel(columnasPacientes, 0);
+        tablaPacientes = new JTable(modelPacientes);
+        tablaPacientes.setDefaultEditor(Object.class, null);
+        JScrollPane scrollPacientes = new JScrollPane(tablaPacientes);
+        scrollPacientes.setPreferredSize(new Dimension(860, 300));
+        panelInferiorDerecho.add(scrollPacientes, BorderLayout.CENTER);
+        cargarTablaPacientes();
+
+        gridPanelBottom.add(panelInferiorDerecho);
+
+        centerContainer.add(gridPanelBottom);
+
+        // Botones
+        JPanel buttonBar = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 12));
+        buttonBar.setBackground(Color.WHITE);
+        buttonBar.setBorder(new EmptyBorder(8, 0, 12, 0));
+        JButton btnEditar = new JButton("Editar");
+        btnEditar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent arg0) {
+                int doctorTablaSeleccionado = tablaDoctores.getSelectedRow();
+                int pacienteTablaSeleccionado = tablaPacientes.getSelectedRow();
+                int idCol = 0;
+
+                if (doctorTablaSeleccionado != -1) {
+                    Object idTexto = tablaDoctores.getModel().getValueAt(doctorTablaSeleccionado, idCol);
+                    String id = String.valueOf(idTexto);
+                    Medico medico = instancia.buscarMedicoPorId(id);
+                    if (medico != null) {
+                        medico.setActivo(false);
+                    }
+
+                    EditarMedico pantallaEditarMedico = new EditarMedico(id);
+                    pantallaEditarMedico.setLocationRelativeTo(DashboardAdmin.this);
+                    pantallaEditarMedico.setVisible(true);
+                    
+                    lbDoctoresNum.setText(String.valueOf(contarNumMedicos()));
+                    cargarTablaDoctores();
+                } else if (pacienteTablaSeleccionado != -1) {
+                    JOptionPane.showMessageDialog(DashboardAdmin.this, "No puedes editar pacientes", "Alerta",
+                            JOptionPane.ERROR_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(DashboardAdmin.this, "No hay nada Seleccionado", "Alerta",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+        JButton btnEliminar = new JButton("Eliminar");
+        btnEliminar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                int doctorTablaSeleccionado = tablaDoctores.getSelectedRow();
+                int pacienteTablaSeleccionado = tablaPacientes.getSelectedRow();
+                int idCol = 0;
+
+                if (doctorTablaSeleccionado != -1) {
+                    Object idTexto = tablaDoctores.getModel().getValueAt(doctorTablaSeleccionado, idCol);
+                    String id = String.valueOf(idTexto);
+                    Medico medico = instancia.buscarMedicoPorId(id);
+                    if (medico != null) {
+                        medico.setActivo(false);
+                    }
+
+                    Control.getInstance().borrarUsuarioPorLinkId(id);
+                    lbDoctoresNum.setText(String.valueOf(contarNumMedicos()));
+                    cargarTablaDoctores();
+                } else if (pacienteTablaSeleccionado != -1) {
+                    Object idTexto = tablaPacientes.getModel().getValueAt(pacienteTablaSeleccionado, idCol);
+                    String id = String.valueOf(idTexto);
+                    Paciente paciente = instancia.buscarPacientePorId(id);
+                    if (paciente != null) {
+                        paciente.setActivo(false);
+                    }
+                    // Actualizar el contador de pacientes
+                    int numPacientes = contarNumPacientes();
+                    for (Component comp : panelPacienteKPI.getComponents()) {
+                        if (comp instanceof JLabel && ((JLabel)comp).getText().matches("\\d+")) {
+                            ((JLabel)comp).setText(String.valueOf(numPacientes));
+                            break;
+                        }
+                    }
+                    cargarTablaPacientes();
+                } else {
+                    JOptionPane.showMessageDialog(DashboardAdmin.this, "No hay nada Seleccionado", "Alerta",
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+        buttonBar.add(btnEditar);
+        buttonBar.add(btnEliminar);
+
+        contentPane.add(buttonBar, BorderLayout.SOUTH);
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            logico.Datos.guardar();
+        }));
+
+        setLocationRelativeTo(null);
+    }
+
+    private void cargarTablaPacientes() {
+        modelPacientes.setRowCount(0);
+        ArrayList<Paciente> pacientes = instancia.getPacientes();
+        if (pacientes == null)
+            return;
+
+        for (Paciente p : pacientes) {
+            String id = p.getId();
+            String nombre = p.getNombre();
+            String apellido = p.getApellido();
+            String telefono = p.getTelefono();
+            String direccion = p.getDireccion();
+
+            if (p.isActivo()) {
+                modelPacientes.addRow(new Object[] { id, nombre + " " + apellido, p.getEdad(), telefono, direccion });
+            }
+        }
+    }
+
+    private ImageIcon loadAndScaleIcon(String resourcePath, int width, int height) {
+        java.net.URL url = getClass().getResource(resourcePath);
+        if (url == null)
+            return null;
+        try {
+            BufferedImage img = ImageIO.read(url);
+            Image scaled = getScaledImage(img, width, height);
+            return new ImageIcon(scaled);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private Image getScaledImage(BufferedImage src, int w, int h) {
+        BufferedImage resized = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = resized.createGraphics();
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.drawImage(src, 0, 0, w, h, null);
+        g2.dispose();
+        return resized;
+    }
+
+    private void cargarTablaDoctores() {
+        modelDoctores.setRowCount(0);
+        ArrayList<Medico> medicos = instancia.getMedicos();
+
+        if (medicos == null)
+            return;
+
+        for (Medico m : medicos) {
+            String id = m.getId();
+            String nombre = m.getNombre();
+            String apellido = m.getApellido();
+            String especialidad = m.getEspecialidad();
+
+            if (m.isActivo()) {
+                modelDoctores.addRow(new Object[] { id, nombre, apellido, especialidad });
+            }
+        }
+    }
+
+    private int contarNumPacientes() {
+        int contador = 0;
+
+        for (Paciente p : instancia.getPacientes()) {
+            if (p.isActivo()) {
+                contador++;
+            }
+        }
+        return contador;
+    }
+
+    private int contarNumMedicos() {
+        int contador = 0;
+
+        for (Medico m : instancia.getMedicos()) {
+            if (m.isActivo()) {
+                contador++;
+            }
+        }
+        return contador;
+    }
+
+    private int contarNumVacunas() {
+        int contador = 0;
+
+        for (Vacuna v : instancia.getCatalogoVacunas()) {
+            if (v.isEsActivo()) {
+                contador++;
+            }
+        }
+        return contador;
+    }
+
+    private int contarNumEnfermedades() {
+        int contador = 0;
+
+        for (EnfermedadBajoVigilancia e : instancia.getEnfermedadesVigiladas()) {
+            if (e.isEsActivo()) {
+                contador++;
+            }
+        }
+        return contador;
+    }
 }

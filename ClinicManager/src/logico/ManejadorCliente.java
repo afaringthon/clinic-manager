@@ -3,6 +3,7 @@ package logico;
 import java.io.*;
 import java.net.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class ManejadorCliente implements Runnable {
@@ -30,7 +31,7 @@ public class ManejadorCliente implements Runnable {
             output = new ObjectOutputStream(clienteSocket.getOutputStream());
             input = new ObjectInputStream(clienteSocket.getInputStream());
             
-            output.writeObject("CONEXION_EXITOSA:Bienvenido al Sistema Doctor+");
+            output.writeObject("CONEXION_EXITOSA:Bienvenido a Clinic Manager");
             output.flush();
             
             while (conectado && !clienteSocket.isClosed()) {
@@ -63,7 +64,6 @@ public class ManejadorCliente implements Runnable {
                     output.writeObject(true);
                     if (medico != null) {
                         System.out.println("Medico agregado por: " + direccionCliente);
-                        servidor.guardarBackup();
                         servidor.broadcast("ACTUALIZAR_MEDICOS", this);
                     }
                     break;
@@ -86,7 +86,6 @@ public class ManejadorCliente implements Runnable {
                     output.writeObject(true);
                     if (paciente != null) {
                         System.out.println("Paciente agregado por: " + direccionCliente);
-                        servidor.guardarBackup();
                         servidor.broadcast("ACTUALIZAR_PACIENTES", this);
                     }
                     break;
@@ -109,21 +108,22 @@ public class ManejadorCliente implements Runnable {
                     output.writeObject(true);
                     if (cita != null) {
                         System.out.println("Cita agendada por: " + direccionCliente);
-                        servidor.guardarBackup();
                         servidor.broadcast("ACTUALIZAR_CITAS", this);
                     }
                     break;
                     
                 case "OBTENER_MEDICOS":
                     output.writeObject(clinica.getMedicos());
+                    output.flush();
                     break;
                     
                 case "OBTENER_PACIENTES":
                     output.writeObject(clinica.getPacientes());
+                    output.flush();
                     break;
                     
                 case "OBTENER_CITAS_ACTIVAS":
-                	ArrayList<Cita> citasActivas = new ArrayList<>();
+                    ArrayList<Cita> citasActivas = new ArrayList<>();
                     for (Cita c : clinica.getCitas()) {
                         if (c != null && c.isEsActivo()) {
                             citasActivas.add(c);
@@ -145,7 +145,6 @@ public class ManejadorCliente implements Runnable {
                     }
                     output.writeObject(true);
                     System.out.println("Consulta agregada por: " + direccionCliente);
-                    servidor.guardarBackup();
                     servidor.broadcast("ACTUALIZAR_CONSULTAS", this);
                     break;
                     
@@ -154,16 +153,17 @@ public class ManejadorCliente implements Runnable {
                     clinica.getEnfermedadesVigiladas().add(enfermedad);
                     output.writeObject(true);
                     System.out.println("Enfermedad vigilada agregada por: " + direccionCliente);
-                    servidor.guardarBackup();
                     servidor.broadcast("ACTUALIZAR_ENFERMEDADES", this);
                     break;
                     
                 case "OBTENER_ENFERMEDADES_VIGILADAS":
                     output.writeObject(clinica.getEnfermedadesVigiladas());
+                    output.flush();
                     break;
                     
                 case "OBTENER_CATALOGO_VACUNAS":
                     output.writeObject(clinica.getCatalogoVacunas());
+                    output.flush();
                     break;
                     
                 case "EXISTE_PACIENTE":
@@ -176,6 +176,67 @@ public class ManejadorCliente implements Runnable {
                     String mensaje = (String) input.readObject();
                     System.out.println("Broadcast de " + direccionCliente + ": " + mensaje);
                     servidor.broadcast("MENSAJE:" + direccionCliente + ": " + mensaje, this);
+                    break;
+                    
+                case "EXPORTAR_ENFERMEDADES_TXT":
+                    String rutaExportar = (String) input.readObject();
+                    boolean exportado = servidor.exportarEnfermedadesATxt(rutaExportar);
+                    output.writeObject(exportado);
+                    if (exportado) {
+                        System.out.println("Enfermedades exportadas por: " + direccionCliente);
+                    }
+                    break;
+                    
+                case "IMPORTAR_ENFERMEDADES_TXT":
+                    String rutaImportar = (String) input.readObject();
+                    int importadas = servidor.importarEnfermedadesDesdeTxt(rutaImportar);
+                    output.writeObject(importadas);
+                    if (importadas > 0) {
+                        System.out.println("Enfermedades importadas por: " + direccionCliente + " - Total: " + importadas);
+                        servidor.broadcast("ACTUALIZAR_ENFERMEDADES", this);
+                    }
+                    break;
+                    
+                case "ENVIAR_ARCHIVO_ENFERMEDADES":
+                    String contenidoArchivo = (String) input.readObject();
+                    String nombreArchivo = (String) input.readObject();
+                    
+                    String rutaServidor = obtenerRutaArchivoTemporal(nombreArchivo);
+                    try (PrintWriter writer = new PrintWriter(new FileWriter(rutaServidor))) {
+                        writer.print(contenidoArchivo);
+                    }
+                    
+                    int importadasDesdeCliente = servidor.importarEnfermedadesDesdeTxt(rutaServidor);
+                    output.writeObject(importadasDesdeCliente);
+                    
+                    System.out.println("Archivo recibido de " + direccionCliente + ": " + nombreArchivo);
+                    System.out.println("Enfermedades importadas: " + importadasDesdeCliente);
+                    
+                    if (importadasDesdeCliente > 0) {
+                        servidor.broadcast("ACTUALIZAR_ENFERMEDADES", this);
+                    }
+                    
+                    limpiarArchivoTemporal(rutaServidor);
+                    break;
+                    
+                case "DESCARGAR_ENFERMEDADES_TXT":
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("=== ENFERMEDADES BAJO VIGILANCIA ===\n");
+                    sb.append("Generado: ").append(LocalDateTime.now()).append("\n");
+                    sb.append("Total: ").append(clinica.getEnfermedadesVigiladas().size()).append("\n");
+                    sb.append("=====================================\n\n");
+                    
+                    for (EnfermedadBajoVigilancia e : clinica.getEnfermedadesVigiladas()) {
+                        if (e != null && e.isEsActivo()) {
+                            sb.append("Nombre: ").append(e.getNombre()).append("\n");
+                            sb.append("Gravedad: ").append(e.getGravedad()).append("\n");
+                            sb.append("Descripción: ").append(e.getDescripcion()).append("\n");
+                            sb.append("-------------------------------------\n");
+                        }
+                    }
+                    
+                    output.writeObject(sb.toString());
+                    System.out.println("Archivo de enfermedades enviado a: " + direccionCliente);
                     break;
                     
                 case "PING":
@@ -193,9 +254,52 @@ public class ManejadorCliente implements Runnable {
             }
             output.flush();
         } catch (Exception e) {
-            output.writeObject("ERROR:" + e.getMessage());
+            try {
+                output.writeObject("ERROR:" + e.getMessage());
+                output.flush();
+            } catch (IOException ex) {
+                System.err.println("Error enviando mensaje de error al cliente: " + ex.getMessage());
+            }
             e.printStackTrace();
         }
+    }
+    
+    private String obtenerRutaArchivoTemporal(String nombreOriginal) {
+        String directorioActual = System.getProperty("user.dir");
+        
+        File carpetaTemp = new File(directorioActual + File.separator + "temp");
+        if (!carpetaTemp.exists()) {
+            carpetaTemp.mkdirs();
+        }
+        
+        String timestamp = String.valueOf(System.currentTimeMillis());
+        String nombreArchivo = "temp_" + timestamp + "_" + nombreOriginal;
+        
+        return carpetaTemp.getAbsolutePath() + File.separator + nombreArchivo;
+    }
+    
+    private void limpiarArchivoTemporal(String rutaArchivo) {
+        try {
+            File archivo = new File(rutaArchivo);
+            if (archivo.exists()) {
+                if (archivo.delete()) {
+                    System.out.println("Archivo temporal eliminado: " + rutaArchivo);
+                } else {
+                    System.err.println("No se pudo eliminar el archivo temporal: " + rutaArchivo);
+                }
+            }
+        } catch (SecurityException e) {
+            System.err.println("Error de seguridad al eliminar archivo temporal: " + e.getMessage());
+        }
+    }
+    
+    public static String getRutaArchivosRelativa() {
+        String directorioActual = System.getProperty("user.dir");
+        File carpetaArchivos = new File(directorioActual + File.separator + "archivos");
+        if (!carpetaArchivos.exists()) {
+            carpetaArchivos.mkdirs();
+        }
+        return carpetaArchivos.getAbsolutePath();
     }
     
     public void enviarMensajeBroadcast(String mensaje) {
@@ -212,14 +316,31 @@ public class ManejadorCliente implements Runnable {
     private void desconectar() {
         conectado = false;
         try {
-            if (input != null) input.close();
-            if (output != null) output.close();
-            if (clienteSocket != null) clienteSocket.close();
+            if (input != null) {
+                try {
+                    input.close();
+                } catch (IOException e) {
+
+                }
+            }
+            if (output != null) {
+                try {
+                    output.close();
+                } catch (IOException e) {
+
+                }
+            }
+            if (clienteSocket != null && !clienteSocket.isClosed()) {
+                try {
+                    clienteSocket.close();
+                } catch (IOException e) {
+                }
+            }
             
             servidor.removerCliente(this);
             System.out.println("Cliente desconectado: " + direccionCliente);
             
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.err.println("Error cerrando conexion: " + e.getMessage());
         }
     }
