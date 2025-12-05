@@ -1,6 +1,7 @@
 package visual;
 
 import java.awt.BorderLayout;
+
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.Dimension;
@@ -43,6 +44,7 @@ import logico.Medico;
 import logico.Paciente;
 import logico.Vacuna;
 import logico.Servidor;
+import logico.BackupService;
 import logico.Cliente;
 
 import javax.swing.table.TableModel;
@@ -60,6 +62,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JMenu;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import logico.ResultadoOperacion;
 
 public class DashboardAdmin extends JFrame {
 
@@ -72,6 +75,7 @@ public class DashboardAdmin extends JFrame {
     JLabel lblEnfermedadesNum;
     DefaultTableModel modelDoctores;
     DefaultTableModel modelPacientes;
+    private BackupService backupService = new BackupService();
 
     /**
      * Launch the application.
@@ -99,244 +103,6 @@ public class DashboardAdmin extends JFrame {
         setBounds(100, 100, 1392, 822);
         JMenuBar menuBar = new JMenuBar();
         setJMenuBar(menuBar);
-
-        JMenu mnServidor = new JMenu("Servidor");
-        menuBar.add(mnServidor);
-
-        JMenuItem mntmManagerServidor = new JMenuItem("Administrar Servidor");
-        mntmManagerServidor.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                JDialog servidorDialog = new JDialog(DashboardAdmin.this, "Gestión de Servidor", true);
-                servidorDialog.setSize(500, 400);
-                servidorDialog.setLocationRelativeTo(DashboardAdmin.this);
-                servidorDialog.setLayout(new BorderLayout(10, 10));
-                
-                JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
-                mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-                
-                JPanel statusPanel = new JPanel(new GridLayout(3, 1, 5, 5));
-                statusPanel.setBorder(BorderFactory.createTitledBorder("Estado"));
-                
-                JLabel lblEstado = new JLabel("Servidor: INACTIVO");
-                lblEstado.setForeground(Color.RED);
-                lblEstado.setFont(new Font("Segoe UI", Font.BOLD, 14));
-                
-                JLabel lblClientes = new JLabel("Clientes conectados: 0");
-                JLabel lblInfo = new JLabel("Puerto: 7000 | IP: localhost");
-                
-                statusPanel.add(lblEstado);
-                statusPanel.add(lblClientes);
-                statusPanel.add(lblInfo);
-                
-                JPanel buttonPanel = new JPanel(new GridLayout(2, 2, 10, 10));
-                buttonPanel.setBorder(BorderFactory.createTitledBorder("Acciones"));
-                
-                JButton btnIniciar = new JButton("Iniciar Servidor");
-                btnIniciar.setBackground(new Color(46, 204, 113));
-                btnIniciar.setForeground(Color.WHITE);
-                
-                JButton btnDetener = new JButton("Detener Servidor");
-                btnDetener.setBackground(new Color(231, 76, 60));
-                btnDetener.setForeground(Color.WHITE);
-                btnDetener.setEnabled(false);
-                
-                JButton btnExportar = new JButton("Exportar Enfermedades");
-                JButton btnImportar = new JButton("Importar Enfermedades");
-                
-                buttonPanel.add(btnIniciar);
-                buttonPanel.add(btnDetener);
-                buttonPanel.add(btnExportar);
-                buttonPanel.add(btnImportar);
-                
-                JTextArea txtLog = new JTextArea(8, 40);
-                txtLog.setEditable(false);
-                JScrollPane scrollLog = new JScrollPane(txtLog);
-                scrollLog.setBorder(BorderFactory.createTitledBorder("Registro"));
-                
-                mainPanel.add(statusPanel, BorderLayout.NORTH);
-                mainPanel.add(buttonPanel, BorderLayout.CENTER);
-                mainPanel.add(scrollLog, BorderLayout.SOUTH);
-                
-                servidorDialog.add(mainPanel);
-                
-                // iniciar servidor
-                btnIniciar.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent ev) {
-                        try {
-                            Servidor servidor = Servidor.getInstance(7000);
-                            servidor.iniciar();
-                            
-                            lblEstado.setText("Servidor: ACTIVO");
-                            lblEstado.setForeground(new Color(46, 204, 113));
-                            btnIniciar.setEnabled(false);
-                            btnDetener.setEnabled(true);
-                            
-                            txtLog.append("[INFO] Servidor iniciado en puerto 7000\n");
-                            
-                            
-                            Timer timer = new Timer(2000, new ActionListener() {
-                                public void actionPerformed(ActionEvent e) {
-                                    lblClientes.setText("Clientes conectados: " + servidor.getClientesConectados());
-                                }
-                            });
-                            timer.start();
-                            
-                        } catch (Exception ex) {
-                            txtLog.append("[ERROR] " + ex.getMessage() + "\n");
-                            JOptionPane.showMessageDialog(servidorDialog, 
-                                "Error iniciando servidor: " + ex.getMessage(), 
-                                "Error", 
-                                JOptionPane.ERROR_MESSAGE);
-                        }
-                    }
-                });
-                
-                //detener servidor
-                btnDetener.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent ev) {
-                        try {
-                            Servidor servidor = Servidor.getInstance(7000);
-                            servidor.detener();
-                            
-                            lblEstado.setText("Servidor: INACTIVO");
-                            lblEstado.setForeground(Color.RED);
-                            btnIniciar.setEnabled(true);
-                            btnDetener.setEnabled(false);
-                            lblClientes.setText("Clientes conectados: 0");
-                            
-                            txtLog.append("[INFO] Servidor detenido\n");
-                            
-                        } catch (Exception ex) {
-                            txtLog.append("[ERROR] " + ex.getMessage() + "\n");
-                        }
-                    }
-                });
-                
-                // exportar enfermedades
-                btnExportar.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent ev) {
-                        JFileChooser fileChooser = new JFileChooser();
-                        fileChooser.setDialogTitle("Exportar Enfermedades");
-                        fileChooser.setSelectedFile(new File("enfermedades.txt"));
-                        
-                        if (fileChooser.showSaveDialog(servidorDialog) == JFileChooser.APPROVE_OPTION) {
-                            File archivo = fileChooser.getSelectedFile();
-                            if (!archivo.getName().endsWith(".txt")) {
-                                archivo = new File(archivo.getAbsolutePath() + ".txt");
-                            }
-                            
-                            try {
-                                Servidor servidor = Servidor.getInstance(7000);
-                                boolean resultado = servidor.exportarEnfermedadesATxt(archivo.getAbsolutePath());
-                                
-                                if (resultado) {
-                                    txtLog.append("[INFO] Enfermedades exportadas a: " + archivo.getAbsolutePath() + "\n");
-                                    JOptionPane.showMessageDialog(servidorDialog, 
-                                        "Enfermedades exportadas exitosamente!", 
-                                        "Éxito", 
-                                        JOptionPane.INFORMATION_MESSAGE);
-                                } else {
-                                    txtLog.append("[ERROR] Error exportando enfermedades\n");
-                                }
-                            } catch (Exception ex) {
-                                txtLog.append("[ERROR] " + ex.getMessage() + "\n");
-                            }
-                        }
-                    }
-                });
-                
-                // importar enfermedades
-                btnImportar.addActionListener(new ActionListener() {
-                    public void actionPerformed(ActionEvent ev) {
-                        JFileChooser fileChooser = new JFileChooser();
-                        fileChooser.setDialogTitle("Importar Enfermedades");
-                        
-                        if (fileChooser.showOpenDialog(servidorDialog) == JFileChooser.APPROVE_OPTION) {
-                            File archivo = fileChooser.getSelectedFile();
-                            
-                            try {
-                                Servidor servidor = Servidor.getInstance(7000);
-                                int importadas = servidor.importarEnfermedadesDesdeTxt(archivo.getAbsolutePath());
-                                
-                                txtLog.append("[INFO] Se importaron " + importadas + " enfermedades\n");
-                                JOptionPane.showMessageDialog(servidorDialog, 
-                                    "Se importaron " + importadas + " enfermedades exitosamente", 
-                                    "Importación Completada", 
-                                    JOptionPane.INFORMATION_MESSAGE);
-                                    
-                                // Actualizar contador en dashboard
-                                int numEnfermedades = instancia.getEnfermedadesVigiladas().size();
-                                lblEnfermedadesNum.setText(String.valueOf(numEnfermedades));
-                                
-                            } catch (Exception ex) {
-                                txtLog.append("[ERROR] " + ex.getMessage() + "\n");
-                            }
-                        }
-                    }
-                });
-                
-                servidorDialog.setVisible(true);
-            }
-        });
-
-        JMenuItem mntmConectarCliente = new JMenuItem("Conectar como Cliente");
-        mntmConectarCliente.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                String ip = JOptionPane.showInputDialog(DashboardAdmin.this, 
-                    "Ingrese la IP del servidor:", 
-                    "localhost");
-                
-                if (ip == null) return;
-                
-                if (ip.trim().isEmpty()) {
-                    ip = "localhost";
-                }
-                
-                try {
-                    Cliente cliente = new Cliente(ip, 7000);
-                    if (cliente.conectar()) {
-                        JOptionPane.showMessageDialog(DashboardAdmin.this, 
-                            "Conectado exitosamente al servidor " + ip, 
-                            "Conexión Exitosa", 
-                            JOptionPane.INFORMATION_MESSAGE);
-                        
-                        // Sincronizar datos del servidor
-                        ArrayList<EnfermedadBajoVigilancia> enfermedadesServidor = cliente.obtenerEnfermedadesVigiladas();
-                        instancia.getEnfermedadesVigiladas().clear();
-                        instancia.getEnfermedadesVigiladas().addAll(enfermedadesServidor);
-                        
-                        ArrayList<Vacuna> vacunasServidor = cliente.obtenerCatalogoVacunas();
-                        instancia.getCatalogoVacunas().clear();
-                        instancia.getCatalogoVacunas().addAll(vacunasServidor);
-                        
-                        ArrayList<Medico> medicosServidor = cliente.obtenerMedicos();
-                        instancia.getMedicos().clear();
-                        instancia.getMedicos().addAll(medicosServidor);
-                        
-                        lblEnfermedadesNum.setText(String.valueOf(instancia.getEnfermedadesVigiladas().size()));
-                        lbVacunaNum.setText(String.valueOf(instancia.getCatalogoVacunas().size()));
-                        lbDoctoresNum.setText(String.valueOf(instancia.getMedicos().size()));
-                        
-                        cargarTablaDoctores();
-                        cargarTablaPacientes();
-                        
-                    } else {
-                        JOptionPane.showMessageDialog(DashboardAdmin.this, 
-                            "No se pudo conectar al servidor " + ip, 
-                            "Error de Conexión", 
-                            JOptionPane.ERROR_MESSAGE);
-                    }
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(DashboardAdmin.this, 
-                        "Error: " + ex.getMessage(), 
-                        "Error", 
-                        JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        });
-
-        mnServidor.add(mntmManagerServidor);
-        mnServidor.add(mntmConectarCliente);
         
         setExtendedState(getExtendedState() | JFrame.MAXIMIZED_BOTH);
         setResizable(true);
@@ -456,6 +222,11 @@ public class DashboardAdmin extends JFrame {
         mnNewMenu.add(mntmNewMenuItem_2);
         
         JMenuItem mntmNewMenuItem = new JMenuItem("Hacer Respaldo");
+        mntmNewMenuItem.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent arg0) {
+        		hacerBackupLocal();
+        	}
+        });
         mnNewMenu.add(mntmNewMenuItem);
         
         contentPane = new JPanel();
@@ -841,4 +612,33 @@ public class DashboardAdmin extends JFrame {
         }
         return contador;
     }
+    
+    private void hacerBackupLocal() {
+		// Generar nombre de archivo con timestamp
+		String nombreArchivo = backupService.generarNombreBackup();
+		
+		// Realizar backup usando el servicio (se guarda en el directorio del proyecto)
+		ResultadoOperacion resultado = backupService.hacerBackupLocal(nombreArchivo);
+		
+		// Mostrar resultado
+		mostrarResultadoOperacion(resultado);
+	}
+	
+	private void mostrarResultadoOperacion(ResultadoOperacion resultado) {
+		if (resultado.isExitoso()) {
+			JOptionPane.showMessageDialog(
+				this,
+				resultado.getMensajeCompleto(),
+				"Operación Exitosa",
+				JOptionPane.INFORMATION_MESSAGE
+			);
+		} else {
+			JOptionPane.showMessageDialog(
+				this,
+				resultado.getMensajeCompleto(),
+				"Error",
+				JOptionPane.ERROR_MESSAGE
+			);
+		}
+	}
 }

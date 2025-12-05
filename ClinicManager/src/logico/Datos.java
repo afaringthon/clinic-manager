@@ -15,8 +15,24 @@ public final class Datos {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("datos.dat"))) {
             oos.writeObject(Clinica.getInstancia());
             oos.flush();
+            oos.close();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+	
+	public static String hacerBackupLocal(String rutaCompleta) {
+        try {
+            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(rutaCompleta));
+            oos.writeObject(Clinica.getInstancia());
+            oos.flush();
+            oos.close();
+            System.out.println("Backup local creado: " + rutaCompleta);
+            return rutaCompleta;
+        } catch (IOException e) {
+            System.err.println("Error creando backup local: " + e.getMessage());
+            e.printStackTrace();
+            return null;
         }
     }
 	
@@ -42,15 +58,3 @@ public final class Datos {
 
 }
 
-
-/*//al inicio del main (antes de crear la UI)
-logico.Datos.load();
-
-//opcional: hook de respaldo para guardar después si JVM finaliza
-
-
-//luego crear y mostrar la UI:
-javax.swing.SwingUtilities.invokeLater(() -> {
- login frame = new login();
- frame.setVisible(true);
-});*/

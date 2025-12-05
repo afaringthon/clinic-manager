@@ -5,7 +5,13 @@ import java.net.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
+/**
+ * Cliente para comunicación con servidor mediante sockets
+ * Maneja la conexión y comandos hacia el servidor de la clínica
+ */
 public class Cliente {
+    private static final int TIMEOUT_CONEXION = 5000; // 5 segundos
+    
     private Socket socket;
     private ObjectOutputStream output;
     private ObjectInputStream input;
@@ -15,15 +21,29 @@ public class Cliente {
     private Thread hiloEscucha;
 
     public Cliente(String host, int puerto) {
+        validarParametros(host, puerto);
         this.host = host;
         this.puerto = puerto;
         this.conectado = false;
     }
+    
+    private void validarParametros(String host, int puerto) {
+        if (host == null || host.trim().isEmpty()) {
+            throw new IllegalArgumentException("El host no puede estar vacío");
+        }
+        if (puerto < 1 || puerto > 65535) {
+            throw new IllegalArgumentException("El puerto debe estar entre 1 y 65535");
+        }
+    }
 
     public boolean conectar() {
         try {
-            socket = new Socket(host, puerto);
+            socket = new Socket();
+            socket.connect(new InetSocketAddress(host, puerto), TIMEOUT_CONEXION);
+            
             output = new ObjectOutputStream(socket.getOutputStream());
+            output.flush();
+            
             input = new ObjectInputStream(socket.getInputStream());
             conectado = true;
             
@@ -33,59 +53,52 @@ public class Cliente {
             iniciarHiloEscucha();
             
             System.out.println("Conectado al servidor: " + host + ":" + puerto);
-            
-            sincronizarDatosIniciales();
-            
             return true;
             
-        } catch (ConnectException e) {
-            System.err.println("No se pudo conectar al servidor " + host + ":" + puerto);
-            return false;
-        } catch (UnknownHostException e) {
-            System.err.println("Host desconocido: " + host);
-            return false;
         } catch (IOException | ClassNotFoundException e) {
             System.err.println("Error conectando al servidor: " + e.getMessage());
+            cerrarRecursos();
             return false;
         }
     }
     
+    private void cerrarRecursos() {
+        try {
+            if (input != null) input.close();
+            if (output != null) output.close();
+            if (socket != null && !socket.isClosed()) socket.close();
+        } catch (IOException e) {
+            System.err.println("Error cerrando recursos: " + e.getMessage());
+        }
+    }
     private void sincronizarDatosIniciales() {
         try {
-            System.out.println("Sincronizando datos con el servidor...");
             
             ArrayList<Medico> medicosServidor = obtenerMedicos();
             ArrayList<Paciente> pacientesServidor = obtenerPacientes();
             ArrayList<EnfermedadBajoVigilancia> enfermedadesServidor = obtenerEnfermedadesVigiladas();
             ArrayList<Vacuna> vacunasServidor = obtenerCatalogoVacunas();
             
+            
             Clinica clinicaLocal = Clinica.getInstancia();
             
-            if (medicosServidor != null && !medicosServidor.isEmpty()) {
-                clinicaLocal.getMedicos().clear();
-                clinicaLocal.getMedicos().addAll(medicosServidor);
-                System.out.println("Médicos sincronizados: " + medicosServidor.size());
-            }
             
-            if (pacientesServidor != null && !pacientesServidor.isEmpty()) {
-                clinicaLocal.getPacientes().clear();
-                clinicaLocal.getPacientes().addAll(pacientesServidor);
-                System.out.println("Pacientes sincronizados: " + pacientesServidor.size());
-            }
+            clinicaLocal.getMedicos().clear();
+            clinicaLocal.getMedicos().addAll(medicosServidor);
             
-            if (enfermedadesServidor != null && !enfermedadesServidor.isEmpty()) {
-                clinicaLocal.getEnfermedadesVigiladas().clear();
-                clinicaLocal.getEnfermedadesVigiladas().addAll(enfermedadesServidor);
-                System.out.println("Enfermedades sincronizadas: " + enfermedadesServidor.size());
-            }
             
-            if (vacunasServidor != null && !vacunasServidor.isEmpty()) {
-                clinicaLocal.getCatalogoVacunas().clear();
-                clinicaLocal.getCatalogoVacunas().addAll(vacunasServidor);
-                System.out.println("Vacunas sincronizadas: " + vacunasServidor.size());
-            }
+            clinicaLocal.getPacientes().clear();
+            clinicaLocal.getPacientes().addAll(pacientesServidor);
             
-            System.out.println("Datos sincronizados exitosamente con el servidor");
+            
+            clinicaLocal.getEnfermedadesVigiladas().clear();
+            clinicaLocal.getEnfermedadesVigiladas().addAll(enfermedadesServidor);
+            
+            
+            clinicaLocal.getCatalogoVacunas().clear();
+            clinicaLocal.getCatalogoVacunas().addAll(vacunasServidor);
+            
+            System.out.println("Datos sincronizados con el servidor");
             
         } catch (Exception e) {
             System.err.println("Error sincronizando datos: " + e.getMessage());
@@ -94,9 +107,6 @@ public class Cliente {
     
     private void iniciarHiloEscucha() {
         hiloEscucha = new Thread(() -> {
-            Thread.currentThread().setName("Hilo-Escucha-Cliente");
-            System.out.println("Hilo de escucha iniciado");
-            
             while (conectado && !socket.isClosed()) {
                 try {
                     Object mensajeObj = input.readObject();
@@ -104,11 +114,8 @@ public class Cliente {
                         String mensaje = (String) mensajeObj;
                         procesarMensajeServidor(mensaje);
                     }
-                } catch (EOFException e) {
-                    System.out.println("Conexión con servidor finalizada (EOF)");
-                    break;
-                } catch (SocketException e) {
-                    System.out.println("Conexión con servidor perdida: " + e.getMessage());
+                } catch (EOFException | SocketException e) {
+                    System.out.println("Conexion con servidor perdida");
                     break;
                 } catch (IOException | ClassNotFoundException e) {
                     if (conectado) {
@@ -129,147 +136,74 @@ public class Cliente {
             String contenido = mensaje.substring(10);
             System.out.println("Broadcast recibido: " + contenido);
         } else if (mensaje.equals("SERVIDOR_APAGADO:El servidor se esta apagando")) {
-            System.out.println("El servidor se está apagando. Desconectando...");
+            System.out.println("El servidor se esta apagando. Desconectando...");
             desconectar();
-        } else if (mensaje.startsWith("ACTUALIZAR_")) {
-            System.out.println("Actualización recibida del servidor: " + mensaje);
         }
     }
 
     public void desconectar() {
+        if (!conectado) {
+            return; // Ya desconectado
+        }
+        
         conectado = false;
+        
         try {
+            // Detener hilo de escucha
             if (hiloEscucha != null && hiloEscucha.isAlive()) {
                 hiloEscucha.interrupt();
             }
             
-            if (output != null && socket != null && !socket.isClosed()) {
+            // Enviar comando de desconexión
+            if (output != null) {
                 try {
                     output.writeObject("DESCONECTAR");
                     output.flush();
                 } catch (IOException e) {
+                    // Ignorar errores al desconectar
                 }
             }
             
-            if (input != null) {
-                try { input.close(); } catch (IOException e) { /* Ignorar */ }
-            }
-            if (output != null) {
-                try { output.close(); } catch (IOException e) { /* Ignorar */ }
-            }
-            if (socket != null && !socket.isClosed()) {
-                try { socket.close(); } catch (IOException e) { /* Ignorar */ }
-            }
-            
+            cerrarRecursos();
             System.out.println("Desconectado del servidor");
             
         } catch (Exception e) {
-            System.err.println("Error durante desconexión: " + e.getMessage());
+            System.err.println("Error desconectando: " + e.getMessage());
         }
     }
 
     public boolean agregarMedico(Medico medico) {
-        if (!estaConectado()) return false;
-        
-        try {
-            output.writeObject("AGREGAR_MEDICO");
-            output.writeObject(medico);
-            output.flush();
-            return (boolean) input.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Error agregando medico: " + e.getMessage());
-            return false;
-        }
+        return enviarEntidad("AGREGAR_MEDICO", medico, "agregando medico");
     }
     
     public Medico buscarMedicoPorCedula(String cedula) {
-        if (!estaConectado()) return null;
-        
-        try {
-            output.writeObject("BUSCAR_MEDICO_POR_CEDULA");
-            output.writeObject(cedula);
-            output.flush();
-            return (Medico) input.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Error buscando medico: " + e.getMessage());
-            return null;
-        }
+        return (Medico) buscarPorCedula("BUSCAR_MEDICO_POR_CEDULA", cedula, "buscando medico");
     }
     
     public boolean agregarPaciente(Paciente paciente) {
-        if (!estaConectado()) return false;
-        
-        try {
-            output.writeObject("AGREGAR_PACIENTE");
-            output.writeObject(paciente);
-            output.flush();
-            return (boolean) input.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Error agregando paciente: " + e.getMessage());
-            return false;
-        }
+        return enviarEntidad("AGREGAR_PACIENTE", paciente, "agregando paciente");
     }
     
     public Paciente buscarPacientePorCedula(String cedula) {
-        if (!estaConectado()) return null;
-        
-        try {
-            output.writeObject("BUSCAR_PACIENTE_POR_CEDULA");
-            output.writeObject(cedula);
-            output.flush();
-            return (Paciente) input.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Error buscando paciente: " + e.getMessage());
-            return null;
-        }
+        return (Paciente) buscarPorCedula("BUSCAR_PACIENTE_POR_CEDULA", cedula, "buscando paciente");
     }
     
     public boolean agendarCita(Cita cita) {
-        if (!estaConectado()) return false;
-        
-        try {
-            output.writeObject("AGENDAR_CITA");
-            output.writeObject(cita);
-            output.flush();
-            return (boolean) input.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Error agendando cita: " + e.getMessage());
-            return false;
-        }
+        return enviarEntidad("AGENDAR_CITA", cita, "agendando cita");
     }
     
     @SuppressWarnings("unchecked")
     public ArrayList<Medico> obtenerMedicos() {
-        if (!estaConectado()) return new ArrayList<>();
-        
-        try {
-            output.writeObject("OBTENER_MEDICOS");
-            output.flush();
-            return (ArrayList<Medico>) input.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Error obteniendo medicos: " + e.getMessage());
-            return new ArrayList<>();
-        }
+        return obtenerLista("OBTENER_MEDICOS", "obteniendo medicos");
     }
     
     @SuppressWarnings("unchecked")
     public ArrayList<Paciente> obtenerPacientes() {
-        if (!estaConectado()) return new ArrayList<>();
-        
-        try {
-            output.writeObject("OBTENER_PACIENTES");
-            output.flush();
-            return (ArrayList<Paciente>) input.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Error obteniendo pacientes: " + e.getMessage());
-            return new ArrayList<>();
-        }
+        return obtenerLista("OBTENER_PACIENTES", "obteniendo pacientes");
     }
     
     @SuppressWarnings("unchecked")
     public ArrayList<Medico> obtenerMedicosDisponibles(LocalDate fecha) {
-        if (!estaConectado()) return new ArrayList<>();
-        
         try {
             output.writeObject("OBTENER_MEDICOS_DISPONIBLES");
             output.writeObject(fecha);
@@ -282,64 +216,24 @@ public class Cliente {
     }
     
     public boolean agregarConsulta(Consulta consulta) {
-        if (!estaConectado()) return false;
-        
-        try {
-            output.writeObject("AGREGAR_CONSULTA");
-            output.writeObject(consulta);
-            output.flush();
-            return (boolean) input.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Error agregando consulta: " + e.getMessage());
-            return false;
-        }
+        return enviarEntidad("AGREGAR_CONSULTA", consulta, "agregando consulta");
     }
     
     public boolean agregarEnfermedadVigilada(EnfermedadBajoVigilancia enfermedad) {
-        if (!estaConectado()) return false;
-        
-        try {
-            output.writeObject("AGREGAR_ENFERMEDAD_VIGILADA");
-            output.writeObject(enfermedad);
-            output.flush();
-            return (boolean) input.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Error agregando enfermedad: " + e.getMessage());
-            return false;
-        }
+        return enviarEntidad("AGREGAR_ENFERMEDAD_VIGILADA", enfermedad, "agregando enfermedad");
     }
     
     @SuppressWarnings("unchecked")
     public ArrayList<EnfermedadBajoVigilancia> obtenerEnfermedadesVigiladas() {
-        if (!estaConectado()) return new ArrayList<>();
-        
-        try {
-            output.writeObject("OBTENER_ENFERMEDADES_VIGILADAS");
-            output.flush();
-            return (ArrayList<EnfermedadBajoVigilancia>) input.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Error obteniendo enfermedades: " + e.getMessage());
-            return new ArrayList<>();
-        }
+        return obtenerLista("OBTENER_ENFERMEDADES_VIGILADAS", "obteniendo enfermedades");
     }
     
     @SuppressWarnings("unchecked")
     public ArrayList<Vacuna> obtenerCatalogoVacunas() {
-        if (!estaConectado()) return new ArrayList<>();
-        
-        try {
-            output.writeObject("OBTENER_CATALOGO_VACUNAS");
-            output.flush();
-            return (ArrayList<Vacuna>) input.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Error obteniendo vacunas: " + e.getMessage());
-            return new ArrayList<>();
-        }
+        return obtenerLista("OBTENER_CATALOGO_VACUNAS", "obteniendo vacunas");
     }
     
     public boolean existePaciente(String cedula) {
-        if (!estaConectado()) return false;
-        
         try {
             output.writeObject("EXISTE_PACIENTE");
             output.writeObject(cedula);
@@ -352,8 +246,6 @@ public class Cliente {
     }
     
     public boolean testConexion() {
-        if (!estaConectado()) return false;
-        
         try {
             output.writeObject("PING");
             output.flush();
@@ -364,9 +256,35 @@ public class Cliente {
         }
     }
     
-    public void enviarBroadcast(String mensaje) {
-        if (!estaConectado()) return;
+    public boolean solicitarBackup() {
+        if (!estaConectado()) {
+            System.err.println("No hay conexión activa con el servidor");
+            return false;
+        }
         
+        try {
+            output.writeObject("HACER_BACKUP");
+            output.flush();
+            
+            Object respuesta = input.readObject();
+            if (respuesta instanceof Boolean) {
+                return (Boolean) respuesta;
+            }
+            
+            System.err.println("Respuesta inesperada del servidor: " + respuesta);
+            return false;
+            
+        } catch (IOException e) {
+            System.err.println("Error de comunicación solicitando backup: " + e.getMessage());
+            desconectar();
+            return false;
+        } catch (ClassNotFoundException e) {
+            System.err.println("Error deserializando respuesta: " + e.getMessage());
+            return false;
+        }
+    }
+    
+    public void enviarBroadcast(String mensaje) {
         try {
             output.writeObject("BROADCAST_MENSAJE");
             output.writeObject(mensaje);
@@ -377,373 +295,97 @@ public class Cliente {
     }
     
     public boolean estaConectado() {
-        return conectado && socket != null && !socket.isClosed() && socket.isConnected();
+        return conectado && socket != null && !socket.isClosed();
     }
     
     @SuppressWarnings("unchecked")
     public ArrayList<Cita> obtenerCitas() {
-        if (!estaConectado()) return new ArrayList<>();
-        
-        try {
-            output.writeObject("OBTENER_CITAS_ACTIVAS");
-            output.flush();
-            return (ArrayList<Cita>) input.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Error obteniendo citas: " + e.getMessage());
-            return new ArrayList<>();
-        }
+        return obtenerLista("OBTENER_CITAS_ACTIVAS", "obteniendo citas");
     }
     
-    private String obtenerRutaRelativa(String nombreArchivo) {
-        String directorioActual = System.getProperty("user.dir");
-        File carpetaArchivos = new File(directorioActual + File.separator + "archivos");
-        if (!carpetaArchivos.exists()) {
-            carpetaArchivos.mkdirs();
-        }
-        return carpetaArchivos.getAbsolutePath() + File.separator + nombreArchivo;
-    }
+    // ============ MÉTODOS HELPER PARA ELIMINAR REDUNDANCIA ============
     
-    private String obtenerRutaTemporal(String nombreOriginal) {
-        String directorioActual = System.getProperty("user.dir");
-        File carpetaTemp = new File(directorioActual + File.separator + "temp");
-        if (!carpetaTemp.exists()) {
-            carpetaTemp.mkdirs();
-        }
-        
-        String timestamp = String.valueOf(System.currentTimeMillis());
-        String nombreArchivo = "temp_" + timestamp + "_" + nombreOriginal;
-        
-        return carpetaTemp.getAbsolutePath() + File.separator + nombreArchivo;
-    }
-    
-    public int enviarArchivoEnfermedades(String rutaArchivo) {
-        if (!estaConectado()) return 0;
-        
-        try {
-            File archivo = new File(rutaArchivo);
-            
-            if (!archivo.exists() && !archivo.isAbsolute()) {
-                File archivoRelativo = new File(obtenerRutaRelativa(archivo.getName()));
-                if (archivoRelativo.exists()) {
-                    archivo = archivoRelativo;
-                } else {
-                    archivoRelativo = new File(System.getProperty("user.dir") + File.separator + archivo.getName());
-                    if (archivoRelativo.exists()) {
-                        archivo = archivoRelativo;
-                    }
-                }
-            }
-            
-            if (!archivo.exists()) {
-                System.err.println("Archivo no encontrado: " + rutaArchivo);
-                return 0;
-            }
-            
-            StringBuilder contenido = new StringBuilder();
-            try (BufferedReader reader = new BufferedReader(new FileReader(archivo))) {
-                String linea;
-                while ((linea = reader.readLine()) != null) {
-                    contenido.append(linea).append("\n");
-                }
-            }
-            
-            output.writeObject("ENVIAR_ARCHIVO_ENFERMEDADES");
-            output.writeObject(contenido.toString());
-            output.writeObject(archivo.getName());
-            output.flush();
-            
-            return (int) input.readObject();
-            
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Error enviando archivo: " + e.getMessage());
-            return 0;
-        }
-    }
-    
-    public boolean descargarEnfermedadesTxt(String rutaDestino) {
-        if (!estaConectado()) return false;
-        
-        try {
-            output.writeObject("DESCARGAR_ENFERMEDADES_TXT");
-            output.flush();
-            
-            String contenido = (String) input.readObject();
-            
-            File archivoDestino = new File(rutaDestino);
-            if (!archivoDestino.isAbsolute()) {
-                rutaDestino = obtenerRutaRelativa(archivoDestino.getName());
-            }
-            
-            try (PrintWriter writer = new PrintWriter(new FileWriter(rutaDestino))) {
-                writer.print(contenido);
-            }
-            
-            System.out.println("Enfermedades descargadas a: " + rutaDestino);
-            return true;
-            
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Error descargando enfermedades: " + e.getMessage());
+    /**
+     * Método genérico para enviar entidades y obtener confirmación boolean
+     */
+    private boolean enviarEntidad(String comando, Object entidad, String operacion) {
+        if (!estaConectado()) {
+            System.err.println("No hay conexión activa con el servidor");
             return false;
         }
-    }
-    
-    public boolean exportarEnfermedadesEnServidor(String rutaServidor) {
-        if (!estaConectado()) return false;
         
         try {
-            output.writeObject("EXPORTAR_ENFERMEDADES_TXT");
-            output.writeObject(rutaServidor);
+            output.writeObject(comando);
+            output.writeObject(entidad);
             output.flush();
-            return (boolean) input.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Error exportando enfermedades: " + e.getMessage());
-            return false;
-        }
-    }
-    
-    public int importarEnfermedadesEnServidor(String rutaServidor) {
-        if (!estaConectado()) return 0;
-        
-        try {
-            output.writeObject("IMPORTAR_ENFERMEDADES_TXT");
-            output.writeObject(rutaServidor);
-            output.flush();
-            return (int) input.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Error importando enfermedades: " + e.getMessage());
-            return 0;
-        }
-    }
-    
-    public boolean exportarEnfermedades(String nombreArchivo) {
-        return exportarEnfermedadesEnServidor(nombreArchivo);
-    }
-    
-    public int importarEnfermedades(String nombreArchivo) {
-        return importarEnfermedadesEnServidor(nombreArchivo);
-    }
-    
-    public static String getRutaArchivos() {
-        String directorioActual = System.getProperty("user.dir");
-        File carpetaArchivos = new File(directorioActual + File.separator + "archivos");
-        if (!carpetaArchivos.exists()) {
-            carpetaArchivos.mkdirs();
-        }
-        return carpetaArchivos.getAbsolutePath();
-    }
-    
-    public static String getRutaTemp() {
-        String directorioActual = System.getProperty("user.dir");
-        File carpetaTemp = new File(directorioActual + File.separator + "temp");
-        if (!carpetaTemp.exists()) {
-            carpetaTemp.mkdirs();
-        }
-        return carpetaTemp.getAbsolutePath();
-    }
-
-    public byte[] obtenerDatosServidor() {
-        if (!estaConectado()) return null;
-        
-        try {
-            output.writeObject("OBTENER_DATOS_SERVIDOR");
-            output.flush();
-            return (byte[]) input.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Error obteniendo datos del servidor: " + e.getMessage());
-            return null;
-        }
-    }
-
-    public boolean enviarDatosServidor(byte[] datos) {
-        if (!estaConectado()) return false;
-        
-        try {
-            output.writeObject("ENVIAR_DATOS_SERVIDOR");
-            output.writeObject(datos);
-            output.flush();
-            return (boolean) input.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Error enviando datos al servidor: " + e.getMessage());
-            return false;
-        }
-    }
-
-    public byte[] obtenerUsuariosServidor() {
-        if (!estaConectado()) return null;
-        
-        try {
-            output.writeObject("OBTENER_USUARIOS_SERVIDOR");
-            output.flush();
-            return (byte[]) input.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Error obteniendo usuarios del servidor: " + e.getMessage());
-            return null;
-        }
-    }
-
-    public boolean enviarUsuariosServidor(byte[] datos) {
-        if (!estaConectado()) return false;
-        
-        try {
-            output.writeObject("ENVIAR_USUARIOS_SERVIDOR");
-            output.writeObject(datos);
-            output.flush();
-            return (boolean) input.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Error enviando usuarios al servidor: " + e.getMessage());
-            return false;
-        }
-    }
-
-    public boolean hacerRespaldoServidor() {
-        if (!estaConectado()) return false;
-        
-        try {
-            output.writeObject("HACER_RESPALDO_SERVIDOR");
-            output.flush();
-            return (boolean) input.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Error haciendo respaldo en servidor: " + e.getMessage());
-            return false;
-        }
-    }
-
-    public boolean restaurarRespaldoServidor(String nombreRespaldo) {
-        if (!estaConectado()) return false;
-        
-        try {
-            output.writeObject("RESTAURAR_RESPALDO_SERVIDOR");
-            output.writeObject(nombreRespaldo);
-            output.flush();
-            return (boolean) input.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Error restaurando respaldo en servidor: " + e.getMessage());
-            return false;
-        }
-    }
-
-    public byte[] serializarClinicaLocal() {
-        try {
-            Clinica clinica = Clinica.getInstancia();
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ObjectOutputStream oos = new ObjectOutputStream(baos);
-            oos.writeObject(clinica);
-            oos.flush();
-            return baos.toByteArray();
+            
+            Object respuesta = input.readObject();
+            return respuesta instanceof Boolean && (Boolean) respuesta;
+            
         } catch (IOException e) {
-            System.err.println("Error serializando clínica local: " + e.getMessage());
-            return null;
-        }
-    }
-
-    public byte[] serializarUsuariosLocal() {
-        try {
-            Control control = Control.getInstance();
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ObjectOutputStream oos = new ObjectOutputStream(baos);
-            oos.writeObject(control);
-            oos.flush();
-            return baos.toByteArray();
-        } catch (IOException e) {
-            System.err.println("Error serializando usuarios locales: " + e.getMessage());
-            return null;
-        }
-    }
-
-    public boolean restaurarClinicaLocal(byte[] datos) {
-        try {
-            ByteArrayInputStream bais = new ByteArrayInputStream(datos);
-            ObjectInputStream ois = new ObjectInputStream(bais);
-            Clinica clinicaRestaurada = (Clinica) ois.readObject();
-            if (clinicaRestaurada != null) {
-                Clinica.setInstancia(clinicaRestaurada);
-                return true;
-            }
+            System.err.println("Error " + operacion + ": " + e.getMessage());
+            desconectar();
             return false;
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Error restaurando clínica local: " + e.getMessage());
+        } catch (ClassNotFoundException e) {
+            System.err.println("Error deserializando respuesta: " + e.getMessage());
             return false;
         }
     }
     
+    /**
+     * Método genérico para buscar por cédula
+     */
+    private Object buscarPorCedula(String comando, String cedula, String operacion) {
+        if (!estaConectado()) {
+            System.err.println("No hay conexión activa con el servidor");
+            return null;
+        }
+        
+        try {
+            output.writeObject(comando);
+            output.writeObject(cedula);
+            output.flush();
+            return input.readObject();
+            
+        } catch (IOException e) {
+            System.err.println("Error " + operacion + ": " + e.getMessage());
+            desconectar();
+            return null;
+        } catch (ClassNotFoundException e) {
+            System.err.println("Error deserializando respuesta: " + e.getMessage());
+            return null;
+        }
+    }
+    
+    /**
+     * Método genérico para obtener listas del servidor
+     */
     @SuppressWarnings("unchecked")
-    public ArrayList<String> listarRespaldosServidor() {
-        if (!estaConectado()) return new ArrayList<>();
-        
-        try {
-            output.writeObject("LISTAR_RESPALDOS_SERVIDOR");
-            output.flush();
-            return (ArrayList<String>) input.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Error listando respaldos del servidor: " + e.getMessage());
+    private <T> ArrayList<T> obtenerLista(String comando, String operacion) {
+        if (!estaConectado()) {
+            System.err.println("No hay conexión activa con el servidor");
             return new ArrayList<>();
         }
-    }
-
-
-    public boolean restaurarUsuariosLocal(byte[] datos) {
-        try {
-            ByteArrayInputStream bais = new ByteArrayInputStream(datos);
-            ObjectInputStream ois = new ObjectInputStream(bais);
-            Control controlRestaurado = (Control) ois.readObject();
-            if (controlRestaurado != null) {
-                Control.setInstancia(controlRestaurado);
-                return true;
-            }
-            return false;
-        } catch (IOException | ClassNotFoundException e) {
-            System.err.println("Error restaurando usuarios locales: " + e.getMessage());
-            return false;
-        }
-    }
-
-    public boolean sincronizarConServidor() {
-        if (!estaConectado()) return false;
         
         try {
-            byte[] datosClinica = obtenerDatosServidor();
-            byte[] datosUsuarios = obtenerUsuariosServidor();
+            output.writeObject(comando);
+            output.flush();
             
-            if (datosClinica != null) {
-                restaurarClinicaLocal(datosClinica);
+            Object respuesta = input.readObject();
+            if (respuesta instanceof ArrayList) {
+                return (ArrayList<T>) respuesta;
             }
             
-            if (datosUsuarios != null) {
-                restaurarUsuariosLocal(datosUsuarios);
-            }
+            System.err.println("Respuesta inesperada del servidor");
+            return new ArrayList<>();
             
-            return datosClinica != null || datosUsuarios != null;
-            
-        } catch (Exception e) {
-            System.err.println("Error sincronizando con servidor: " + e.getMessage());
-            return false;
-        }
-    }
-
-
-    public boolean subirDatosAlServidor() {
-        if (!estaConectado()) return false;
-        
-        try {
-            byte[] datosClinica = serializarClinicaLocal();
-            byte[] datosUsuarios = serializarUsuariosLocal();
-            
-            boolean clinicaEnviada = false;
-            boolean usuariosEnviados = false;
-            
-            if (datosClinica != null) {
-                clinicaEnviada = enviarDatosServidor(datosClinica);
-            }
-            
-            if (datosUsuarios != null) {
-                usuariosEnviados = enviarUsuariosServidor(datosUsuarios);
-            }
-            
-            return clinicaEnviada || usuariosEnviados;
-            
-        } catch (Exception e) {
-            System.err.println("Error subiendo datos al servidor: " + e.getMessage());
-            return false;
+        } catch (IOException e) {
+            System.err.println("Error " + operacion + ": " + e.getMessage());
+            desconectar();
+            return new ArrayList<>();
+        } catch (ClassNotFoundException e) {
+            System.err.println("Error deserializando respuesta: " + e.getMessage());
+            return new ArrayList<>();
         }
     }
 }
